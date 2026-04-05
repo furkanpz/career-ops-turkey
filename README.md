@@ -31,7 +31,7 @@ Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored
 | **Auto-Pipeline** | Paste a URL, get a full evaluation + PDF + tracker entry |
 | **6-Block Evaluation** | Role summary, CV match, level strategy, comp research, personalization, interview prep |
 | **ATS PDF Generation** | Keyword-injected CVs with Space Grotesk + DM Sans design |
-| **Portal Scanner** | Automated discovery across job boards with dedup |
+| **Portal Scanner** | 45+ companies pre-configured (Anthropic, OpenAI, ElevenLabs, Retool, n8n...) + custom queries across Ashby, Greenhouse, Lever, Wellfound |
 | **Batch Processing** | Parallel evaluation with `claude -p` workers |
 | **Dashboard TUI** | Terminal UI to browse, filter, and sort your pipeline |
 | **Pipeline Integrity** | Automated merge, dedup, status normalization, health checks |
@@ -99,6 +99,21 @@ You paste a job URL or description
  Report  PDF  Tracker
   .md   .pdf   .tsv
 ```
+
+## Pre-configured Portals
+
+The scanner comes with **45+ companies** ready to scan and **19 search queries** across major job boards. Copy `templates/portals.example.yml` to `portals.yml` and add your own:
+
+**AI Labs:** Anthropic, OpenAI, Mistral, Cohere, LangChain, Pinecone
+**Voice AI:** ElevenLabs, PolyAI, Parloa, Hume AI, Deepgram, Vapi, Bland AI
+**AI Platforms:** Retool, Airtable, Vercel, Temporal, Glean, Arize AI
+**Contact Center:** Ada, LivePerson, Sierra, Decagon, Talkdesk, Genesys
+**Enterprise:** Salesforce, Twilio, Gong, Dialpad
+**LLMOps:** Langfuse, Weights & Biases, Lindy, Cognigy, Speechmatics
+**Automation:** n8n, Zapier, Make.com
+**European:** Factorial, Attio, Tinybird, Clarity AI, Travelperk
+
+**Job boards searched:** Ashby, Greenhouse, Lever, Wellfound, Workable, RemoteFront
 
 ## Dashboard TUI
 
@@ -197,6 +212,21 @@ claude   # Abrir Claude Code y pegar una URL de oferta
 ```
 
 Guia completa en [docs/SETUP.md](docs/SETUP.md).
+
+## Portales incluidos
+
+El scanner viene con **45+ empresas** pre-configuradas y **19 queries** en los principales portales de empleo. Copia `templates/portals.example.yml` a `portals.yml` y añade las tuyas:
+
+**AI Labs:** Anthropic, OpenAI, Mistral, Cohere, LangChain, Pinecone
+**Voice AI:** ElevenLabs, PolyAI, Parloa, Hume AI, Deepgram, Vapi, Bland AI
+**Plataformas AI:** Retool, Airtable, Vercel, Temporal, Glean, Arize AI
+**Contact Center:** Ada, LivePerson, Sierra, Decagon, Talkdesk, Genesys
+**Enterprise:** Salesforce, Twilio, Gong, Dialpad
+**LLMOps:** Langfuse, Weights & Biases, Lindy, Cognigy, Speechmatics
+**Automatizacion:** n8n, Zapier, Make.com
+**Europa:** Factorial, Attio, Tinybird, Clarity AI, Travelperk
+
+**Portales de empleo:** Ashby, Greenhouse, Lever, Wellfound, Workable, RemoteFront
 
 ## Uso
 
