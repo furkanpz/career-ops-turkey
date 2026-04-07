@@ -1,0 +1,136 @@
+# Career-Ops Turkey Profile Configuration
+# Copy this file to config/profile.yml for a Turkey-oriented setup.
+# This schema is backward-compatible with the existing profile.example.yml.
+# Existing fields stay valid; all Turkey-specific additions below are optional.
+
+candidate:
+  full_name: "Ayse Yilmaz"
+  email: "ayse@example.com"
+  phone: "+90 555 123 45 67"
+  location: "Istanbul, Turkiye"
+  linkedin: "linkedin.com/in/ayseyilmaz"
+  portfolio_url: "https://ayseyilmaz.dev"
+  github: "github.com/ayseyilmaz"
+  twitter: "https://x.com/ayseyilmaz"
+  # (Optional) Canva resume design ID for visual CV generation via /career-ops pdf.
+  # canva_resume_design_id: "DAxxxxxxxxx"
+
+target_roles:
+  primary:
+    - "Senior Backend Engineer"
+    - "Staff Platform Engineer"
+  archetypes:
+    - name: "Backend / Platform Engineer"
+      level: "Senior/Staff"
+      fit: "primary"
+    - name: "Solutions Architect"
+      level: "Senior"
+      fit: "secondary"
+    - name: "Engineering Manager"
+      level: "Manager"
+      fit: "adjacent"
+
+narrative:
+  headline: "Backend and platform engineer focused on production systems"
+  exit_story: "Built core backend and platform systems across fast-moving product teams. Now targeting high-ownership engineering roles with strong product impact."
+  superpowers:
+    - "Distributed systems and API design"
+    - "Production debugging under pressure"
+    - "Cross-functional delivery"
+  proof_points:
+    - name: "Payments Platform Migration"
+      url: "https://ayseyilmaz.dev/payments-platform"
+      hero_metric: "Cut payment failure rate 28%"
+    - name: "Observability Rollout"
+      url: "https://ayseyilmaz.dev/observability"
+      hero_metric: "Reduced MTTR from 90m to 18m"
+  # dashboard:
+  #   url: "https://ayseyilmaz.dev/demo"
+  #   password: "demo-2026"
+
+compensation:
+  # Backward-compatible legacy fields. Existing prompts and docs already refer to these.
+  target_range: "TRY 1,800,000-2,400,000 gross annual"
+  currency: "TRY"
+  minimum: "TRY 1,500,000 gross annual"
+  location_flexibility: "Istanbul preferred, Ankara/Izmir open, remote-first, relocation within Turkiye possible"
+
+  # New optional structured salary preferences for Turkey-oriented workflows.
+  # Future tooling should prefer this block when present, but must fall back to the legacy fields above.
+  salary_preferences:
+    TRY:
+      target_min: 1800000
+      target_max: 2400000
+      minimum: 1500000
+      period: "gross_annual"
+    EUR:
+      target_min: 45000
+      target_max: 65000
+      minimum: 40000
+      period: "gross_annual"
+    USD:
+      target_min: 55000
+      target_max: 85000
+      minimum: 50000
+      period: "gross_annual"
+
+location:
+  country: "Turkiye"
+  city: "Istanbul"
+  timezone: "Europe/Istanbul"
+  visa_status: "Turkiye citizen"
+  # onsite_availability: "2-3 days/week in Istanbul, planned travel for Ankara/Izmir"
+
+# Optional language settings.
+# `modes_dir` follows the same convention already documented for `modes/de` and `modes/fr`.
+language:
+  # modes_dir: "modes/tr"
+  cv_preferences:
+    default: "en"
+    supported:
+      - "tr"
+      - "en"
+    by_listing_language:
+      tr: "tr"
+      en: "en"
+
+# New optional location/work-model preferences for Turkey-oriented filtering and scoring.
+location_preferences:
+  preferred_cities:
+    - "Istanbul"
+    - "Ankara"
+    - "Izmir"
+  relocation_flexibility:
+    willing: true
+    scope: "within_turkey"   # one of: none, same_city_only, within_turkey, international, case_by_case
+    notes: "Relocation possible for the right role and compensation."
+  work_model_preference:
+    priority_order:
+      - "remote"
+      - "hybrid"
+      - "onsite"
+    acceptable:
+      - "remote"
+      - "hybrid"
+      - "onsite"
+
+# New optional hard filters for routing, scoring, and apply/no-apply decisions.
+constraints:
+  must_haves:
+    - "Senior-level ownership"
+    - "Clear technical scope"
+    - "Competitive compensation"
+  deal_breakers:
+    - "5 days/week mandatory onsite"
+    - "Unpaid trial project"
+    - "Salary withheld until final round"
+
+# New optional behavior controls for future apply/pipeline automation.
+automation:
+  application:
+    auto_generate_pdf: true
+    auto_generate_cover_letter: true
+    auto_draft_form_answers: true
+    auto_fill_easy_fields: false
+    require_manual_review_before_submit: true
+    follow_up_outreach: "manual_first"   # one of: disabled, manual_first, assisted, auto_draft_only

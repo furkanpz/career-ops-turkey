@@ -8,6 +8,9 @@
  * 2. config/profile.yml exists and has required fields
  * 3. No hardcoded metrics in _shared.md or batch/batch-prompt.md
  * 4. article-digest.md freshness (if exists)
+ *
+ * Future additive profile validation notes for the Turkey-ready schema live in
+ * docs/tr-profile-schema.md to avoid making optional fields breaking.
  */
 
 import { readFileSync, existsSync, statSync } from 'fs';

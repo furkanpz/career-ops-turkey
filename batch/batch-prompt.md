@@ -18,7 +18,10 @@ Eres un worker de evaluación de ofertas de empleo for the candidate (read name 
 | llms.txt | `llms.txt (if exists)` | SIEMPRE |
 | article-digest.md | `article-digest.md (project root)` | SIEMPRE (proof points) |
 | i18n.ts | `i18n.ts (if exists, optional)` | Solo entrevistas/deep |
-| cv-template.html | `templates/cv-template.html` | Para PDF |
+| cv-template.html | `templates/cv-template.html` | Fallback legacy para PDF |
+| cv-template.en.html | `templates/cv-template.en.html` | Template EN para PDF |
+| cv-template.tr.html | `templates/cv-template.tr.html` | Template TR para PDF |
+| cv-template-utils.mjs | `cv-template-utils.mjs` | Selección segura de template, labels y nombres |
 | generate-pdf.mjs | `generate-pdf.mjs` | Para PDF |
 
 **REGLA: NUNCA escribir en cv.md ni i18n.ts.** Son read-only.
@@ -208,16 +211,24 @@ Donde `{company-slug}` es el nombre de empresa en lowercase, sin espacios, con g
 8. Reordena bullets de experiencia por relevancia al JD
 9. Construye competency grid (6-8 keyword phrases)
 10. Inyecta keywords en logros existentes (**NUNCA inventa**)
-11. Genera HTML completo desde template (lee `templates/cv-template.html`)
-12. Escribe HTML a `/tmp/cv-candidate-{company-slug}.html`
-13. Ejecuta:
+11. Selecciona template de forma segura:
+   - `tr` → `templates/cv-template.tr.html`
+   - `en` → `templates/cv-template.en.html`
+   - fallback → `templates/cv-template.html`
+   - Puedes resolver path, labels y nombres con:
+```bash
+node cv-template-utils.mjs --lang={tr|en} --company-slug={company-slug} --date={{DATE}}
+```
+12. Genera HTML completo desde el template resuelto
+13. Escribe HTML a `/tmp/cv-candidate-{company-slug}-{lang}.html`
+14. Ejecuta:
 ```bash
 node generate-pdf.mjs \
-  /tmp/cv-candidate-{company-slug}.html \
-  output/cv-candidate-{company-slug}-{{DATE}}.pdf \
+  /tmp/cv-candidate-{company-slug}-{lang}.html \
+  output/cv-candidate-{company-slug}-{lang}-{{DATE}}.pdf \
   --format={letter|a4}
 ```
-14. Reporta: ruta PDF, nº páginas, % cobertura keywords
+15. Reporta: ruta PDF, nº páginas, % cobertura keywords
 
 **Reglas ATS:**
 - Single-column (sin sidebars)
@@ -242,11 +253,11 @@ node generate-pdf.mjs \
 - NUNCA añadir skills the candidate doesn't have
 - Ejemplo: JD dice "RAG pipelines" y CV dice "LLM workflows with retrieval" → "RAG pipeline design and LLM orchestration workflows"
 
-**Template placeholders (en cv-template.html):**
+**Template placeholders (en el template resuelto):**
 
 | Placeholder | Contenido |
 |-------------|-----------|
-| `{{LANG}}` | `en` o `es` |
+| `{{LANG}}` | `en`, `es`, o `tr` |
 | `{{PAGE_WIDTH}}` | `8.5in` (letter) o `210mm` (A4) |
 | `{{NAME}}` | (from profile.yml) |
 | `{{EMAIL}}` | (from profile.yml) |

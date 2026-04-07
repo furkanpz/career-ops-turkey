@@ -3,6 +3,8 @@
 /**
  * doctor.mjs — Setup validation for career-ops
  * Checks all prerequisites and prints a pass/fail checklist.
+ * Extended Turkey-ready profile validation remains intentionally non-enforcing;
+ * see docs/tr-profile-schema.md for future checks.
  */
 
 import { existsSync, mkdirSync, readdirSync } from 'fs';

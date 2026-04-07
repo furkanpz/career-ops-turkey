@@ -1,0 +1,281 @@
+# Turkey / EMEA Portal Scanner Configuration
+# Used by /career-ops scan to discover new offers for Turkey-based candidates.
+#
+# Compatibility:
+# - Keeps the same top-level structure as templates/portals.example.yml
+# - Existing scanner keys remain: title_filter, search_queries, tracked_companies
+# - Extra metadata keys below are additive and safe for current scanner implementations to ignore
+#
+# Strategy:
+#   1. Company career pages in Turkey or Turkey-founded employers
+#   2. Global ATS providers used by Turkey / EMEA employers
+#   3. Turkish job boards via WebSearch site: queries
+#
+# IMPORTANT:
+# - This file is for discovery only. It does NOT imply automatic application submission.
+# - Each tracked company should still have a careers_url.
+#
+# Optional metadata fields:
+#   source_type: turkish_job_board | company_careers | global_ats
+#   parser_key: parser routing hint for a future locale-aware scanner layer
+#   locale: expected locale of the page or source (for example tr-TR, en-TR, en-EMEA)
+#   language: expected posting language(s)
+#   anti_duplication: hints for company / title / URL normalization across multiple sources
+
+title_filter:
+  positive:
+    # -- Turkish AI / data keywords --
+    - "Yapay Zeka"
+    - "Makine Öğrenmesi"
+    - "Veri Bilimi"
+    - "Veri Bilimci"
+    - "Veri Mühendisi"
+    - "Analitik"
+    - "İş Zekası"
+    - "MLOps"
+    - "LLM"
+    - "GenAI"
+    # -- English equivalents commonly used in Turkey / EMEA --
+    - "AI Engineer"
+    - "ML Engineer"
+    - "Data Scientist"
+    - "Data Engineer"
+    - "Analytics Engineer"
+    - "Platform Engineer"
+    - "Backend Engineer"
+    - "Product Analyst"
+    - "Machine Learning"
+    - "Applied Scientist"
+  negative:
+    - "Stajyer"
+    - "Intern"
+    - "Çağrı Merkezi"
+    - "Müşteri Temsilcisi"
+    - "Satış Temsilcisi"
+    - "Saha Satış"
+    - "Muhasebe"
+    - "Ön Muhasebe"
+    - "Kasiyer"
+    - "Mağaza"
+    - "Android"
+    - "iOS"
+    - "PHP"
+    - "SAP "
+  seniority_boost:
+    - "Senior"
+    - "Lead"
+    - "Principal"
+    - "Staff"
+    - "Uzman"
+    - "Kıdemli"
+    - "Müdür"
+
+search_queries:
+  # -- Turkish job boards --
+  - name: Kariyer.net — AI & Data
+    source_type: turkish_job_board
+    parser_key: kariyernet_search
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "kariyer.net"
+      normalize_company_from_result: true
+      strip_title_suffixes: ["İstanbul", "Ankara", "Hybrid", "Hibrit", "Remote", "Uzaktan"]
+    query: 'site:kariyer.net/is-ilanlari "Yapay Zeka" OR "Makine Öğrenmesi" OR "Veri Bilimci" OR "Data Scientist"'
+    enabled: true
+
+  - name: Kariyer.net — Data & Platform
+    source_type: turkish_job_board
+    parser_key: kariyernet_search
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "kariyer.net"
+      normalize_company_from_result: true
+      prefer_url_job_id: true
+    query: 'site:kariyer.net/is-ilanlari "Data Engineer" OR "Veri Mühendisi" OR "Platform Engineer" OR "Analytics Engineer"'
+    enabled: true
+
+  - name: Secretcv — AI & Analytics
+    source_type: turkish_job_board
+    parser_key: secretcv_search
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "secretcv"
+      normalize_company_from_result: true
+    query: 'site:secretcv.com/is-ilanlari "Yapay Zeka" OR "Data Scientist" OR "Veri Analisti" OR "ML Engineer"'
+    enabled: true
+
+  - name: Yenibiris — Data & BI
+    source_type: turkish_job_board
+    parser_key: yenibiris_search
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "yenibiris"
+      normalize_company_from_result: true
+    query: 'site:yenibiris.com/is-ilanlari "Veri Bilimci" OR "İş Zekası" OR "Business Intelligence" OR "Analytics"'
+    enabled: true
+
+  - name: Youthall — New Grad Data & Product
+    source_type: turkish_job_board
+    parser_key: youthall_search
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "youthall"
+      normalize_company_from_result: true
+    query: 'site:youthall.com "Data" OR "Analytics" OR "Product" "Intern" OR "New Grad"'
+    enabled: false
+
+  # -- Global ATS providers commonly used by Turkey / EMEA employers --
+  - name: Greenhouse — Turkey / EMEA AI & Data
+    source_type: global_ats
+    parser_key: greenhouse_board
+    locale: en-EMEA
+    language: [en]
+    anti_duplication:
+      canonical_source: "greenhouse"
+      prefer_url_job_id: true
+      strip_title_suffixes: ["Remote", "Hybrid", "EMEA", "Turkey", "Türkiye"]
+    query: 'site:job-boards.greenhouse.io OR site:boards.greenhouse.io "Data Engineer" OR "AI Engineer" OR "Machine Learning" "EMEA" OR "Turkey"'
+    enabled: true
+
+  - name: Ashby — Turkey / EMEA AI & Product
+    source_type: global_ats
+    parser_key: ashby_board
+    locale: en-EMEA
+    language: [en]
+    anti_duplication:
+      canonical_source: "ashby"
+      prefer_url_job_id: true
+    query: 'site:jobs.ashbyhq.com "Data Scientist" OR "AI Engineer" OR "Product Analyst" "EMEA" OR "Turkey"'
+    enabled: true
+
+  - name: Lever — EMEA Platform & Data
+    source_type: global_ats
+    parser_key: lever_board
+    locale: en-EMEA
+    language: [en]
+    anti_duplication:
+      canonical_source: "lever"
+      prefer_url_job_id: true
+    query: 'site:jobs.lever.co "Data Engineer" OR "Platform Engineer" OR "Machine Learning" "EMEA" OR "Istanbul"'
+    enabled: true
+
+  - name: Workable — Turkey Tech
+    source_type: global_ats
+    parser_key: workable_board
+    locale: en-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "workable"
+      prefer_url_job_id: true
+    query: 'site:apply.workable.com "Istanbul" OR "Türkiye" "Data Engineer" OR "Backend Engineer" OR "AI"'
+    enabled: true
+
+  - name: Teamtailor — Turkey / EMEA Product & Data
+    source_type: global_ats
+    parser_key: teamtailor_board
+    locale: en-EMEA
+    language: [en]
+    anti_duplication:
+      canonical_source: "teamtailor"
+      prefer_url_job_id: true
+    query: 'site:career.teamtailor.com OR site:jobs.teamtailor.com "Data" OR "Analytics" OR "AI" "EMEA" OR "Turkey"'
+    enabled: true
+
+tracked_companies:
+  # -- Turkey-founded company career pages --
+
+  - name: Trendyol
+    source_type: company_careers
+    parser_key: custom_careers_hub
+    locale: en-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["Trendyol Group", "DSM Grup"]
+      prefer_company_page_over_job_board: true
+      strip_title_suffixes: ["Istanbul", "İstanbul", "Hybrid", "Hibrit", "Remote", "Uzaktan"]
+    careers_url: https://careers.trendyol.com/
+    notes: "Large Turkey-founded e-commerce and marketplace platform."
+    enabled: true
+
+  - name: Hepsiburada
+    source_type: company_careers
+    parser_key: custom_careers_hub
+    locale: en-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["D-Market", "Hepsiburada Global"]
+      prefer_company_page_over_job_board: true
+    careers_url: https://kurumsal.hepsiburada.com/en/career
+    scan_method: websearch
+    scan_query: 'site:kurumsal.hepsiburada.com/en/career OR site:kurumsal.hepsiburada.com "Data" OR "Analytics" OR "Engineer"'
+    notes: "Public Turkish e-commerce company with local and global-facing roles."
+    enabled: true
+
+  - name: Insider
+    source_type: company_careers
+    parser_key: custom_careers_hub
+    locale: en-TR
+    language: [en]
+    anti_duplication:
+      company_aliases: ["useInsider", "Insider."]
+      prefer_company_page_over_job_board: true
+    careers_url: https://useinsider.com/careers/open-positions/
+    notes: "Turkey-founded global SaaS employer; roles often listed in English."
+    enabled: true
+
+  - name: Papara
+    source_type: company_careers
+    parser_key: custom_careers_hub
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["Papara Elektronik Para A.Ş."]
+      prefer_company_page_over_job_board: true
+    careers_url: https://careers.papara.com/en/all-jobs/
+    notes: "Turkey fintech with dedicated careers hub and engineering hiring."
+    enabled: true
+
+  - name: iyzico
+    source_type: company_careers
+    parser_key: custom_careers_hub
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["iyzico a PayU company"]
+      prefer_company_page_over_job_board: true
+    careers_url: https://www.iyzico.com/en/about-us/career/2564
+    scan_method: websearch
+    scan_query: 'site:iyzico.com/en/about-us/career OR site:iyzico.com/hakkimizda/kariyer "engineer" OR "data"'
+    notes: "Turkey fintech / payments employer with local-market hiring."
+    enabled: true
+
+  - name: Dream Games
+    source_type: company_careers
+    parser_key: custom_careers_hub
+    locale: en-TR
+    language: [en]
+    anti_duplication:
+      company_aliases: ["Dream Games Dijital Teknolojiler A.Ş."]
+      prefer_company_page_over_job_board: true
+      strip_title_suffixes: ["Istanbul", "İstanbul"]
+    careers_url: https://www.dreamgames.com/open-positions
+    notes: "Turkey-founded game studio with engineering and data-adjacent roles."
+    enabled: true
+
+  - name: Peak
+    source_type: company_careers
+    parser_key: custom_careers_hub
+    locale: en-TR
+    language: [en]
+    anti_duplication:
+      company_aliases: ["Peak Games"]
+      prefer_company_page_over_job_board: true
+      strip_title_suffixes: ["Istanbul", "İstanbul", "On-site"]
+    careers_url: https://peak.com/jobs
+    notes: "Turkey-founded gaming employer with engineering, data, and new-grad roles."
+    enabled: true

@@ -5,7 +5,7 @@
 1. Lee `cv.md` como fuentes de verdad
 2. Pide al usuario el JD si no está en contexto (texto o URL)
 3. Extrae 15-20 keywords del JD
-4. Detecta idioma del JD → idioma del CV (EN default)
+4. Detecta idioma del JD → idioma del CV (`en` default, `tr` soportado)
 5. Detecta ubicación empresa → formato papel:
    - US/Canada → `letter`
    - Resto del mundo → `a4`
@@ -15,10 +15,15 @@
 9. Reordena bullets de experiencia por relevancia al JD
 10. Construye competency grid desde requisitos del JD (6-8 keyword phrases)
 11. Inyecta keywords naturalmente en logros existentes (NUNCA inventa)
-12. Genera HTML completo desde template + contenido personalizado
-13. Escribe HTML a `/tmp/cv-candidate-{company}.html`
-14. Ejecuta: `node generate-pdf.mjs /tmp/cv-candidate-{company}.html output/cv-candidate-{company}-{YYYY-MM-DD}.pdf --format={letter|a4}`
-15. Reporta: ruta del PDF, nº páginas, % cobertura de keywords
+12. Selecciona template de forma segura:
+    - `tr` → `templates/cv-template.tr.html`
+    - `en` → `templates/cv-template.en.html`
+    - fallback → `templates/cv-template.html`
+    - Puedes resolver path, labels y nombres con `node cv-template-utils.mjs --lang={tr|en} --company-slug={company} --date={YYYY-MM-DD}`
+13. Genera HTML completo desde template + contenido personalizado
+14. Escribe HTML a `/tmp/cv-candidate-{company}-{lang}.html`
+15. Ejecuta: `node generate-pdf.mjs /tmp/cv-candidate-{company}-{lang}.html output/cv-candidate-{company}-{lang}-{YYYY-MM-DD}.pdf --format={letter|a4}`
+16. Reporta: ruta del PDF, nº páginas, % cobertura de keywords
 
 ## Reglas ATS (parseo limpio)
 
@@ -62,11 +67,11 @@ Ejemplos de reformulación legítima:
 
 ## Template HTML
 
-Usar el template en `cv-template.html`. Reemplazar los placeholders `{{...}}` con contenido personalizado:
+Usar el template resuelto (`cv-template.tr.html`, `cv-template.en.html`, o fallback `cv-template.html`). Reemplazar los placeholders `{{...}}` con contenido personalizado:
 
 | Placeholder | Contenido |
 |-------------|-----------|
-| `{{LANG}}` | `en` o `es` |
+| `{{LANG}}` | `en`, `es`, o `tr` |
 | `{{PAGE_WIDTH}}` | `8.5in` (letter) o `210mm` (A4) |
 | `{{NAME}}` | (from profile.yml) |
 | `{{EMAIL}}` | (from profile.yml) |

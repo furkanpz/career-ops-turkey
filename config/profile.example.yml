@@ -1,6 +1,9 @@
 # Career-Ops Profile Configuration
 # Copy this file to config/profile.yml and fill in your details.
 # This is the single source of truth for your personal data across all modes.
+# For Turkey-specific defaults and additive profile fields, see:
+# - config/profile.tr.example.yml
+# - docs/tr-profile-schema.md
 
 candidate:
   full_name: "Jane Smith"
