@@ -37,10 +37,12 @@ const APPLICATIONS_PATH = existsSync(join(DATA_DIR, 'applications.md'))
 
 const FETCH_TIMEOUT_MS = 12_000;
 const API_CONCURRENCY = 8;
-const SEARCH_CONCURRENCY = 4;
+const SEARCH_CONCURRENCY = 2;
 const SEARCH_RESULT_LIMIT = 8;
 const CAREERS_PAGE_TIMEOUT_MS = 20_000;
 const CAREERS_PAGE_WAIT_MS = 2_000;
+const FETCH_RETRY_COUNT = 2;
+const FETCH_RETRY_DELAY_MS = 800;
 const SEARCH_ENDPOINT = 'https://html.duckduckgo.com/html/';
 
 export const PRIMARY_TR_PARSER_KEYS = [
@@ -262,32 +264,56 @@ function makeFetchOptions(extra = {}) {
   };
 }
 
-async function fetchText(url, extra = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const response = await fetch(url, { ...makeFetchOptions(extra), signal: controller.signal });
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableFetchError(error) {
+  if (!error) return false;
+
+  const message = String(error.message || '');
+  if (error.name === 'AbortError') return true;
+  if (/This operation was aborted/i.test(message)) return true;
+  if (/fetch failed/i.test(message)) return true;
+  if (/HTTP 429/i.test(message)) return true;
+  if (/HTTP 5\d\d/i.test(message)) return true;
+  return false;
+}
+
+async function fetchWithRetry(url, responseType, extra = {}) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= FETCH_RETRY_COUNT; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, { ...makeFetchOptions(extra), signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return responseType === 'json' ? await response.json() : await response.text();
+    } catch (error) {
+      lastError = error;
+      if (attempt === FETCH_RETRY_COUNT || !isRetryableFetchError(error)) {
+        throw error;
+      }
+    } finally {
+      clearTimeout(timer);
     }
-    return await response.text();
-  } finally {
-    clearTimeout(timer);
+
+    await sleep(FETCH_RETRY_DELAY_MS * (attempt + 1));
   }
+
+  throw lastError;
+}
+
+async function fetchText(url, extra = {}) {
+  return fetchWithRetry(url, 'text', extra);
 }
 
 async function fetchJson(url, extra = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const response = await fetch(url, { ...makeFetchOptions(extra), signal: controller.signal });
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    return await response.json();
-  } finally {
-    clearTimeout(timer);
-  }
+  return fetchWithRetry(url, 'json', extra);
 }
 
 export function detectApi(company) {
