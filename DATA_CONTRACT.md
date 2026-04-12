@@ -17,6 +17,7 @@ These files contain your personal data, customizations, and work product. Update
 | `data/applications.md` | Your application tracker |
 | `data/pipeline.md` | Your URL inbox |
 | `data/scan-history.tsv` | Your scan history |
+| `data/follow-ups.md` | Your follow-up history |
 | `reports/*` | Your evaluation reports |
 | `output/*` | Your generated PDFs |
 | `jds/*` | Your saved job descriptions |
@@ -42,9 +43,13 @@ These files contain system logic, scripts, templates, and instructions that impr
 | `modes/tracker.md` | Tracker instructions |
 | `modes/training.md` | Training evaluation instructions |
 | `modes/de/*` | German language modes |
+| `modes/tr/*` | Turkey / EMEA override modes |
+| `config/profile.tr.example.yml` | Turkey locale profile starter |
+| `tracker-status-registry.json` | Canonical machine status registry |
 | `CLAUDE.md` | Agent instructions |
 | `AGENTS.md` | Codex instructions |
 | `*.mjs` | Utility scripts |
+| `.opencode/commands/*` | OpenCode command entrypoints |
 | `batch/batch-prompt.md` | Batch worker prompt |
 | `batch/batch-runner.sh` | Batch orchestrator |
 | `dashboard/*` | Go TUI dashboard |
@@ -60,3 +65,5 @@ These files contain system logic, scripts, templates, and instructions that impr
 **If a file is in the User Layer, no update process may read, modify, or delete it.**
 
 **If a file is in the System Layer, it can be safely replaced with the latest version from the upstream repo.**
+
+`templates/states.yml` is documentation-only. The machine-readable source of truth for canonical tracker statuses is `tracker-status-registry.json`.

@@ -1,18 +1,23 @@
 # Turkey Status Map
 
+> Historical design note. This document captures the status-modeling analysis from before the
+> current tracker hardening. The active contract now lives in `tracker-status-registry.json`,
+> `templates/states.yml`, `normalize-statuses.mjs`, `merge-tracker.mjs`, and `verify-pipeline.mjs`.
+
 ## Purpose
 
 This document defines a Turkey-friendly status vocabulary for `career-ops` while preserving internal normalization safety, dedup behavior, and historical tracker integrity.
 
-This is a design and implementation-planning document only.
+This is a historical design and implementation-planning document only.
 
 - No runtime code changes in this step.
 - No silent reinterpretation of historical statuses.
 - Data integrity takes priority over nicer labels.
 
-## Current Inspection Findings
+## Historical Inspection Findings Before Hardening
 
-The current status layer is not fully centralized. Different parts of the repo assume different vocabularies:
+At the time of the original audit, the status layer was not fully centralized. Different parts of
+the repo assumed different vocabularies:
 
 ### `templates/states.yml`
 
@@ -20,7 +25,7 @@ Current canonical state ids:
 
 - `evaluated`
 - `applied`
-- `responded`
+- `response_received`
 - `interview`
 - `offer`
 - `rejected`
@@ -31,12 +36,12 @@ Current labels are English, with limited Spanish aliases.
 
 ### `normalize-statuses.mjs`
 
-Current behavior:
+Historical behavior at the time of the audit:
 
-- hardcodes Spanish canonical outputs such as `Evaluada`, `Aplicado`, `Entrevista`
-- strips dates and markdown from status cells
-- maps several ad hoc inputs into existing tracker states
-- moves `duplicado` / `repost` hints into notes
+- hardcoded legacy canonical outputs in script-local tables
+- stripped dates and markdown from status cells
+- mapped several ad hoc inputs into existing tracker states
+- moved `duplicado` / `repost` hints into notes
 
 Risk:
 
@@ -45,11 +50,11 @@ Risk:
 
 ### `merge-tracker.mjs`
 
-Current behavior:
+Historical behavior at the time of the audit:
 
-- validates statuses with a hardcoded vocabulary
-- defaults unknown statuses to `Evaluada`
-- treats duplicate/repost-like statuses as `Descartado`
+- validated statuses with a hardcoded vocabulary
+- defaulted unknown statuses to a legacy evaluated state
+- treated duplicate/repost-like statuses as discarded
 
 Risk:
 
@@ -58,10 +63,10 @@ Risk:
 
 ### `verify-pipeline.mjs`
 
-Current behavior:
+Historical behavior at the time of the audit:
 
-- validates statuses using a hardcoded Spanish list
-- does not actually load canonical labels/aliases from `states.yml`
+- validated statuses using a hardcoded legacy list
+- did not actually load canonical labels/aliases from the registry mirror
 
 Risk:
 
@@ -69,9 +74,9 @@ Risk:
 
 ### `dedup-tracker.mjs`
 
-Current behavior:
+Historical behavior at the time of the audit:
 
-- relies on a hardcoded advancement order:
+- relied on a hardcoded advancement order:
   - `no aplicar`
   - `descartado`
   - `rechazado`
@@ -88,9 +93,9 @@ Risk:
 
 ### `modes/tracker.md`
 
-Current issue:
+Historical issue:
 
-- documents a `Contacto` state that is not part of `templates/states.yml` and is not supported consistently by the scripts
+- documented a `Contacto` state that was not part of the canonical tracker contract and was not supported consistently by the scripts
 
 This is a data-integrity problem already present today and should not be expanded in a Turkey implementation.
 
@@ -112,13 +117,13 @@ These should remain the only status meanings allowed in `applications.md` unless
 
 | Canonical id | Current meaning | Recommended tracker label |
 |---|---|---|
-| `evaluated` | Offer evaluated, pending decision | `Evaluated` |
-| `applied` | Application submitted | `Applied` |
-| `responded` | Company responded, not yet interview | `Responded` |
-| `interview` | Active interview process | `Interview` |
-| `offer` | Offer received | `Offer` |
-| `rejected` | Rejected by company | `Rejected` |
-| `discarded` | Candidate discarded or posting closed | `Discarded` |
+| `evaluated` | Offer evaluated, pending decision | `EVALUATED` |
+| `applied` | Application submitted | `APPLIED` |
+| `response_received` | Company-side response received, not yet interview | `RESPONSE_RECEIVED` |
+| `interview` | Active interview process | `INTERVIEW` |
+| `offer` | Offer received | `OFFER` |
+| `rejected` | Rejected by company | `REJECTED` |
+| `discarded` | Candidate discarded or posting closed | `DISCARDED` |
 | `skip` | Not a fit, do not apply | `SKIP` |
 
 Recommendation:
@@ -140,7 +145,7 @@ Recommended Turkish labels and alias families:
 |---|---|---|
 | `evaluated` | `Degerlendirildi` | `degerlendirildi`, `incelendi`, `degerlendirme tamam`, `degerlendirme bitti` |
 | `applied` | `Basvuruldu` | `basvuruldu`, `basvuru yapildi`, `gonderildi`, `iletildi` |
-| `responded` | `Geri Donus Alindi` | `geri donus alindi`, `donus geldi`, `iletisim kuruldu`, `recruiter dondu` |
+| `response_received` | `Geri Donus Alindi` | `geri donus alindi`, `donus geldi`, `iletisim kuruldu`, `recruiter dondu` |
 | `interview` | `Mulakat` | `mulakat`, `gorusme`, `on gorusme`, `ik mulakati`, `teknik mulakat`, `teknik interview`, `case study`, `vaka calismasi`, `test gonderildi` |
 | `offer` | `Teklif` | `teklif`, `offer`, `verbal offer`, `yazili teklif` |
 | `rejected` | `Reddedildi` | `reddedildi`, `olumsuz`, `ret`, `elendi` |
@@ -294,13 +299,13 @@ If the team wants a Turkish-facing tracker UI or docs, use these display terms w
 
 | Internal id | English label | Turkish display label |
 |---|---|---|
-| `evaluated` | `Evaluated` | `Degerlendirildi` |
-| `applied` | `Applied` | `Basvuruldu` |
-| `responded` | `Responded` | `Geri Donus Alindi` |
-| `interview` | `Interview` | `Mulakat` |
-| `offer` | `Offer` | `Teklif` |
-| `rejected` | `Rejected` | `Reddedildi` |
-| `discarded` | `Discarded` | `Vazgecildi` |
+| `evaluated` | `EVALUATED` | `Degerlendirildi` |
+| `applied` | `APPLIED` | `Basvuruldu` |
+| `response_received` | `RESPONSE_RECEIVED` | `Geri Donus Alindi` |
+| `interview` | `INTERVIEW` | `Mulakat` |
+| `offer` | `OFFER` | `Teklif` |
+| `rejected` | `REJECTED` | `Reddedildi` |
+| `discarded` | `DISCARDED` | `Vazgecildi` |
 | `skip` | `SKIP` | `Uygun Degil` |
 
 ## Data Integrity Rules
@@ -309,7 +314,7 @@ If the team wants a Turkish-facing tracker UI or docs, use these display terms w
 2. Never remap `CV ready` to `applied`.
 3. Never remap `reviewing` to `evaluated`.
 4. Never collapse `screening`, `HR interview`, `technical interview`, and `case study` into bare `interview` without preserving detail somewhere.
-5. Never default an unknown Turkish status to `Evaluated`.
+5. Never default an unknown Turkish status to `EVALUATED`.
 6. Historical meanings already in the tracker must remain parseable after Turkish aliases are added.
 
 ## Recommended Implementation Plan
@@ -379,7 +384,7 @@ Actions:
 
 Reason:
 
-- silent fallback to `Evaluated` is unsafe for Turkish intake terms like `Yeni` or `CV Hazir`
+- silent fallback to `EVALUATED` is unsafe for Turkish intake terms like `Yeni` or `CV Hazir`
 
 ### Phase 4: Support Turkish-friendly intake without tracker drift
 
@@ -469,4 +474,4 @@ The safe Turkey implementation is:
 - accept Turkish vocabulary as aliases
 - treat `new`, `reviewing`, `cv_ready`, `ready_to_apply`, and `no_response` as workflow metadata, not tracker states
 - map interview-family Turkish statuses to canonical `interview` while preserving subtype detail
-- remove unsafe defaults that silently rewrite unknown statuses into `Evaluated`
+- remove unsafe defaults that silently rewrite unknown statuses into `EVALUATED`

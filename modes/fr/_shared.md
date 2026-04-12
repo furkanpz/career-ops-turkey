@@ -1,14 +1,12 @@
 # Contexte partage -- career-ops (Francais)
 
 <!-- ============================================================
-     PERSONNALISATION DE CE FICHIER
+     CE FICHIER EST AUTO-METTABLE A JOUR. N'y mets pas de donnees personnelles.
      ============================================================
-     Ce fichier contient le contexte partage pour tous les modes
-     career-ops en version francaise. Avant d'utiliser career-ops, tu DOIS :
-     1. Remplir config/profile.yml avec tes informations personnelles
-     2. Creer cv.md a la racine du projet (CV en Markdown)
-     3. (Optionnel) Creer article-digest.md avec tes proof points
-     4. Adapter les sections marquees [PERSONNALISER] ci-dessous
+     Tes personnalisations doivent aller dans `config/profile.yml` et
+     `modes/_profile.md` (jamais auto-remplaces).
+     Ce fichier contient les regles systeme, la logique de scoring et le
+     contexte partage de la variante francaise.
      ============================================================ -->
 
 ## Sources de verite (TOUJOURS lire avant chaque evaluation)
@@ -18,31 +16,28 @@
 | cv.md | `cv.md` (racine du projet) | TOUJOURS |
 | article-digest.md | `article-digest.md` (si existant) | TOUJOURS (proof points detailles) |
 | profile.yml | `config/profile.yml` | TOUJOURS (identite et roles cibles) |
+| _profile.md | `modes/_profile.md` | TOUJOURS (archetypes, narration, cadre de negociation utilisateur) |
 
 **REGLE : Ne JAMAIS coder en dur des metriques issues des proof points.** Les lire depuis `cv.md` et `article-digest.md` au moment de l'evaluation.
 **REGLE : Pour les metriques d'articles/projets, `article-digest.md` a priorite sur `cv.md`** (`cv.md` peut contenir des chiffres plus anciens).
+**REGLE : Lire `modes/_profile.md` APRES ce fichier. Les personnalisations utilisateur y prennent priorite.**
 
 ---
 
 ## North Star -- Roles cibles
 
-Le skill traite TOUS les roles cibles avec le meme soin. Aucun n'est primaire ou secondaire -- chacun est un succes si la remuneration et les perspectives d'evolution sont au rendez-vous :
+Preferer les archetypes definis par l'utilisateur dans `config/profile.yml` et `modes/_profile.md`.
+Si ces cibles ne sont pas encore claires, classer l'offre dans une des familles de secours ci-dessous.
+Cette liste est volontairement generale et ne suppose aucun persona par defaut :
 
 | Archetype | Axes thematiques | Ce que l'entreprise achete |
 |-----------|------------------|----------------------------|
-| **AI Platform / LLMOps Engineer** | Evaluation, Observability, Fiabilite, Pipelines | Quelqu'un qui met l'IA en production avec des metriques |
-| **Agentic Workflows / Automation** | HITL, Tooling, Orchestration, Multi-Agent | Quelqu'un qui construit des systemes agents fiables |
-| **Technical AI Product Manager** | GenAI/Agents, PRDs, Discovery, Delivery | Quelqu'un qui traduit le business en produits IA |
-| **AI Solutions Architect** | Hyperautomation, Enterprise, Integrations | Quelqu'un qui concoit des architectures IA end-to-end |
-| **AI Forward Deployed Engineer** | Client-facing, Livraison rapide, Prototypage | Quelqu'un qui deploie des solutions IA rapidement chez le client |
-| **AI Transformation Lead** | Conduite du changement, Adoption, Enablement | Quelqu'un qui pilote la transformation IA dans les organisations |
-
-<!-- [PERSONNALISER] Adapte les archetypes ci-dessus a tes roles cibles.
-     Exemple pour le backend engineering :
-     - Senior Backend Engineer
-     - Staff Platform Engineer
-     - Engineering Manager
-     etc. -->
+| **Software / Backend / Platform** | APIs, fiabilite, infrastructure, systemes distribues | Quelqu'un qui livre et fait tourner des systemes techniques critiques |
+| **Data / Analytics** | SQL, reporting, dashboards, experimentation, data engineering | Quelqu'un qui transforme la donnee en decisions et systemes utiles |
+| **Product / Program** | Discovery, roadmap, priorisation, delivery, stakeholders | Quelqu'un qui transforme les zones floues en execution claire |
+| **Solutions / Customer Engineering** | Implementations, integrations, delivery cote client | Quelqu'un qui rend le produit utile chez le client |
+| **Design / UX** | UX, UI, research, interaction, design visuel | Quelqu'un qui traduit les besoins utilisateur en experiences utilisables |
+| **Business Systems / Operations** | Automation, outils internes, ops, enablement, workflows | Quelqu'un qui ameliore les systemes et processus internes |
 
 ### Framing adaptatif par archetype
 
@@ -50,19 +45,18 @@ Le skill traite TOUS les roles cibles avec le meme soin. Aucun n'est primaire ou
 
 | Si le role est... | Mettre en avant chez le candidat... | Sources de proof points |
 |-------------------|-------------------------------------|-------------------------|
-| Platform / LLMOps | Experience production, observability, evals, closed-loop | article-digest.md + cv.md |
-| Agentic / Automation | Orchestration multi-agent, HITL, fiabilite, couts | article-digest.md + cv.md |
-| Technical AI PM | Product discovery, PRDs, metriques, gestion des parties prenantes | cv.md + article-digest.md |
-| Solutions Architect | Conception systeme, integrations, pret pour l'entreprise | article-digest.md + cv.md |
-| Forward Deployed Engineer | Livraison rapide, proximite client, prototype a production | cv.md + article-digest.md |
-| AI Transformation Lead | Conduite du changement, enablement d'equipe, adoption | cv.md + article-digest.md |
-
-<!-- [PERSONNALISER] Associe tes projets/articles concrets aux archetypes ci-dessus -->
+| Software / Backend / Platform | Conception systeme, fiabilite, ownership, delivery en production | article-digest.md + cv.md |
+| Data / Analytics | SQL, modelisation de donnees, experimentation, qualite d'analyse | article-digest.md + cv.md |
+| Product / Program | Discovery, priorisation, pilotage des parties prenantes, outcomes | cv.md + article-digest.md |
+| Solutions / Customer Engineering | Implementations, integrations, proximite client, time-to-value | article-digest.md + cv.md |
+| Design / UX | Comprehension utilisateur, research, iteration, clarte visuelle | cv.md + article-digest.md |
+| Business Systems / Operations | Amelioration de processus, automation, enablement, tooling | cv.md + article-digest.md |
 
 ### Narratif de transition (a utiliser dans TOUS les framings)
 
-<!-- [PERSONNALISER] Remplace par ton propre narratif. Exemples :
-     - "SaaS construite et vendue apres 5 ans. Desormais 100% focus sur l'IA appliquee en entreprise."
+<!-- EXEMPLES de narratifs possibles. Les vraies valeurs viennent de
+     `config/profile.yml` ou `modes/_profile.md`, pas de ce fichier.
+     - "SaaS construite et vendue apres 5 ans. Desormais 100% focus sur des roles techniques orientes produit."
      - "Lead engineering dans une Series-B pendant une croissance x10. En quete du prochain defi."
      - "Transition du conseil vers le produit. Recherche de roles a forte responsabilite."
      Lu depuis config/profile.yml -> narrative.exit_story -->
@@ -77,27 +71,29 @@ Utiliser le narratif de transition depuis `config/profile.yml` pour cadrer TOUS 
 
 Cadrer le profil comme **"Builder technique avec une pratique demontrable"**, en adaptant le framing au role :
 - Pour PM : "Builder qui reduit l'incertitude avec des prototypes puis livre en production de maniere disciplinee"
-- Pour FDE : "Builder qui livre des le jour 1 avec observability et metriques"
-- Pour SA : "Builder qui concoit des systemes end-to-end avec une vraie experience d'integration"
-- Pour LLMOps : "Builder qui met l'IA en production avec des systemes qualite en boucle fermee"
+- Pour le customer engineering : "Builder qui met vite en service des integrations utiles cote client"
+- Pour le design : "Builder qui transforme le feedback utilisateur en iterations concretes"
+- Pour les operations : "Builder qui transforme les taches manuelles en systemes repetables"
 
 Positionner "Builder" comme signal professionnel -- pas comme "bricoleur". Les proof points reels rendent ca credible.
 
 ### Portfolio comme proof point (utiliser dans les candidatures a fort enjeu)
 
-<!-- [PERSONNALISER] Si tu as une demo live, un dashboard ou un projet public, configure-le ici.
+<!-- EXEMPLE de proof point. Les vraies valeurs viennent de
+     `config/profile.yml` ou `modes/_profile.md`.
      Exemple :
      dashboard:
        url: "https://tondomaine.dev/demo"
        password: "demo-2026"
-       when_to_share: "Roles LLMOps, AI Platform, Observability"
+       when_to_share: "roles plateforme, delivery cote client, verification de portfolio"
      Lu depuis config/profile.yml -> narrative.proof_points et narrative.dashboard -->
 
 Si le candidat a une demo live / un dashboard (verifier `profile.yml`), proposer l'acces dans les candidatures pertinentes.
 
 ### Intelligence remuneration (Comp Intelligence)
 
-<!-- [PERSONNALISER] Recherche les fourchettes de remuneration pour tes roles cibles et adapte les valeurs -->
+<!-- Notes d'exemple. Les fourchettes concretes doivent vivre dans
+     `config/profile.yml` ou `modes/_profile.md`. -->
 
 **Conseils generaux :**
 - WebSearch pour les donnees marche actuelles (Glassdoor, Levels.fyi, Welcome to the Jungle, APEC, Talent.io, Indeed Salaires)
@@ -130,7 +126,8 @@ Dans les offres et negociations francophones, certains termes n'existent pas sur
 
 ### Scripts de negociation
 
-<!-- [PERSONNALISER] Adapte a ta situation -->
+<!-- Scripts d'exemple. Les valeurs concretes viennent de
+     `config/profile.yml` ou `modes/_profile.md`. -->
 
 **Pretentions salariales (framework general) :**
 > "Sur la base des donnees marche actuelles pour ce type de poste, je vise une fourchette de [FOURCHETTE depuis profile.yml]. Je reste flexible sur la structure -- c'est le package global et les perspectives d'evolution qui comptent."
@@ -146,7 +143,8 @@ Dans les offres et negociations francophones, certains termes n'existent pas sur
 
 ### Politique de localisation (Location Policy)
 
-<!-- [PERSONNALISER] Adapte a ta situation. Lu depuis config/profile.yml -> location -->
+<!-- Exemple de logique de localisation. Les vraies preferences utilisateur
+     viennent de `config/profile.yml` ou `modes/_profile.md`. -->
 
 **Dans les formulaires :**
 - Questions binaires "Pouvez-vous etre sur site ?" : repondre selon la disponibilite reelle dans `profile.yml`

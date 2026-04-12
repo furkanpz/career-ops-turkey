@@ -8,7 +8,7 @@ Goals:
 
 - keep parser logic replaceable per source family
 - force every adapter to emit the same normalized schema
-- align adapter output with [docs/tr-data-model.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-data-model.md) and [docs/tr-normalization-spec.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-normalization-spec.md)
+- align adapter output with `docs/tr-data-model.md` and `docs/tr-normalization-spec.md`
 - keep the contract additive and maintainable
 
 Non-goals:
@@ -29,9 +29,9 @@ Non-goals:
 
 The current repo already has:
 
-- source metadata in [templates/portals.tr.example.yml](/Users/furkan/Desktop/Proje/career-ops/templates/portals.tr.example.yml)
-- a normalized target model in [docs/tr-data-model.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-data-model.md)
-- normalization rules in [docs/tr-normalization-spec.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-normalization-spec.md)
+- source metadata in `templates/portals.tr.example.yml`
+- a normalized target model in `docs/tr-data-model.md`
+- normalization rules in `docs/tr-normalization-spec.md`
 
 The adapter layer sits between source discovery and normalized listing storage:
 
@@ -47,13 +47,17 @@ Each adapter is registered by `parser_key`.
 Recommended rule:
 
 - `parser_key` is the only routing key used to select an adapter
-- `source_type`, `locale`, `language`, and `anti_duplication` remain configuration metadata passed into the adapter
+- `adapter_family`, `locale`, `language`, and `anti_duplication` remain configuration metadata passed into the adapter
 
 Examples from the current Turkey config:
 
+- `linkedin_jobs_search`
 - `kariyernet_search`
+- `indeed_tr_search`
+- `elemannet_search`
 - `secretcv_search`
 - `yenibiris_search`
+- `iskur_search`
 - `youthall_search`
 - `custom_careers_hub`
 - `greenhouse_board`
@@ -96,7 +100,7 @@ This stays intentionally small. Avoid adapter-specific public methods unless a r
 ```ts
 interface SourceConfig {
   name: string;
-  source_type: "turkish_job_board" | "company_careers" | "global_ats";
+  adapter_family: "turkish_job_board" | "company_careers" | "global_ats";
   parser_key: string;
   locale?: string;
   language?: string[];
@@ -183,7 +187,8 @@ interface NormalizedListingCandidate {
     title: string;
     location_text: string | null;
     city: string | null;
-    country_code: "TR";
+    country_code: string | null;
+    region_scope: string | null; // e.g. TR, EMEA, GLOBAL when explicit
     work_model: string;         // canonical enum or unknown
     seniority: string;          // canonical enum or unknown
     language: string;           // canonical enum or unknown
@@ -242,6 +247,7 @@ These must always be present:
 - `listing.title_raw`
 - `listing.title`
 - `listing.country_code`
+- `listing.region_scope`
 - `listing.work_model`
 - `listing.seniority`
 - `listing.language`
@@ -265,7 +271,7 @@ Adapters must emit enum values already normalized to the target spec for:
 - `listing.language`
 - `listing.employment_type`
 
-Those canonical values must come from [docs/tr-normalization-spec.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-normalization-spec.md).
+Those canonical values must come from `docs/tr-normalization-spec.md`.
 
 ### Raw vs normalized split
 
@@ -371,6 +377,7 @@ Recommended error codes:
     "location_text": "İstanbul / Hibrit",
     "city": "Istanbul",
     "country_code": "TR",
+    "region_scope": "TR",
     "work_model": "hybrid",
     "seniority": "senior",
     "language": "tr_en",

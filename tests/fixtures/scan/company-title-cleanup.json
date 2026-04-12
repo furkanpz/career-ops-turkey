@@ -1,0 +1,12 @@
+[
+  {
+    "name": "dream-games-card-title",
+    "input": "NEWData ScientistIstanbulData Science",
+    "expected": "Data Scientist"
+  },
+  {
+    "name": "backend-with-location",
+    "input": "Senior Backend Engineer Istanbul Engineering",
+    "expected": "Senior Backend Engineer"
+  }
+]

@@ -1,5 +1,14 @@
 # Mod: basvur -- Canli basvuru asistani (Turkiye)
 
+Bu dosya `modes/apply.md` ile birlikte okunur. `modes/apply.md` icindeki workflow'un TAMAMI korunur:
+
+- ekran/url/screenshot algilama
+- report lookup
+- rol mismatch uyarisi
+- soru siniflandirma
+- iteratif scroll/screenshot toplama
+- post-apply tracker/report update
+
 Bu mod, `modes/tr/teklif.md` ile uretilmis evaluation report'unu temel alir.
 
 ## Ana kural
@@ -47,12 +56,26 @@ Asla:
 - dogrulanmamis bilgiyi kesin gibi yazma
 - riskli case'lerde agresif "I'm choosing you" tonu kullanma
 
+## Parity kurali
+
+`modes/apply.md` icindeki tum soru tipleri burada da desteklenir:
+
+- text area
+- dropdown
+- yes/no
+- salary expectation
+- work authorization
+- relocation
+- upload alanlari
+
+Form uzun ise scroll alip iteratif devam et. Bu davranis dusmez.
+
 ## Onerilen output
 
 ```markdown
 ## Basvuru Cevaplari -- {Sirket} / {Rol}
 
-Temel: Final Score X.X/5 | Confidence: medium | Recommendation: secici_basvur
+Temel: Final Score X.X/5 | Confidence: medium | Recommendation: secici_basvur | Archetype: [type]
 
 ### 1. [Form sorusu]
 > [copy-paste hazir cevap]

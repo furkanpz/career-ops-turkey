@@ -1,10 +1,12 @@
 {
   "name": "career-ops",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "AI-powered job search pipeline built on Claude Code",
   "scripts": {
     "doctor": "node doctor.mjs",
     "verify": "node verify-pipeline.mjs",
+    "scan": "node scan.mjs",
+    "followup": "node followup-cadence.mjs --summary",
     "normalize": "node normalize-statuses.mjs",
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
@@ -15,15 +17,16 @@
     "rollback": "node update-system.mjs rollback",
     "liveness": "node check-liveness.mjs"
   },
-  "keywords": ["ai", "job-search", "claude-code", "career", "automation"],
+  "keywords": ["job-search", "claude-code", "career", "automation", "turkey"],
   "author": "Santiago Fernández de Valderrama <hi@santifer.io> (https://santifer.io)",
-  "homepage": "https://santifer.io",
+  "homepage": "https://github.com/furkanpz/career-ops-turkey",
   "repository": {
     "type": "git",
-    "url": "https://github.com/santifer/career-ops"
+    "url": "https://github.com/furkanpz/career-ops-turkey"
   },
   "license": "MIT",
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "playwright": "^1.58.1"
   }
 }

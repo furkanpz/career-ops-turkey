@@ -154,7 +154,7 @@ Die vollständige Bewertung in `reports/{###}-{company-slug}-{YYYY-MM-DD}.md` ab
 - Firma
 - Rolle
 - Score: Match-Durchschnitt (1-5)
-- Status: `Evaluated`
+- Status: `EVALUATED`
 - PDF: ❌ (oder ✅, wenn Auto-Pipeline ein PDF erzeugt hat)
 - Report: relativer Link zur Report-Datei (z. B. `[001](reports/001-company-2026-01-01.md)`)
 

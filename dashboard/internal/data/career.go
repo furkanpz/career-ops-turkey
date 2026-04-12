@@ -1,12 +1,15 @@
 package data
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/santifer/career-ops/dashboard/internal/model"
 )
@@ -14,19 +17,223 @@ import (
 var (
 	reReportLink     = regexp.MustCompile(`\[(\d+)\]\(([^)]+)\)`)
 	reScoreValue     = regexp.MustCompile(`(\d+\.?\d*)/5`)
-	reArchetype      = regexp.MustCompile(`(?i)\*\*Arquetipo(?:\s+detectado)?\*\*\s*\|\s*(.+)`)
+	reArchetype      = regexp.MustCompile(`(?i)\*\*(?:Archetype|Arquetipo)(?:\s+detectado)?\*\*\s*\|\s*(.+)`)
 	reTlDr           = regexp.MustCompile(`(?i)\*\*TL;DR\*\*\s*\|\s*(.+)`)
 	reTlDrColon      = regexp.MustCompile(`(?i)\*\*TL;DR:\*\*\s*(.+)`)
 	reRemote         = regexp.MustCompile(`(?i)\*\*Remote\*\*\s*\|\s*(.+)`)
 	reComp           = regexp.MustCompile(`(?i)\*\*Comp\*\*\s*\|\s*(.+)`)
-	reArchetypeColon = regexp.MustCompile(`(?i)\*\*Arquetipo:\*\*\s*(.+)`)
+	reArchetypeColon = regexp.MustCompile(`(?i)\*\*(?:Archetype|Arquetipo):\*\*\s*(.+)`)
 	reReportURL      = regexp.MustCompile(`(?m)^\*\*URL:\*\*\s*(https?://\S+)`)
 	reBatchID        = regexp.MustCompile(`(?m)^\*\*Batch ID:\*\*\s*(\d+)`)
+
+	statusRegistryOnce   sync.Once
+	statusAliasToGroup   map[string]string
+	statusGroupToRank    map[string]int
+	statusGroupToDisplay map[string]int
+	statusGroupToLabel   map[string]string
+	statusGroupOrder     []string
+	statusOptions        []string
+	statusRegistryError  error
 )
+
+type trackerStatusRegistry struct {
+	TrackerStatuses []trackerStatusEntry `json:"tracker_statuses"`
+}
+
+type trackerStatusEntry struct {
+	Label        string   `json:"label"`
+	Group        string   `json:"group"`
+	Rank         int      `json:"rank"`
+	DisplayOrder int      `json:"display_order"`
+	Aliases      []string `json:"aliases"`
+}
+
+func initStatusRegistryDefaults() {
+	if statusAliasToGroup != nil && statusGroupToRank != nil {
+		return
+	}
+
+	statusAliasToGroup = make(map[string]string)
+	statusGroupToLabel = map[string]string{
+		"evaluated":         "EVALUATED",
+		"applied":           "APPLIED",
+		"response_received": "RESPONSE_RECEIVED",
+		"interview":         "INTERVIEW",
+		"offer":             "OFFER",
+		"rejected":          "REJECTED",
+		"discarded":         "DISCARDED",
+		"skip":              "SKIP",
+	}
+	statusGroupToRank = map[string]int{
+		"discarded":         0,
+		"skip":              0,
+		"rejected":          1,
+		"evaluated":         2,
+		"applied":           3,
+		"response_received": 4,
+		"interview":         5,
+		"offer":             6,
+	}
+	statusGroupToDisplay = map[string]int{
+		"interview":         0,
+		"offer":             1,
+		"response_received": 2,
+		"applied":           3,
+		"evaluated":         4,
+		"skip":              5,
+		"rejected":          6,
+		"discarded":         7,
+	}
+	statusGroupOrder = []string{
+		"interview",
+		"offer",
+		"response_received",
+		"applied",
+		"evaluated",
+		"skip",
+		"rejected",
+		"discarded",
+	}
+	statusOptions = []string{
+		"EVALUATED",
+		"APPLIED",
+		"RESPONSE_RECEIVED",
+		"INTERVIEW",
+		"OFFER",
+		"REJECTED",
+		"DISCARDED",
+		"SKIP",
+	}
+
+	registerStatusAliases("evaluated", "EVALUATED", "evaluada", "degerlendirildi", "değerlendirildi", "condicional", "hold")
+	registerStatusAliases("applied", "APPLIED", "aplicado", "enviada", "aplicada", "sent", "basvuruldu", "başvuruldu")
+	registerStatusAliases("response_received", "RESPONSE_RECEIVED", "response received", "responded", "respondido", "contacted", "contacto", "geri donus alindi", "geri dönüş alındı")
+	registerStatusAliases("interview", "INTERVIEW", "entrevista", "mulakat", "mülakat")
+	registerStatusAliases("offer", "OFFER", "oferta", "teklif")
+	registerStatusAliases("rejected", "REJECTED", "rechazado", "rechazada", "ret", "olumsuz")
+	registerStatusAliases("discarded", "DISCARDED", "descartado", "descartada", "cerrada", "cancelada", "vazgecildi", "vazgeçildi", "duplicado", "dup")
+	registerStatusAliases("skip", "SKIP", "no aplicar", "no_aplicar", "monitor", "uygun degil", "uygun değil", "geo blocker")
+}
+
+func registerStatusAliases(group string, values ...string) {
+	for _, value := range values {
+		statusAliasToGroup[foldStatus(value)] = group
+	}
+}
+
+func loadStatusRegistry(careerOpsPath string) {
+	statusRegistryOnce.Do(func() {
+		initStatusRegistryDefaults()
+
+		path := filepath.Join(careerOpsPath, "tracker-status-registry.json")
+		content, err := os.ReadFile(path)
+		if err != nil {
+			statusRegistryError = err
+			return
+		}
+
+		var registry trackerStatusRegistry
+		if err := json.Unmarshal(content, &registry); err != nil {
+			statusRegistryError = err
+			return
+		}
+
+		aliasToGroup := make(map[string]string)
+		groupToRank := make(map[string]int)
+		groupToDisplay := make(map[string]int)
+		groupToLabel := make(map[string]string)
+		orderedStatuses := append([]trackerStatusEntry(nil), registry.TrackerStatuses...)
+		sort.SliceStable(orderedStatuses, func(i, j int) bool {
+			return orderedStatuses[i].DisplayOrder < orderedStatuses[j].DisplayOrder
+		})
+		options := make([]string, 0, len(orderedStatuses))
+		groups := make([]string, 0, len(orderedStatuses))
+
+		for _, status := range registry.TrackerStatuses {
+			groupToRank[status.Group] = status.Rank
+			groupToDisplay[status.Group] = status.DisplayOrder
+			groupToLabel[status.Group] = status.Label
+			aliasToGroup[foldStatus(status.Label)] = status.Group
+			aliasToGroup[foldStatus(status.Group)] = status.Group
+			for _, alias := range status.Aliases {
+				aliasToGroup[foldStatus(alias)] = status.Group
+			}
+		}
+		for _, status := range orderedStatuses {
+			options = append(options, status.Label)
+			groups = append(groups, status.Group)
+		}
+
+		if len(aliasToGroup) > 0 {
+			statusAliasToGroup = aliasToGroup
+		}
+		if len(groupToRank) > 0 {
+			statusGroupToRank = groupToRank
+		}
+		if len(groupToDisplay) > 0 {
+			statusGroupToDisplay = groupToDisplay
+		}
+		if len(groupToLabel) > 0 {
+			statusGroupToLabel = groupToLabel
+		}
+		if len(groups) > 0 {
+			statusGroupOrder = groups
+		}
+		if len(options) > 0 {
+			statusOptions = options
+		}
+	})
+}
+
+func foldStatus(raw string) string {
+	replacer := strings.NewReplacer(
+		"İ", "i",
+		"I", "i",
+		"ı", "i",
+		"ğ", "g",
+		"Ğ", "g",
+		"ü", "u",
+		"Ü", "u",
+		"ş", "s",
+		"Ş", "s",
+		"ö", "o",
+		"Ö", "o",
+		"ç", "c",
+		"Ç", "c",
+	)
+	s := replacer.Replace(raw)
+	s = strings.ReplaceAll(s, "**", "")
+	s = strings.TrimSpace(strings.ToLower(s))
+	if idx := strings.Index(s, " 202"); idx > 0 {
+		s = strings.TrimSpace(s[:idx])
+	}
+	s = strings.Join(strings.Fields(s), " ")
+	return s
+}
+
+func TrackerStatusOptions() []string {
+	initStatusRegistryDefaults()
+	return append([]string(nil), statusOptions...)
+}
+
+func TrackerStatusGroupOrder() []string {
+	initStatusRegistryDefaults()
+	return append([]string(nil), statusGroupOrder...)
+}
+
+func TrackerStatusLabel(group string) string {
+	initStatusRegistryDefaults()
+	if label, ok := statusGroupToLabel[group]; ok {
+		return label
+	}
+	return strings.ToUpper(group)
+}
 
 // ParseApplications reads applications.md and returns parsed applications.
 // It tries both {path}/applications.md and {path}/data/applications.md for compatibility.
 func ParseApplications(careerOpsPath string) []model.CareerApplication {
+	loadStatusRegistry(careerOpsPath)
+
 	filePath := filepath.Join(careerOpsPath, "applications.md")
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -339,13 +546,44 @@ func enrichFromScanHistory(careerOpsPath string, apps []model.CareerApplication)
 	}
 }
 
-// normalizeCompany strips common suffixes and lowercases a company name.
+// normalizeCompany folds Turkish characters and trims common local legal suffixes.
 func normalizeCompany(name string) string {
-	s := strings.ToLower(strings.TrimSpace(name))
-	for _, suffix := range []string{" inc.", " inc", " llc", " ltd", " corp", " corporation", " technologies", " technology", " group", " co."} {
-		s = strings.TrimSuffix(s, suffix)
+	replacer := strings.NewReplacer(
+		"İ", "i",
+		"I", "i",
+		"ı", "i",
+		"ğ", "g",
+		"Ğ", "g",
+		"ü", "u",
+		"Ü", "u",
+		"ş", "s",
+		"Ş", "s",
+		"ö", "o",
+		"Ö", "o",
+		"ç", "c",
+		"Ç", "c",
+		"&", " and ",
+		".", " ",
+		",", " ",
+		"(", " ",
+		")", " ",
+		"/", " ",
+		"-", " ",
+		"'", " ",
+		"’", " ",
+	)
+	s := strings.ToLower(strings.TrimSpace(replacer.Replace(name)))
+	tokens := strings.Fields(s)
+	suffixTokens := map[string]bool{
+		"a": true, "s": true, "as": true, "anonim": true,
+		"limited": true, "ltd": true, "sti": true,
+		"sirket": true, "sirketi": true, "san": true,
+		"ve": true, "tic": true,
 	}
-	return strings.TrimSpace(s)
+	for len(tokens) > 0 && suffixTokens[tokens[len(tokens)-1]] {
+		tokens = tokens[:len(tokens)-1]
+	}
+	return strings.Join(tokens, "")
 }
 
 // enrichAppURLsByCompany fills in JobURL for apps that didn't get one via report_num mapping.
@@ -462,39 +700,21 @@ func ComputeMetrics(apps []model.CareerApplication) model.PipelineMetrics {
 	return m
 }
 
-// NormalizeStatus normalizes raw status text to a canonical form.
-// Aliases match states.yml -- keep in sync with career-ops/states.yml
+// NormalizeStatus normalizes raw status text to an internal dashboard group.
+// Aliases mirror tracker-status-registry.json.
 func NormalizeStatus(raw string) string {
-	// Strip markdown bold and trailing dates
-	s := strings.ReplaceAll(raw, "**", "")
-	s = strings.TrimSpace(strings.ToLower(s))
-	// Strip trailing date (e.g., "aplicado 2026-03-12")
-	if idx := strings.Index(s, " 202"); idx > 0 {
-		s = strings.TrimSpace(s[:idx])
-	}
-
-	switch {
-	// Most restrictive first — accepts both English and Spanish
-	case strings.Contains(s, "no aplicar") || strings.Contains(s, "no_aplicar") || s == "skip" || strings.Contains(s, "geo blocker"):
-		return "skip"
-	case strings.Contains(s, "interview") || strings.Contains(s, "entrevista"):
-		return "interview"
-	case s == "offer" || strings.Contains(s, "oferta"):
-		return "offer"
-	case strings.Contains(s, "responded") || strings.Contains(s, "respondido"):
-		return "responded"
-	case strings.Contains(s, "applied") || strings.Contains(s, "aplicado") || s == "enviada" || s == "aplicada" || s == "sent":
-		return "applied"
-	case strings.Contains(s, "rejected") || strings.Contains(s, "rechazado") || s == "rechazada":
-		return "rejected"
-	case strings.Contains(s, "discarded") || strings.Contains(s, "descartado") || s == "descartada" || s == "cerrada" || s == "cancelada" ||
-		strings.HasPrefix(s, "duplicado") || strings.HasPrefix(s, "dup"):
+	initStatusRegistryDefaults()
+	s := foldStatus(raw)
+	if s == "" {
 		return "discarded"
-	case strings.Contains(s, "evaluated") || strings.Contains(s, "evaluada") || s == "condicional" || s == "hold" || s == "monitor" || s == "evaluar" || s == "verificar":
-		return "evaluated"
-	default:
-		return s
 	}
+	if strings.HasPrefix(s, "duplicado") || strings.HasPrefix(s, "dup") || strings.HasPrefix(s, "repost") {
+		return "discarded"
+	}
+	if group, ok := statusAliasToGroup[s]; ok {
+		return group
+	}
+	return s
 }
 
 // LoadReportSummary extracts key fields from a report file.
@@ -556,8 +776,11 @@ func UpdateApplicationStatus(careerOpsPath string, app model.CareerApplication, 
 		}
 		// Match by report number
 		if app.ReportNumber != "" && strings.Contains(line, fmt.Sprintf("[%s]", app.ReportNumber)) {
-			// Replace the status field
-			lines[i] = replaceStatusInLine(line, app.Status, newStatus)
+			updatedLine, ok := replaceStatusInLine(line, newStatus)
+			if !ok {
+				return fmt.Errorf("could not parse tracker row for report %s", app.ReportNumber)
+			}
+			lines[i] = updatedLine
 			found = true
 			break
 		}
@@ -570,10 +793,14 @@ func UpdateApplicationStatus(careerOpsPath string, app model.CareerApplication, 
 	return os.WriteFile(filePath, []byte(strings.Join(lines, "\n")), 0644)
 }
 
-// replaceStatusInLine replaces the old status with new status in a table line.
-func replaceStatusInLine(line, oldStatus, newStatus string) string {
-	// Case-insensitive replacement of the status field
-	return strings.Replace(line, oldStatus, newStatus, 1)
+// replaceStatusInLine replaces only the status column in a markdown table line.
+func replaceStatusInLine(line, newStatus string) (string, bool) {
+	parts := strings.Split(line, "|")
+	if len(parts) < 10 {
+		return "", false
+	}
+	parts[6] = " " + newStatus + " "
+	return strings.Join(parts, "|"), true
 }
 
 // cleanTableCell removes trailing pipes and whitespace from a table cell value.
@@ -585,24 +812,12 @@ func cleanTableCell(s string) string {
 
 // StatusPriority returns the sort priority for a status (lower = higher priority).
 func StatusPriority(status string) int {
-	switch NormalizeStatus(status) {
-	case "interview":
-		return 0
-	case "offer":
-		return 1
-	case "responded":
-		return 2
-	case "applied":
-		return 3
-	case "evaluated":
-		return 4
-	case "skip":
-		return 5
-	case "rejected":
-		return 6
-	case "discarded":
-		return 7
-	default:
-		return 8
+	initStatusRegistryDefaults()
+
+	norm := NormalizeStatus(status)
+	order, ok := statusGroupToDisplay[norm]
+	if !ok {
+		return len(statusGroupToDisplay) + 1
 	}
+	return order
 }

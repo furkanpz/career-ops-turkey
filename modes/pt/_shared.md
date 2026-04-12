@@ -44,23 +44,18 @@ A avaliacao usa 6 blocos (A-F) com uma nota global de 1-5:
 
 ## North Star -- Vagas-Alvo
 
-O skill trata TODAS as vagas-alvo com o mesmo cuidado. Nenhuma e primaria ou secundaria — qualquer uma e uma vitoria, desde que a remuneracao e a perspectiva de crescimento estejam adequadas:
+Prefira os arquetipos definidos pelo usuario em `config/profile.yml` e `modes/_profile.md`.
+Se esses alvos ainda nao estiverem claros, classifique a vaga em uma das familias de fallback abaixo.
+Esta lista e intencionalmente geral e nao assume nenhum perfil padrao:
 
 | Arquetipo | Eixos tematicos | O que estao comprando |
 |-----------|-----------------|----------------------|
-| **AI Platform / LLMOps Engineer** | Avaliacao, Observability, Confiabilidade, Pipelines | Alguem que coloca IA em producao com metricas |
-| **Agentic Workflows / Automation** | HITL, Tooling, Orquestracao, Multi-Agent | Alguem que constroi sistemas de agentes confiaveis |
-| **Technical AI Product Manager** | GenAI/Agents, PRDs, Discovery, Delivery | Alguem que traduz negocios em produtos de IA |
-| **AI Solutions Architect** | Hiperautomacao, Enterprise, Integracoes | Alguem que projeta arquiteturas de IA de ponta a ponta |
-| **AI Forward Deployed Engineer** | Cliente-proximo, entrega rapida, Prototipagem | Alguem que implanta solucoes de IA rapidamente no cliente |
-| **AI Transformation Lead** | Gestao de mudanca, Adocao, Enablement organizacional | Alguem que lidera transformacao de IA em organizacoes |
-
-<!-- [PERSONALIZAR] Adapte os arquetipos acima para suas vagas-alvo.
-     Exemplo para engenharia backend:
-     - Senior Backend Engineer
-     - Staff Platform Engineer
-     - Engineering Manager
-     etc. -->
+| **Software / Backend / Platform** | APIs, confiabilidade, infraestrutura, sistemas distribuidos | Alguem que entrega e opera sistemas tecnicos centrais |
+| **Data / Analytics** | SQL, reporting, dashboards, experimentacao, data engineering | Alguem que transforma dados em decisoes e sistemas uteis |
+| **Product / Program** | Discovery, roadmap, priorizacao, delivery, stakeholders | Alguem que transforma ambiguidade em execucao clara |
+| **Solutions / Customer Engineering** | Implementacao, integracoes, delivery proximo ao cliente | Alguem que torna o produto util no contexto do cliente |
+| **Design / UX** | UX, UI, research, interacao, design visual | Alguem que traduz necessidades do usuario em experiencias usaveis |
+| **Business Systems / Operations** | Automation, ferramentas internas, ops, enablement, workflows | Alguem que melhora sistemas e processos internos |
 
 ### Framing Adaptativo por Arquetipo
 
@@ -68,19 +63,18 @@ O skill trata TODAS as vagas-alvo com o mesmo cuidado. Nenhuma e primaria ou sec
 
 | Se a vaga e... | Enfatizar no candidato... | Fontes de Proof Points |
 |----------------|--------------------------|------------------------|
-| Platform / LLMOps | Experiencia em producao, Observability, Evals, Closed-Loop | article-digest.md + cv.md |
-| Agentic / Automation | Orquestracao multi-agent, HITL, Confiabilidade, Custos | article-digest.md + cv.md |
-| Technical AI PM | Product Discovery, PRDs, Metricas, Gestao de stakeholders | cv.md + article-digest.md |
-| Solutions Architect | Design de sistemas, Integracoes, Enterprise-ready | article-digest.md + cv.md |
-| Forward Deployed Engineer | Entrega rapida, proximo do cliente, Prototipo a producao | cv.md + article-digest.md |
-| AI Transformation Lead | Gestao de mudanca, Enablement de equipe, Adocao | cv.md + article-digest.md |
-
-<!-- [PERSONALIZAR] Mapeie seus projetos/artigos concretos para os arquetipos acima -->
+| Software / Backend / Platform | Design de sistemas, confiabilidade, ownership, entrega em producao | article-digest.md + cv.md |
+| Data / Analytics | SQL, modelagem de dados, experimentacao, qualidade analitica | article-digest.md + cv.md |
+| Product / Program | Discovery, priorizacao, alinhamento com stakeholders, outcomes | cv.md + article-digest.md |
+| Solutions / Customer Engineering | Implementacao, integracoes, proximidade com cliente, time-to-value | article-digest.md + cv.md |
+| Design / UX | Entendimento do usuario, research, iteracao, clareza visual | cv.md + article-digest.md |
+| Business Systems / Operations | Melhoria de processo, automation, enablement, tooling | cv.md + article-digest.md |
 
 ### Narrativa de Transicao (usar em TODOS os framings)
 
-<!-- [PERSONALIZAR] Substitua pela sua propria narrativa. Exemplos:
-     - "Construi e vendi minha propria SaaS em 5 anos. Agora foco total em IA aplicada no Enterprise."
+<!-- EXEMPLOS de narrativa. Os valores reais devem vir de
+     `config/profile.yml` ou `modes/_profile.md`.
+     - "Construi e vendi minha propria SaaS em 5 anos. Agora foco total em funcoes tecnicas orientadas a produto."
      - "Lead de engenharia em uma Series-B durante crescimento 10x. Buscando o proximo desafio."
      - "Transicao de consultoria para produto. Buscando vagas com alta responsabilidade."
      Lido de config/profile.yml -> narrative.exit_story -->
@@ -95,27 +89,29 @@ Use a narrativa de transicao de `config/profile.yml` para enquadrar TODO o conte
 
 Enquadrar o perfil como **"Builder tecnico com pratica comprovada"**, adaptando o framing a vaga:
 - Para PM: "Builder que reduz incerteza com prototipos e depois leva a producao com disciplina"
-- Para FDE: "Builder que entrega desde o dia 1 com observability e metricas"
-- Para SA: "Builder que projeta sistemas end-to-end com experiencia real de integracao"
-- Para LLMOps: "Builder que coloca IA em producao com sistemas de qualidade closed-loop"
+- Para customer engineering: "Builder que coloca integracoes uteis no ar rapidamente"
+- Para design: "Builder que transforma feedback de usuario em iteracoes concretas"
+- Para operations: "Builder que converte trabalho manual em sistemas repetiveis"
 
 Posicionar "Builder" como sinal profissional — nao como "hobbyista". Proof points reais tornam isso credivel.
 
 ### Portfolio como Proof Point (usar em candidaturas de alto valor)
 
-<!-- [PERSONALIZAR] Se voce tem uma demo ao vivo, dashboard ou projeto publico, configure aqui.
+<!-- EXEMPLO de proof point. Os valores reais devem vir de
+     `config/profile.yml` ou `modes/_profile.md`.
      Exemplo:
      dashboard:
        url: "https://seudominio.dev/demo"
        password: "demo-2026"
-       when_to_share: "LLMOps, AI-Platform, vagas de Observability"
+       when_to_share: "vagas de plataforma, integracao com cliente, revisao de portfolio"
      Lido de config/profile.yml -> narrative.proof_points e narrative.dashboard -->
 
 Quando o candidato tem uma demo ao vivo / dashboard (verificar `profile.yml`), oferecer acesso em candidaturas relevantes.
 
 ### Inteligencia de Remuneracao (Comp Intelligence)
 
-<!-- [PERSONALIZAR] Pesquise faixas salariais para suas vagas-alvo e ajuste os valores -->
+<!-- Notas de exemplo. Faixas concretas devem ficar em
+     `config/profile.yml` ou `modes/_profile.md`. -->
 
 **Orientacoes gerais:**
 - WebSearch para dados atuais de mercado (Glassdoor, Levels.fyi, Blind)
@@ -143,7 +139,8 @@ Em vagas e negociacoes brasileiras, existem termos e praticas que nao aparecem n
 
 ### Scripts de Negociacao
 
-<!-- [PERSONALIZAR] Adapte para sua situacao -->
+<!-- Scripts de exemplo. Valores concretos devem vir de
+     `config/profile.yml` ou `modes/_profile.md`. -->
 
 **Pretensao salarial (framework geral):**
 > "Com base em dados atuais de mercado para essa vaga, minha expectativa esta na faixa de [FAIXA do profile.yml]. Tenho flexibilidade na estrutura — o que importa e o pacote total e a perspectiva de crescimento."
@@ -159,7 +156,8 @@ Em vagas e negociacoes brasileiras, existem termos e praticas que nao aparecem n
 
 ### Politica de Localizacao (Location Policy)
 
-<!-- [PERSONALIZAR] Adapte para sua situacao. Lido de config/profile.yml -> location -->
+<!-- Exemplo de logica por localizacao. Os dados reais do usuario devem vir de
+     `config/profile.yml` ou `modes/_profile.md`. -->
 
 **Em formularios:**
 - Perguntas binarias "Voce pode trabalhar presencialmente?": responder conforme disponibilidade real de `profile.yml`

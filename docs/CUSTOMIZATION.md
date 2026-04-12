@@ -1,19 +1,28 @@
 # Customization Guide
 
-## Profile (config/profile.yml)
+## Profile (`config/profile.yml` + `modes/_profile.md`)
 
-This is the single source of truth for your identity. All modes read from here.
+This is the single source of truth for your identity and user-specific targeting. All modes read from here.
 
-Key sections:
+Key sections in `config/profile.yml`:
 - **candidate**: Name, email, phone, location, LinkedIn, portfolio
 - **target_roles**: Your North Star roles and archetypes
 - **narrative**: Your headline, exit story, superpowers, proof points
 - **compensation**: Target range, minimum, currency
 - **location**: Country, timezone, visa status, on-site availability
 
-## Target Roles (modes/_shared.md)
+Turkey-locale additions that the TR override layer reads when present:
+- **compensation.salary_preferences**
+- **language.cv_preferences**
+- **location_preferences**
+- **constraints**
+- **automation.application**
 
-The archetype table in `_shared.md` determines how offers are scored and CVs are framed. Edit the table to match YOUR career targets:
+Use `modes/_profile.md` for user-specific archetype notes, negotiation scripts, and narrative tweaks that should survive system updates.
+
+## Target Roles (`modes/_profile.md`)
+
+Put your archetype tweaks and adaptive framing overrides in `modes/_profile.md`, not `modes/_shared.md`:
 
 ```markdown
 | Archetype | Thematic axes | What they buy |
@@ -22,29 +31,42 @@ The archetype table in `_shared.md` determines how offers are scored and CVs are
 | **Your Role 2** | key skills | what they need |
 ```
 
-Also update the "Adaptive Framing" table to map YOUR specific projects to each archetype.
+Also update your adaptive framing notes to map YOUR specific projects to each archetype.
 
 ## Portals (portals.yml)
 
-Copy from `templates/portals.example.yml` and customize:
+In the Turkey fork, start from `templates/portals.tr.example.yml` unless you explicitly want the global default. The global fallback remains `templates/portals.example.yml`.
+
+Important distinction:
+- System layer = Turkey market behavior, locale-aware scoring, parser coverage, aliases
+- User layer = your target roles, keywords, company list, compensation targets, and narrative
+
+Customize:
 
 1. **title_filter.positive**: Keywords matching your target roles
 2. **title_filter.negative**: Tech stacks or domains to exclude
-3. **search_queries**: WebSearch queries for job boards (Ashby, Greenhouse, Lever)
+3. **search_queries**: WebSearch queries for job boards (LinkedIn Jobs, Kariyer.net, Indeed Turkiye, Eleman.net, Ashby, Greenhouse, Lever, Workable, Teamtailor)
 4. **tracked_companies**: Companies to check directly
 
-## CV Template (templates/cv-template.html)
+The TR template is deliberately a tech-first generic starter. Do not treat it as the "correct" default role list; trim it to your own target families.
 
-The HTML template uses these design tokens:
+## CV Templates (`templates/cv-template*.html`)
+
+The HTML templates use these design tokens:
 - **Fonts**: Space Grotesk (headings) + DM Sans (body) -- self-hosted in `fonts/`
 - **Colors**: Cyan primary (`hsl(187,74%,32%)`) + Purple accent (`hsl(270,70%,45%)`)
 - **Layout**: Single-column, ATS-optimized
 
-To customize fonts/colors, edit the CSS in the template. Update font files in `fonts/` if switching fonts.
+Template variants:
+- `templates/cv-template.html` — legacy / Spanish-compatible default
+- `templates/cv-template.en.html` — explicit English template
+- `templates/cv-template.tr.html` — explicit Turkish template
 
-## Negotiation Scripts (modes/_shared.md)
+To customize fonts/colors, edit the CSS in the templates. Update font files in `fonts/` if switching fonts.
 
-The negotiation section provides frameworks for salary discussions. Replace the example scripts with your own:
+## Negotiation Scripts (`modes/_profile.md`)
+
+Keep negotiation scripts and comp pushback in `modes/_profile.md` or `config/profile.yml`. Replace the example scripts with your own:
 - Target ranges
 - Geographic arbitrage strategy
 - Pushback responses
@@ -68,9 +90,12 @@ Career-ops can integrate with external systems via Claude Code hooks. Example ho
 
 Save hooks in `.claude/settings.json`.
 
-## States (templates/states.yml)
+## States (`tracker-status-registry.json`)
 
-The canonical states rarely need changing. If you add new states, update:
-1. `templates/states.yml`
-2. `normalize-statuses.mjs` (alias mappings)
-3. `modes/_shared.md` (any references)
+The machine-readable source of truth is `tracker-status-registry.json`.
+`templates/states.yml` is only a human-readable mirror.
+
+If you add or rename states, update:
+1. `tracker-status-registry.json`
+2. Any docs that explain canonical statuses
+3. `templates/states.yml` only as a mirror of the registry

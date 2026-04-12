@@ -1,100 +1,96 @@
 # Career-Ops Turkey Profile Configuration
-# Copy this file to config/profile.yml for a Turkey-oriented setup.
-# This schema is backward-compatible with the existing profile.example.yml.
-# Existing fields stay valid; all Turkey-specific additions below are optional.
+# Copy this file to config/profile.yml for a Turkey-oriented locale starter.
+# The Turkey starter is locale-aware, not role-specific. Replace the sample
+# values below with your own identity, targets, and preferences.
 
 candidate:
-  full_name: "Ayse Yilmaz"
-  email: "ayse@example.com"
-  phone: "+90 555 123 45 67"
+  full_name: "Deniz Kaya"
+  email: "deniz@example.com"
+  phone: "+90 555 000 00 00"
   location: "Istanbul, Turkiye"
-  linkedin: "linkedin.com/in/ayseyilmaz"
-  portfolio_url: "https://ayseyilmaz.dev"
-  github: "github.com/ayseyilmaz"
-  twitter: "https://x.com/ayseyilmaz"
+  linkedin: "linkedin.com/in/denizkaya"
+  portfolio_url: "https://example.dev"
+  github: "github.com/denizkaya"
+  twitter: "https://x.com/denizkaya"
   # (Optional) Canva resume design ID for visual CV generation via /career-ops pdf.
   # canva_resume_design_id: "DAxxxxxxxxx"
 
 target_roles:
+  # Replace these with your real target roles.
   primary:
-    - "Senior Backend Engineer"
-    - "Staff Platform Engineer"
+    - "Software Engineer"
+    - "Product Manager"
   archetypes:
-    - name: "Backend / Platform Engineer"
-      level: "Senior/Staff"
+    - name: "Software / Backend Engineer"
+      level: "Mid-Senior"
       fit: "primary"
-    - name: "Solutions Architect"
-      level: "Senior"
+    - name: "Data / Analytics Engineer"
+      level: "Mid-Senior"
       fit: "secondary"
-    - name: "Engineering Manager"
-      level: "Manager"
+    - name: "Product / Program Manager"
+      level: "Mid-Senior"
       fit: "adjacent"
 
 narrative:
-  headline: "Backend and platform engineer focused on production systems"
-  exit_story: "Built core backend and platform systems across fast-moving product teams. Now targeting high-ownership engineering roles with strong product impact."
+  headline: "Technical professional building practical products and systems"
+  exit_story: "Built hands-on experience across real-world technical work and now targeting roles with clear scope, ownership, and room to grow."
   superpowers:
-    - "Distributed systems and API design"
-    - "Production debugging under pressure"
-    - "Cross-functional delivery"
+    - "Structured problem solving"
+    - "Turning ambiguity into working systems"
+    - "Cross-functional communication"
   proof_points:
-    - name: "Payments Platform Migration"
-      url: "https://ayseyilmaz.dev/payments-platform"
-      hero_metric: "Cut payment failure rate 28%"
-    - name: "Observability Rollout"
-      url: "https://ayseyilmaz.dev/observability"
-      hero_metric: "Reduced MTTR from 90m to 18m"
+    - name: "Project or case study #1"
+      url: "https://example.dev/project-1"
+      hero_metric: "Replace with a real quantified result"
+    - name: "Project or case study #2"
+      url: "https://example.dev/project-2"
+      hero_metric: "Replace with a second proof point"
   # dashboard:
-  #   url: "https://ayseyilmaz.dev/demo"
+  #   url: "https://example.dev/demo"
   #   password: "demo-2026"
 
 compensation:
-  # Backward-compatible legacy fields. Existing prompts and docs already refer to these.
-  target_range: "TRY 1,800,000-2,400,000 gross annual"
+  target_range: "<set-your-target-range>"
   currency: "TRY"
-  minimum: "TRY 1,500,000 gross annual"
-  location_flexibility: "Istanbul preferred, Ankara/Izmir open, remote-first, relocation within Turkiye possible"
+  minimum: "<set-your-minimum>"
+  location_flexibility: "Update this with your city, remote, and relocation preferences"
 
-  # New optional structured salary preferences for Turkey-oriented workflows.
-  # Future tooling should prefer this block when present, but must fall back to the legacy fields above.
+  # Optional structured salary preferences. Keep or remove as needed.
   salary_preferences:
     TRY:
-      target_min: 1800000
-      target_max: 2400000
-      minimum: 1500000
+      target_min: 900000
+      target_max: 1400000
+      minimum: 750000
       period: "gross_annual"
     EUR:
-      target_min: 45000
-      target_max: 65000
-      minimum: 40000
+      target_min: 30000
+      target_max: 50000
+      minimum: 25000
       period: "gross_annual"
     USD:
-      target_min: 55000
-      target_max: 85000
-      minimum: 50000
+      target_min: 35000
+      target_max: 60000
+      minimum: 30000
       period: "gross_annual"
 
 location:
   country: "Turkiye"
   city: "Istanbul"
   timezone: "Europe/Istanbul"
-  visa_status: "Turkiye citizen"
-  # onsite_availability: "2-3 days/week in Istanbul, planned travel for Ankara/Izmir"
+  visa_status: "Update with your work authorization status"
 
-# Optional language settings.
-# `modes_dir` follows the same convention already documented for `modes/de` and `modes/fr`.
 language:
-  # modes_dir: "modes/tr"
+  modes_dir: "modes/tr"
   cv_preferences:
     default: "en"
     supported:
       - "tr"
       - "en"
+      - "es"
     by_listing_language:
       tr: "tr"
       en: "en"
 
-# New optional location/work-model preferences for Turkey-oriented filtering and scoring.
 location_preferences:
   preferred_cities:
     - "Istanbul"
@@ -102,8 +98,8 @@ location_preferences:
     - "Izmir"
   relocation_flexibility:
     willing: true
-    scope: "within_turkey"   # one of: none, same_city_only, within_turkey, international, case_by_case
-    notes: "Relocation possible for the right role and compensation."
+    scope: "within_turkey"
+    notes: "Replace with your actual relocation policy."
   work_model_preference:
     priority_order:
       - "remote"
@@ -114,18 +110,15 @@ location_preferences:
       - "hybrid"
       - "onsite"
 
-# New optional hard filters for routing, scoring, and apply/no-apply decisions.
 constraints:
   must_haves:
-    - "Senior-level ownership"
-    - "Clear technical scope"
-    - "Competitive compensation"
+    - "Clear scope"
+    - "Fair compensation"
   deal_breakers:
-    - "5 days/week mandatory onsite"
     - "Unpaid trial project"
-    - "Salary withheld until final round"
+    - "Misleading compensation process"
+    - "Mandatory on-site requirement that conflicts with my real availability"
 
-# New optional behavior controls for future apply/pipeline automation.
 automation:
   application:
     auto_generate_pdf: true
@@ -133,4 +126,4 @@ automation:
     auto_draft_form_answers: true
     auto_fill_easy_fields: false
     require_manual_review_before_submit: true
-    follow_up_outreach: "manual_first"   # one of: disabled, manual_first, assisted, auto_draft_only
+    follow_up_outreach: "manual_first"

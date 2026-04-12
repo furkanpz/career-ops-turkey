@@ -1,5 +1,7 @@
 # Mod: teklif -- Turkiye icin tam A-F degerlendirme
 
+Bu dosya `modes/oferta.md` ile birlikte okunur. `modes/oferta.md` icindeki A-F feature set'inin TAMAMI korunur: story bank entegrasyonu, Section G gating, ATS keyword extraction, report kaydi ve tracker writeback davranisi dusmez.
+
 Kullanici bir ilan metni veya URL verdiginde, HER ZAMAN A-F bloklarini uret. Ardindan Turkiye scoring framework ile final sonucu ver.
 
 ## Adim 0 -- Archetype tespiti
@@ -16,19 +18,21 @@ Bu secim sunlari etkiler:
 
 Tablo mutlaka su satirlari icerir:
 
-- `**Arquetipo:** | ...`
-- `**Domain:** | ...`
-- `**Function:** | ...`
-- `**Seniority:** | ...`
-- `**Remote:** | ...`
-- `**Team size:** | ...` veya `Bilinmiyor`
-- `**TL;DR:** | ...`
+- `**Archetype** | ...`
+- `**Domain** | ...`
+- `**Function** | ...`
+- `**Seniority** | ...`
+- `**Remote** | ...`
+- `**Team size** | ...` veya `Bilinmiyor`
+- `**TL;DR** | ...`
 
 `TL;DR` tek cumlede rolun gercek ozunu anlatmali. Bos slogan istemiyorum.
 
 ## Blok B -- CV eslesmesi
 
 `cv.md` oku. Ilandaki her ana gereksinimi CV'deki somut kanitla eslestir.
+
+`modes/oferta.md` icindeki story-bank ve keyword extraction davranisi korunur. `interview-prep/story-bank.md` varsa tekrar kullan, yoksa uygun hikayeleri ekle.
 
 Gerekli alt bolumler:
 
@@ -68,6 +72,8 @@ Turkiye icin ozellikle bak:
 - payroll mu contractor / EOR mu?
 - maas bilgisi yoksa, buna ragmen adil bir piyasa tahmini kurulabiliyor mu?
 
+`config/profile.yml -> compensation.salary_preferences` varsa TRY/EUR/USD beklentilerini bu blokta referans al. `constraints` ve `location_preferences` ile celisen comp/lokasyon setup'larini risk hanesine tasimayi unutma.
+
 Emin degilsen bunu soyle. Uydurma yapma.
 
 ## Blok E -- CV kisisellestirme plani
@@ -96,7 +102,7 @@ Ek olarak:
 
 ## Final degerlendirme mantigi
 
-A-F bittikten sonra, [docs/tr-scoring-framework.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-scoring-framework.md) ve `modes/tr/_shared.md` ile uyumlu sekilde su ciktiyi EKLE:
+A-F bittikten sonra, `docs/tr-scoring-framework.md` ve `modes/tr/_shared.md` ile uyumlu sekilde su ciktiyi EKLE:
 
 ### 1. Global Score tablosu
 
@@ -178,6 +184,15 @@ Recommendation dili pratik ve recruiter-respectful olmali:
 - dusuk confidence varsa "iyi firsat" deme
 - adayin zamanini ve recruiter'in zamanini koru
 
+### 6. Kok mode parity kurali
+
+`modes/oferta.md` icindeki asagidaki davranislar korunur:
+
+- `interview-prep/story-bank.md` ile story reuse
+- `## Keywords extracted` bolumu
+- `## G) Draft Application Answers` gating kurali
+- tracker'a final capped score yazimi
+
 ---
 
 ## Conservative logic
@@ -222,7 +237,7 @@ Header icin parser-riskini azaltmak uzere su anahtarlar korunur:
 # Degerlendirme: {Sirket} -- {Rol}
 
 **Date:** {YYYY-MM-DD}
-**Arquetipo:** {tespit edilen archetype}
+**Archetype** | {tespit edilen archetype}
 **Score:** {final score}/5
 **URL:** {ilan URL}
 **PDF:** {yol veya pending}

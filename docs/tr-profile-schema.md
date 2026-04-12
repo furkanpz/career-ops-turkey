@@ -241,7 +241,7 @@ language:
   modes_dir: "modes/tr"
   cv_preferences:
     default: "en"
-    supported: ["tr", "en"]
+    supported: ["tr", "en", "es"]
     by_listing_language:
       tr: "tr"
       en: "en"
@@ -342,51 +342,58 @@ Canonical `follow_up_outreach` values:
 
 ## Recommended Full Turkey Schema
 
+This is a locale-aware starter example, not a recommended default candidate persona.
+Users should replace role targets, narrative, and compensation with their own data.
+
 ```yaml
 candidate:
-  full_name: "Ayse Yilmaz"
-  email: "ayse@example.com"
+  full_name: "Deniz Kaya"
+  email: "deniz@example.com"
   phone: "+90 555 123 45 67"
   location: "Istanbul, Turkiye"
-  linkedin: "linkedin.com/in/ayseyilmaz"
-  portfolio_url: "https://ayseyilmaz.dev"
-  github: "github.com/ayseyilmaz"
+  linkedin: "linkedin.com/in/denizkaya"
+  portfolio_url: "https://denizkaya.dev"
+  github: "github.com/denizkaya"
 
 target_roles:
   primary:
-    - "Senior Backend Engineer"
+    - "Software Engineer"
+    - "Product Manager"
   archetypes:
-    - name: "Backend / Platform Engineer"
+    - name: "Software / Backend / Platform"
       level: "Senior/Staff"
       fit: "primary"
+    - name: "Product / Program"
+      level: "Mid/Senior"
+      fit: "secondary"
 
 narrative:
-  headline: "Backend and platform engineer focused on production systems"
-  exit_story: "Built core backend and platform systems across fast-moving product teams."
+  headline: "Technology professional with experience turning ambiguous problems into shipped outcomes"
+  exit_story: "Looking for roles where strong execution, cross-functional delivery, and technical judgment matter."
   superpowers:
-    - "Distributed systems"
-    - "Production debugging"
+    - "Structured problem solving"
+    - "Cross-functional execution"
 
 compensation:
-  target_range: "TRY 1,800,000-2,400,000 gross annual"
+  target_range: "TRY 1,200,000-1,800,000 gross annual"
   currency: "TRY"
-  minimum: "TRY 1,500,000 gross annual"
+  minimum: "TRY 1,000,000 gross annual"
   location_flexibility: "Remote-first, Istanbul preferred"
   salary_preferences:
     TRY:
-      target_min: 1800000
-      target_max: 2400000
-      minimum: 1500000
+      target_min: 1200000
+      target_max: 1800000
+      minimum: 1000000
       period: "gross_annual"
     EUR:
-      target_min: 45000
-      target_max: 65000
-      minimum: 40000
+      target_min: 35000
+      target_max: 55000
+      minimum: 30000
       period: "gross_annual"
     USD:
-      target_min: 55000
-      target_max: 85000
-      minimum: 50000
+      target_min: 40000
+      target_max: 70000
+      minimum: 35000
       period: "gross_annual"
 
 location:
@@ -398,7 +405,7 @@ location:
 language:
   cv_preferences:
     default: "en"
-    supported: ["tr", "en"]
+    supported: ["tr", "en", "es"]
     by_listing_language:
       tr: "tr"
       en: "en"
@@ -532,4 +539,4 @@ The recommended Turkey-ready profile schema is:
 - compatible with current prompts and checks
 - explicit about Turkish market preferences without forcing a loader rewrite
 
-Use [profile.tr.example.yml](/Users/furkan/Desktop/Proje/career-ops/config/profile.tr.example.yml) as the reference starter template.
+Use `config/profile.tr.example.yml` as the reference starter template.

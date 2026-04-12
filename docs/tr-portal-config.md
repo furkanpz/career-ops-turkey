@@ -4,6 +4,9 @@
 
 `templates/portals.tr.example.yml` defines a Turkey-specific discovery layer for job scanning without changing the current scanner contract.
 
+It is a locale starter, not a default candidate strategy. Users are expected to customize their own
+role keywords, company targets, and board coverage in `portals.yml`.
+
 It keeps the existing configuration shape:
 
 - `title_filter`
@@ -12,7 +15,7 @@ It keeps the existing configuration shape:
 
 The new file adds metadata fields that are safe to ignore today and useful for a future Turkey-aware parser and dedup layer:
 
-- `source_type`
+- `adapter_family`
 - `parser_key`
 - `locale`
 - `language`
@@ -70,12 +73,16 @@ That is why the template includes both:
 
 The template includes realistic WebSearch discovery hooks for:
 
+- `linkedin.com/jobs`
 - `kariyer.net`
+- `indeed`
+- `eleman.net`
 - `secretcv`
 - `yenibiris`
+- `iskur`
 - `youthall` as optional early-career coverage
 
-These are modeled as `search_queries` because board HTML and access patterns are more volatile than direct employer pages.
+These are modeled as `search_queries` because board HTML and access patterns are more volatile than direct employer pages. LinkedIn is discovery-only in this fork: search results may be used to find public listings, but login-gated scraping is intentionally out of scope.
 
 ### Company career pages
 
@@ -89,7 +96,7 @@ The template includes a compact set of Turkey-relevant employers with direct car
 - Dream Games
 - Peak
 
-This is intentionally not exhaustive. The goal is a realistic starter layer, not a directory of every Turkey employer.
+This is intentionally not exhaustive. The goal is a realistic, tech-first locale starter layer, not a directory of every Turkey employer or a fixed recommendation set.
 
 ### Global ATS providers used by Turkey / EMEA employers
 
@@ -105,9 +112,9 @@ These are common enough in EMEA hiring that they deserve first-class discovery c
 
 ## Field Reference
 
-### `source_type`
+### `adapter_family`
 
-High-level source classification.
+High-level config/routing classification.
 
 Suggested values in this template:
 
@@ -116,6 +123,7 @@ Suggested values in this template:
 - `global_ats`
 
 This helps future scanner logic choose trust level, dedup precedence, and parser behavior.
+It is not the normalized listing `source_type`.
 
 ### `parser_key`
 
@@ -188,10 +196,4 @@ When extending it:
 
 ## Recommended Next Step
 
-If this config layer is accepted, the next implementation step should be scanner-side support for:
-
-1. parser dispatch by `parser_key`
-2. locale-aware liveness checks by `locale` and `language`
-3. dedup precedence using `anti_duplication`
-
-Until then, the file is still useful as a realistic Turkey-focused template and migration target for user `portals.yml` files.
+The current implementation now uses this metadata for parser dispatch, Turkey-aware liveness heuristics, and dedup precedence. User `portals.yml` files are still not auto-merged by updates; missing primary parser keys should be merged manually from the template.

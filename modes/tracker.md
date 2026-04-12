@@ -7,11 +7,11 @@ Lee y muestra `data/applications.md`.
 | # | Fecha | Empresa | Rol | Score | Estado | PDF | Report |
 ```
 
-Estados posibles: `Evaluada` → `Aplicado` → `Respondido` → `Contacto` → `Entrevista` → `Oferta` / `Rechazada` / `Descartada` / `NO APLICAR`
+Estados posibles: `EVALUATED` → `APPLIED` → `RESPONSE_RECEIVED` → `INTERVIEW` → `OFFER` / `REJECTED` / `DISCARDED` / `SKIP`
 
-- `Aplicado` = el candidato envió su candidatura
-- `Respondido` = Un recruiter/empresa contactó y el candidato respondió (inbound)
-- `Contacto` = El candidato contactó proactivamente a alguien de la empresa (outbound, ej: LinkedIn power move)
+- `APPLIED` = el candidato envió su candidatura
+- `RESPONSE_RECEIVED` = hubo una respuesta de la empresa, pero aún no está claramente en fase de entrevista
+- `INTERVIEW` = proceso de entrevista activo
 
 Si el usuario pide actualizar un estado, editar la fila correspondiente.
 

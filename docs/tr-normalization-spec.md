@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines how common raw values from Turkish job listings should map into the canonical Turkey job data model in [docs/tr-data-model.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-data-model.md).
+This document defines how common raw values from Turkish job listings should map into the canonical Turkey job data model in `docs/tr-data-model.md`.
 
 This is a mapping spec only.
 
@@ -65,6 +65,7 @@ Although `source_type` is not one of the required enum families, it should still
 | `Secretcv`, `Secret CV` | `Secretcv` | `job_board` |
 | `Eleman.net` | `Eleman.net` | `job_board` |
 | `Indeed` | `Indeed` | `aggregator` |
+| `ISKUR`, `İŞKUR`, `Iskur` | `ISKUR` | `job_board` |
 | `Glassdoor` | `Glassdoor` | `aggregator` |
 | `Youthall` | `Youthall` | `job_board` |
 | `Web site`, `Career page`, `Kariyer sayfasi` | `Company Careers` | `company_careers` |
@@ -254,7 +255,7 @@ Canonical values:
 - `evaluation_in_progress`
 - `evaluated`
 - `applied`
-- `responded`
+- `response_received`
 - `interview`
 - `offer`
 - `rejected`
@@ -270,7 +271,7 @@ Current tracker-safe statuses in the repo:
 
 - `evaluated`
 - `applied`
-- `responded`
+- `response_received`
 - `interview`
 - `offer`
 - `rejected`
@@ -288,7 +289,7 @@ Only these should sync into `data/applications.md`.
 | `Degerlendiriliyor`, `Analiz ediliyor`, `Processing` | `evaluation_in_progress` |
 | `Degerlendirildi`, `Raporlandi`, `Evaluated` | `evaluated` |
 | `Basvuruldu`, `Application sent`, `Applied` | `applied` |
-| `Geri donus alindi`, `Recruiter reached out`, `Responded` | `responded` |
+| `Geri donus alindi`, `Recruiter reached out`, `Responded`, `Response received` | `response_received` |
 | `Mulakat`, `Telefon gorusmesi`, `IK gorusmesi`, `Teknik mulakat`, `Case interview` | `interview` |
 | `Teklif`, `Offer`, `Verbal offer` | `offer` |
 | `Red`, `Olumsuz`, `Rejected`, `Ret` | `rejected` |
@@ -303,7 +304,7 @@ Rules:
 1. `Interview` includes recruiter screen, HR screen, technical interview, hiring manager, panel, and case stages in the current simplified pipeline.
 2. `Discarded` is candidate-side or listing-side abandonment.
 3. `Rejected` is employer-side rejection.
-4. `Closed` should not be projected into `applications.md` unless the team later adds it to `templates/states.yml`.
+4. `Closed` should not be projected into `applications.md` unless the team later adds it to `tracker-status-registry.json`.
 
 ## Compensation Text Handling
 

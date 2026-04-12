@@ -4,7 +4,7 @@ Cuando el candidato pega una oferta (texto o URL), entregar SIEMPRE los 6 bloque
 
 ## Paso 0 — Detección de Arquetipo
 
-Clasificar la oferta en uno de los 6 arquetipos (ver `_shared.md`). Si es híbrido, indicar los 2 más cercanos. Esto determina:
+Clasificar la oferta en el arquetipo o familia de rol más cercana (ver `_shared.md` y `_profile.md`). Si es híbrido, indicar los 2 más cercanos. Esto determina:
 - Qué proof points priorizar en bloque B
 - Cómo reescribir el summary en bloque E
 - Qué historias STAR preparar en bloque F
@@ -25,12 +25,12 @@ Tabla con:
 Lee `cv.md`. Crea tabla con cada requisito del JD mapeado a líneas exactas del CV.
 
 **Adaptado al arquetipo:**
-- Si FDE → priorizar proof points de delivery rápida y client-facing
-- Si SA → priorizar diseño de sistemas e integrations
-- Si PM → priorizar product discovery y métricas
-- Si LLMOps → priorizar evals, observability, pipelines
-- Si Agentic → priorizar multi-agent, HITL, orchestration
-- Si Transformation → priorizar change management, adoption, scaling
+- Si Software / Backend / Platform → priorizar systems depth, APIs, reliability, delivery
+- Si Data / Analytics → priorizar SQL, reporting, experimentation, dashboards
+- Si Product / Program → priorizar discovery, prioritization, roadmap, stakeholder trade-offs
+- Si Solutions / Customer Engineering → priorizar integrations, implementation speed, customer context
+- Si Design / UX → priorizar research, workflows, usability, craft
+- Si Business Systems / Operations → priorizar automation, enablement, internal tooling, process improvement
 
 Sección de **gaps** con estrategia de mitigación para cada uno. Para cada gap:
 1. ¿Es un hard blocker o un nice-to-have?
@@ -41,7 +41,7 @@ Sección de **gaps** con estrategia de mitigación para cada uno. Para cada gap:
 ## Bloque C — Nivel y Estrategia
 
 1. **Nivel detectado** en el JD vs **nivel natural del candidato para ese arquetipo**
-2. **Plan "vender senior sin mentir"**: frases específicas adaptadas al arquetipo, logros concretos a destacar, cómo posicionar la experiencia de founder como ventaja
+2. **Plan "vender senior sin mentir"**: frases específicas adaptadas al arquetipo, logros concretos a destacar, y cómo posicionar experiencia no lineal o emprendedora cuando aplique
 3. **Plan "si me downlevelan"**: aceptar si comp es justa, negociar review a 6 meses, criterios de promoción claros
 
 ## Bloque D — Comp y Demanda
@@ -74,12 +74,12 @@ The **Reflection** column captures what was learned or what would be done differ
 **Story Bank:** If `interview-prep/story-bank.md` exists, check if any of these stories are already there. If not, append new ones. Over time this builds a reusable bank of 5-10 master stories that can be adapted to any interview question.
 
 **Seleccionadas y enmarcadas según el arquetipo:**
-- FDE → enfatizar velocidad de entrega y client-facing
-- SA → enfatizar decisiones de arquitectura
-- PM → enfatizar discovery y trade-offs
-- LLMOps → enfatizar métricas, evals, production hardening
-- Agentic → enfatizar orchestration, error handling, HITL
-- Transformation → enfatizar adopción, cambio organizacional
+- Software / Backend / Platform → enfatizar systems thinking, reliability, debugging, performance
+- Data / Analytics → enfatizar structured thinking, metrics, dashboards, experimentation
+- Product / Program → enfatizar discovery, prioritization, stakeholder management, trade-offs
+- Solutions / Customer Engineering → enfatizar implementation speed, integrations, client outcomes
+- Design / UX → enfatizar research, interaction choices, user impact, collaboration
+- Business Systems / Operations → enfatizar workflow improvement, automation, enablement, process design
 
 Incluir también:
 - 1 case study recomendado (cuál de sus proyectos presentar y cómo)
@@ -105,7 +105,7 @@ Guardar evaluación completa en `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`.
 # Evaluación: {Empresa} — {Rol}
 
 **Fecha:** {YYYY-MM-DD}
-**Arquetipo:** {detectado}
+**Archetype:** {detectado}
 **Score:** {X/5}
 **PDF:** {ruta o pendiente}
 
@@ -146,7 +146,7 @@ Guardar evaluación completa en `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`.
 - Empresa
 - Rol
 - Score: promedio de match (1-5)
-- Estado: `Evaluada`
+- Estado: `EVALUATED`
 - PDF: ❌ (o ✅ si auto-pipeline generó PDF)
 - Report: link relativo al report .md (ej: `[001](reports/001-company-2026-01-01.md)`)
 

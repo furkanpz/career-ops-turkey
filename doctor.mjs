@@ -7,7 +7,7 @@
  * see docs/tr-profile-schema.md for future checks.
  */
 
-import { existsSync, mkdirSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,6 +19,25 @@ const isTTY = process.stdout.isTTY;
 const green = (s) => isTTY ? `\x1b[32m${s}\x1b[0m` : s;
 const red = (s) => isTTY ? `\x1b[31m${s}\x1b[0m` : s;
 const dim = (s) => isTTY ? `\x1b[2m${s}\x1b[0m` : s;
+const PRIMARY_TR_PARSER_KEYS = [
+  'linkedin_jobs_search',
+  'kariyernet_search',
+  'indeed_tr_search',
+  'elemannet_search',
+];
+
+function detectMissingTrSearchParsers(portalsContent) {
+  const lower = portalsContent.toLowerCase();
+  const isTurkeyConfig = /parser_key:\s*(kariyernet_search|secretcv_search|yenibiris_search|iskur_search|linkedin_jobs_search)/i.test(portalsContent)
+    || /locale:\s*(tr-tr|en-tr)/i.test(portalsContent)
+    || /türkiye|turkiye|istanbul|ankara|izmir/i.test(lower);
+
+  if (!isTurkeyConfig) {
+    return [];
+  }
+
+  return PRIMARY_TR_PARSER_KEYS.filter((parserKey) => !new RegExp(`parser_key:\\s*${parserKey}\\b`, 'i').test(portalsContent));
+}
 
 function checkNodeVersion() {
   const major = parseInt(process.versions.node.split('.')[0]);
@@ -86,22 +105,32 @@ function checkProfile() {
     pass: false,
     label: 'config/profile.yml not found',
     fix: [
-      'Run: cp config/profile.example.yml config/profile.yml',
+      'Run: cp config/profile.tr.example.yml config/profile.yml',
+      'Fallback: cp config/profile.example.yml config/profile.yml',
       'Then edit it with your details',
     ],
   };
 }
 
 function checkPortals() {
-  if (existsSync(join(projectRoot, 'portals.yml'))) {
-    return { pass: true, label: 'portals.yml found' };
+  const portalsPath = join(projectRoot, 'portals.yml');
+  if (existsSync(portalsPath)) {
+    const notes = [];
+    const portalsContent = readFileSync(portalsPath, 'utf-8');
+    const missingParsers = detectMissingTrSearchParsers(portalsContent);
+    if (missingParsers.length > 0) {
+      notes.push(`Missing primary Turkey search parsers: ${missingParsers.join(', ')}`);
+      notes.push('Keep your custom portals.yml, but merge the missing starter entries if you want the full Turkey board coverage.');
+    }
+    return { pass: true, label: 'portals.yml found', notes };
   }
   return {
     pass: false,
     label: 'portals.yml not found',
     fix: [
-      'Run: cp templates/portals.example.yml portals.yml',
-      'Then customize with your target companies',
+      'Run: cp templates/portals.tr.example.yml portals.yml',
+      'Fallback: cp templates/portals.example.yml portals.yml',
+      'Then customize it for your own target roles, keywords, and companies',
     ],
   };
 }
@@ -173,6 +202,9 @@ async function main() {
   for (const result of checks) {
     if (result.pass) {
       console.log(`${green('✓')} ${result.label}`);
+      for (const note of result.notes || []) {
+        console.log(`  ${dim('→ ' + note)}`);
+      }
     } else {
       failures++;
       console.log(`${red('✗')} ${result.label}`);

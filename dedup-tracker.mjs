@@ -12,6 +12,8 @@
 import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { normalizeCompanyKey, normalizeRoleTitle } from './company-name-utils.mjs';
+import { getTrackerStatusRank, normalizeTrackerStatus } from './tracker-status-utils.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -20,51 +22,9 @@ const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
   : join(CAREER_OPS, 'applications.md');
 const DRY_RUN = process.argv.includes('--dry-run');
 
-// Status advancement order (higher = more advanced in pipeline)
-// Aplicado > Rechazado because active application > terminal state
-const STATUS_RANK = {
-  // English canonicals (states.yml labels)
-  'skip': 0,
-  'discarded': 0,
-  'rejected': 1,
-  'evaluated': 2,
-  'applied': 3,
-  'responded': 4,
-  'interview': 5,
-  'offer': 6,
-  // Spanish aliases — kept for backwards compat with existing tracker data
-  'no_aplicar': 0,
-  'no aplicar': 0,
-  'descartado': 0,
-  'descartada': 0,
-  'rechazado': 1,  // Terminal — below active states
-  'rechazada': 1,
-  'evaluada': 2,
-  'aplicado': 3,
-  'respondido': 4,
-  'entrevista': 5,
-  'oferta': 6,
-};
-
-function normalizeCompany(name) {
-  return name.toLowerCase()
-    .replace(/[()]/g, '')
-    .replace(/\s+/g, ' ')
-    .replace(/[^a-z0-9 ]/g, '')
-    .trim();
-}
-
-function normalizeRole(role) {
-  return role.toLowerCase()
-    .replace(/[()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .replace(/[^a-z0-9 /]/g, '')
-    .trim();
-}
-
 function roleMatch(a, b) {
-  const wordsA = normalizeRole(a).split(/\s+/).filter(w => w.length > 3);
-  const wordsB = normalizeRole(b).split(/\s+/).filter(w => w.length > 3);
+  const wordsA = normalizeRoleTitle(a).split(/\s+/).filter(w => w.length > 3);
+  const wordsB = normalizeRoleTitle(b).split(/\s+/).filter(w => w.length > 3);
   const overlap = wordsA.filter(w => wordsB.some(wb => wb.includes(w) || w.includes(wb)));
   return overlap.length >= 2;
 }
@@ -119,7 +79,7 @@ console.log(`📊 ${entries.length} entries loaded`);
 // Group by company+role
 const groups = new Map();
 for (const entry of entries) {
-  const key = normalizeCompany(entry.company);
+  const key = normalizeCompanyKey(entry.company);
   if (!groups.has(key)) groups.set(key, []);
   groups.get(key).push(entry);
 }
@@ -153,13 +113,15 @@ for (const [company, companyEntries] of groups) {
     const keeper = cluster[0];
 
     // Check if any removed entry has more advanced status
-    let bestStatusRank = STATUS_RANK[keeper.status.toLowerCase()] || 0;
-    let bestStatus = keeper.status;
+    const keeperStatus = normalizeTrackerStatus(keeper.status);
+    let bestStatusRank = keeperStatus.rank ?? getTrackerStatusRank(keeper.status);
+    let bestStatus = keeperStatus.status ?? keeper.status;
     for (let k = 1; k < cluster.length; k++) {
-      const rank = STATUS_RANK[cluster[k].status.toLowerCase()] || 0;
+      const normalized = normalizeTrackerStatus(cluster[k].status);
+      const rank = normalized.rank ?? getTrackerStatusRank(cluster[k].status);
       if (rank > bestStatusRank) {
         bestStatusRank = rank;
-        bestStatus = cluster[k].status;
+        bestStatus = normalized.status ?? cluster[k].status;
       }
     }
 
@@ -170,7 +132,8 @@ for (const [company, companyEntries] of groups) {
         const parts = lines[lineIdx].split('|').map(s => s.trim());
         parts[6] = bestStatus;
         lines[lineIdx] = '| ' + parts.slice(1, -1).join(' | ') + ' |';
-        console.log(`  📝 #${keeper.num}: status promoted to "${bestStatus}" (from #${cluster.find(e => e.status === bestStatus)?.num})`);
+        const promotedFrom = cluster.find((entry) => normalizeTrackerStatus(entry.status).status === bestStatus)?.num;
+        console.log(`  📝 #${keeper.num}: status promoted to "${bestStatus}" (from #${promotedFrom})`);
       }
     }
 

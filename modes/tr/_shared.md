@@ -21,11 +21,33 @@
 **KURAL:** `article-digest.md`, proje / etki metrigi konusunda `cv.md`'den daha guvenilir sayilir.
 **KURAL:** Profil tercihleri yoksa varsayim yap, ama varsayim yaptigini acikca soyle.
 
+## Profil-driven alanlar
+
+`config/profile.yml` icinde su alanlar varsa aktif olarak kullan:
+
+- `compensation.salary_preferences`
+  Maas analizi ve fairness yorumunda legacy `target_range` yerine once bunu referans al.
+- `language.cv_preferences`
+  PDF/CV dili seciminde once bu alan kullanilir.
+- `location_preferences`
+  City / work model fit skorunda ve recommendation'da bunu referans al.
+- `constraints`
+  `must_haves` ve `deal_breakers` recommendation logic'e dogrudan girer.
+- `automation.application`
+  PDF, draft answers ve apply helper davranisinda gating sinyali olarak kullanilir.
+
+## Makine kontrati
+
+- Tracker status label'lari her zaman canonical English kalir.
+- Report machine-key'leri her zaman canonical English kalir:
+  `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`
+- Turkce govde ve Turkce operator metni serbesttir.
+
 ---
 
 ## Turkiye Scoring Sistemi
 
-Bu katman [docs/tr-scoring-framework.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-scoring-framework.md) ile hizalidir.
+Bu katman `docs/tr-scoring-framework.md` ile hizalidir.
 
 Skor 10 agirlikli boyuttan olusur ve 1-5 araligindadir:
 
@@ -235,4 +257,4 @@ Kural:
 5. Puan verirken kanit eksigini not et
 6. Final score, strengths, risks, recommendation category ve confidence ver
 7. Borderline ve low-confidence vakalari acikca isaretle
-8. Dili Turkce tut, ama makine icin kritik report key'lerini sabit birak
+8. Dili Turkce tut, ama makine icin kritik report key'lerini English ve sabit birak

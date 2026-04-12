@@ -54,7 +54,7 @@ Volontairement non traduit car vocabulaire tech standard :
 
 - `cv.md`, `pipeline`, `tracker`, `report`, `score`, `archetype`, `proof point`
 - Noms d'outils (`Playwright`, `WebSearch`, `WebFetch`, `Read`, `Write`, `Edit`, `Bash`)
-- Valeurs de statut dans le tracker (`Evaluated`, `Applied`, `Interview`, `Offer`, `Rejected`)
+- Valeurs de statut dans le tracker (`EVALUATED`, `APPLIED`, `INTERVIEW`, `OFFER`, `REJECTED`)
 - Extraits de code, chemins, commandes
 
 Les modes utilisent du francais tech naturel, tel qu'il est parle dans les equipes engineering a Paris, Lyon ou Geneve : texte courant en francais, termes techniques en anglais la ou c'est l'usage. Pas de traduction forcee de "Pipeline" en "Canalisation" ni de "Deploy" en "Deploiement applicatif".

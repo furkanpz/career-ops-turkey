@@ -41,8 +41,9 @@ if (!existsSync(profilePath)) {
 } else {
   const profileContent = readFileSync(profilePath, 'utf-8');
   const requiredFields = ['full_name', 'email', 'location'];
+  const exampleMarkers = ['"Jane Smith"', '"Deniz Kaya"', '"Deniz KAYA"'];
   for (const field of requiredFields) {
-    if (!profileContent.includes(field) || profileContent.includes(`"Jane Smith"`)) {
+    if (!profileContent.includes(field) || exampleMarkers.some((marker) => profileContent.includes(marker))) {
       warnings.push(`config/profile.yml may still have example data. Check field: ${field}`);
       break;
     }

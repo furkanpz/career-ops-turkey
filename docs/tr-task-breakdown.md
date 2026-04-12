@@ -1,5 +1,9 @@
 # Turkey Localization Task Breakdown
 
+> Historical planning note. This file documents earlier implementation phases that led to the
+> current Turkey fork. The active product contract now lives in `README.md`, `CLAUDE.md`,
+> `DATA_CONTRACT.md`, and the current `docs/tr-*` runtime docs.
+
 ## Priority Model
 
 - `P0`: must be decided before implementation

@@ -1,5 +1,8 @@
 # Turkey Validation Plan
 
+This document is an active validation checklist, but any inline sample candidate or sample listing
+should be treated as placeholder data only. It does not define a default user persona.
+
 ## Purpose
 
 This plan defines the minimum practical validation required before treating the Turkey-localized surface as release-ready.
@@ -79,11 +82,11 @@ Setup:
 ```bash
 cp config/profile.tr.example.yml config/profile.yml
 cat > cv.md <<'EOF'
-# Ayse Yilmaz
+# Deniz Kaya
 
-Senior backend and platform engineer with production systems experience across payments, observability,
-API design, distributed systems, and cross-functional delivery. Comfortable with English and Turkish
-application flows. Looking for senior or staff backend/platform roles in Turkey or remote-friendly teams.
+Technology professional with hands-on delivery experience across software, operations, and product-adjacent
+work. Comfortable with Turkish and English application flows. Looking for roles that match the user's own
+targets after `config/profile.yml` and `modes/_profile.md` are customized.
 EOF
 ```
 
@@ -174,7 +177,7 @@ Fail:
 Command:
 
 ```bash
-rg -n "source_type:|parser_key:|locale:|language:|anti_duplication:" templates/portals.tr.example.yml
+rg -n "adapter_family:|parser_key:|locale:|language:|anti_duplication:" templates/portals.tr.example.yml
 ```
 
 Pass:
@@ -255,14 +258,16 @@ Any Turkey release that claims automated field normalization must add executable
 Command:
 
 ```bash
-rg -n "source_type|language|pipeline_status|country_code" docs/tr-normalization-spec.md docs/tr-data-model.md docs/tr-source-adapter-contract.md templates/portals.tr.example.yml
+rg -n "adapter_family|source_type|language|pipeline_status|country_code|region_scope" docs/tr-normalization-spec.md docs/tr-data-model.md docs/tr-source-adapter-contract.md templates/portals.tr.example.yml
 ```
 
 Pass:
 
-- the same field name is not used for two incompatible enum families
+- `adapter_family` is used only for config/routing metadata
+- `source_type` is used only for normalized output semantics
 - tracker-safe statuses are clearly separated from richer listing-layer statuses
 - `country_code` assumptions do not contradict source scope
+- `region_scope` is available for EMEA/global eligibility cases
 
 Fail:
 
@@ -415,7 +420,7 @@ mkdir -p data reports batch/tracker-additions
 cat > data/applications.md <<'EOF'
 | # | Fecha | Empresa | Rol | Score | Estado | PDF | Report | Notas |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 2026-04-01 | Acme | Data Engineer | 4.0/5 | Evaluada | ❌ | [001](reports/001-acme-2026-04-01.md) | seed |
+| 1 | 2026-04-01 | Acme | Data Engineer | 4.0/5 | EVALUATED | ❌ | [001](reports/001-acme-2026-04-01.md) | seed |
 EOF
 cat > reports/001-acme-2026-04-01.md <<'EOF'
 # Evaluación: Acme — Data Engineer
@@ -426,13 +431,13 @@ cat > reports/001-acme-2026-04-01.md <<'EOF'
 **PDF:** pending
 EOF
 cat > batch/tracker-additions/002.tsv <<'EOF'
-2	2026-04-07	Peak	Senior Backend Engineer	Evaluada	4.3/5	❌	[002](reports/002-peak-2026-04-07.md)	TR fixture
+2	2026-04-07	Peak	Software Engineer	EVALUATED	4.3/5	❌	[002](reports/002-peak-2026-04-07.md)	TR fixture
 EOF
 cat > reports/002-peak-2026-04-07.md <<'EOF'
-# Evaluación: Peak — Senior Backend Engineer
+# Evaluación: Peak — Software Engineer
 
 **Fecha:** 2026-04-07
-**Arquetipo:** Backend / Platform
+**Arquetipo:** Software / Backend / Platform
 **Score:** 4.3/5
 **PDF:** pending
 EOF
@@ -488,7 +493,7 @@ Setup:
 rm -rf batch/tracker-additions
 mkdir -p batch/tracker-additions
 cat > batch/tracker-additions/003.tsv <<'EOF'
-3	2026-04-08	Acme	Data Engineer	Evaluada	4.6/5	✅	[003](reports/003-acme-2026-04-08.md)	Re-eval
+3	2026-04-08	Acme	Data Engineer	EVALUATED	4.6/5	✅	[003](reports/003-acme-2026-04-08.md)	Re-eval
 EOF
 cat > reports/003-acme-2026-04-08.md <<'EOF'
 # Evaluación: Acme — Data Engineer
@@ -560,9 +565,9 @@ node normalize-statuses.mjs --dry-run
 
 Pass:
 
-- `enviada` maps to `Aplicado`
-- dated `rechazada` maps to `Rechazado`
-- `repost #77` maps to `Descartado` and is marked for note preservation
+- `enviada` maps to `APPLIED`
+- dated `rechazada` maps to `REJECTED`
+- `repost #77` maps to `DISCARDED` and is marked for note preservation
 
 Fail:
 

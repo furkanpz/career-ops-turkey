@@ -155,7 +155,7 @@ Sauvegarder l'evaluation complete dans `reports/{###}-{company-slug}-{YYYY-MM-DD
 - Entreprise
 - Role
 - Score : moyenne du match (1-5)
-- Statut : `Evaluated`
+- Statut : `EVALUATED`
 - PDF : non (ou oui si l'auto-pipeline a genere un PDF)
 - Report : lien relatif vers le fichier report (ex : `[001](reports/001-company-2026-01-01.md)`)
 

@@ -14,6 +14,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { normalizeTrackerStatus, normalizeTrackerStatusGroup } from './tracker-status-utils.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
@@ -27,30 +28,17 @@ const summaryMode = args.includes('--summary');
 const minThresholdIdx = args.indexOf('--min-threshold');
 const MIN_THRESHOLD = minThresholdIdx !== -1 ? parseInt(args[minThresholdIdx + 1]) || 5 : 5;
 
-// --- Status normalization (mirrors verify-pipeline.mjs) ---
-const ALIASES = {
-  'evaluada': 'evaluated', 'condicional': 'evaluated', 'hold': 'evaluated',
-  'evaluar': 'evaluated', 'verificar': 'evaluated',
-  'aplicado': 'applied', 'enviada': 'applied', 'aplicada': 'applied',
-  'applied': 'applied', 'sent': 'applied',
-  'respondido': 'responded',
-  'entrevista': 'interview',
-  'oferta': 'offer',
-  'rechazado': 'rejected', 'rechazada': 'rejected',
-  'descartado': 'discarded', 'descartada': 'discarded',
-  'cerrada': 'discarded', 'cancelada': 'discarded',
-  'no aplicar': 'skip', 'no_aplicar': 'skip', 'monitor': 'skip', 'geo blocker': 'skip',
-};
-
 function normalizeStatus(raw) {
-  const clean = raw.replace(/\*\*/g, '').trim().toLowerCase()
-    .replace(/\s+\d{4}-\d{2}-\d{2}.*$/, '').trim();
-  return ALIASES[clean] || clean;
+  const normalized = normalizeTrackerStatus(raw);
+  if (!normalized.status) {
+    return String(raw ?? '').replace(/\*\*/g, '').trim().toLowerCase();
+  }
+  return normalized.group;
 }
 
 function classifyOutcome(status) {
   const s = normalizeStatus(status);
-  if (['interview', 'offer', 'responded', 'applied'].includes(s)) return 'positive';
+  if (['interview', 'offer', 'response_received', 'applied'].includes(s)) return 'positive';
   if (['rejected', 'discarded'].includes(s)) return 'negative';
   if (['skip'].includes(s)) return 'self_filtered';
   return 'pending'; // evaluated
@@ -94,13 +82,13 @@ function parseReport(reportPath) {
   // Strip bold markers for easier matching
   const plain = content.replace(/\*\*/g, '');
 
-  // Extract Block A table (Role Summary) — works with both EN and ES headers
+  // Extract Block A table (Role Summary) — works with EN/ES/TR variants
   const blockARegex = /\|\s*(?:Archetype|Arquetipo)\s*\|\s*(.*?)\s*\|/i;
-  const seniorityRegex = /\|\s*(?:Seniority|Nivel|Level)\s*\|\s*(.*?)\s*\|/i;
-  const remoteRegex = /\|\s*(?:Remote|Remoto|Location)\s*\|\s*(.*?)\s*\|/i;
-  const teamRegex = /\|\s*(?:Team|Team size|Equipo)\s*\|\s*(.*?)\s*\|/i;
-  const compRegex = /\|\s*(?:Comp|Salary|Salario|Listed salary)\s*\|\s*(.*?)\s*\|/i;
-  const domainRegex = /\|\s*(?:Domain|Dominio|Industry)\s*\|\s*(.*?)\s*\|/i;
+  const seniorityRegex = /\|\s*(?:Seniority|Nivel|Level|Kidem|Kıdem|Seviye)\s*\|\s*(.*?)\s*\|/i;
+  const remoteRegex = /\|\s*(?:Remote|Remoto|Location|Lokasyon|Calisma modeli|Çalışma modeli)\s*\|\s*(.*?)\s*\|/i;
+  const teamRegex = /\|\s*(?:Team|Team size|Equipo|Takim buyuklugu|Takım büyüklüğü)\s*\|\s*(.*?)\s*\|/i;
+  const compRegex = /\|\s*(?:Comp|Salary|Salario|Listed salary|Ucret|Ücret|Maas|Maaş)\s*\|\s*(.*?)\s*\|/i;
+  const domainRegex = /\|\s*(?:Domain|Dominio|Industry|Alan|Sektor|Sektör)\s*\|\s*(.*?)\s*\|/i;
 
   const archMatch = plain.match(blockARegex);
   if (archMatch) report.archetype = archMatch[1].trim();
@@ -126,7 +114,8 @@ function parseReport(reportPath) {
   const compScoreRegex = /\|\s*(?:Comp)\s*\|\s*([\d.]+)\/5\s*\|/i;
   const culturalRegex = /\|\s*(?:Cultural signals|Cultural)\s*\|\s*([\d.]+)\/5\s*\|/i;
   const redFlagsRegex = /\|\s*(?:Red flags)\s*\|\s*([-+]?[\d.]+)\s*\|/i;
-  const globalRegex = /\|\s*(?:Global)\s*\|\s*([\d.]+)\/5\s*\|/i;
+  const globalRegex = /\|\s*(?:Global|Weighted Score)\s*\|(?:\s*\*\*)?\s*([\d.]+)\/5\s*\|/i;
+  const finalScoreRegex = /(?:\*\*Final Score:\*\*|Final Score:)\s*([\d.]+)\/5/i;
 
   const cvScoreMatch = plain.match(scoreRegex);
   if (cvScoreMatch) report.scores.cvMatch = parseFloat(cvScoreMatch[1]);
@@ -145,6 +134,10 @@ function parseReport(reportPath) {
 
   const glMatch = plain.match(globalRegex);
   if (glMatch) report.scores.global = parseFloat(glMatch[1]);
+  if (!report.scores.global) {
+    const finalScoreMatch = plain.match(finalScoreRegex);
+    if (finalScoreMatch) report.scores.global = parseFloat(finalScoreMatch[1]);
+  }
 
   // Extract gaps table
   const gapTableRegex = /\|\s*Gap\s*\|\s*Severity\s*\|.*?\n\|[-|\s]+\n([\s\S]*?)(?:\n\n|\n##|\n\*\*|$)/i;
@@ -173,9 +166,10 @@ function classifyRemote(raw) {
   // Order matters: check geo-restricted before general remote
   if (/\b(us[- ]?only|canada[- ]?only|residents only|usa only|us residents|canada residents)\b/.test(lower)) return 'geo-restricted';
   if (/\bargentina\s+remote\s+only\b/.test(lower)) return 'geo-restricted';
-  if (/\b(hybrid|on-?site|office|columbus|cape town|relocat)\b/.test(lower)) return 'hybrid/onsite';
-  if (/\b(global|anywhere|worldwide|no restrict|70\+|work from anywhere)\b/.test(lower)) return 'global remote';
-  if (/\b(remote|latam|americas|brazil|fully remote)\b/.test(lower)) return 'regional remote';
+  if (/\b(turkiye\s+icinden|türkiye\s+içinden|yalnizca turkiye|yalnızca türkiye|turkiye'de ikamet|türkiye'de ikamet)\b/.test(lower)) return 'geo-restricted';
+  if (/\b(hybrid|hibrit|on-?site|office|ofis|yerinde|columbus|cape town|relocat)\b/.test(lower)) return 'hybrid/onsite';
+  if (/\b(global|anywhere|worldwide|no restrict|70\+|work from anywhere|dunyanin her yerinden|dünyanın her yerinden)\b/.test(lower)) return 'global remote';
+  if (/\b(remote|uzaktan|fully remote|emea|avrupa|europe|latam|americas|brazil)\b/.test(lower)) return 'regional remote';
   return 'unknown';
 }
 
@@ -201,10 +195,10 @@ function extractBlockerType(gap) {
   const desc = gap.description.toLowerCase();
   const sev = gap.severity.toLowerCase();
   if (sev.includes('nice') || sev.includes('soft')) return null; // skip soft gaps
-  if (/\b(residency|us[- ]only|canada|location|visa|geo|country|region)\b/.test(desc)) return 'geo-restriction';
+  if (/\b(residency|us[- ]only|canada|location|visa|geo|country|region|ikamet|oturum|calisma izni|çalışma izni|lokasyon|sehir|şehir)\b/.test(desc)) return 'geo-restriction';
   if (/\b(javascript|typescript|python|ruby|java|go|rust|node|react|angular|vue|django|flask|rails)\b/.test(desc)) return 'stack-mismatch';
-  if (/\b(senior|staff|lead|principal|director|manager|head)\b/.test(desc)) return 'seniority-mismatch';
-  if (/\b(hybrid|on-?site|office|relocat)\b/.test(desc)) return 'onsite-requirement';
+  if (/\b(senior|staff|lead|principal|director|manager|head|mudur|müdür|yonetici|yönetici)\b/.test(desc)) return 'seniority-mismatch';
+  if (/\b(hybrid|hibrit|on-?site|office|ofis|yerinde|relocat)\b/.test(desc)) return 'onsite-requirement';
   return 'other';
 }
 
@@ -230,7 +224,7 @@ function analyze() {
 
     return {
       ...e,
-      normalizedStatus: normalizeStatus(e.status),
+      normalizedStatus: normalizeTrackerStatusGroup(e.status) ?? normalizeStatus(e.status),
       outcome,
       score,
       report: reportData,
@@ -476,7 +470,7 @@ function printSummary(result) {
   // Funnel
   console.log('CONVERSION FUNNEL');
   console.log('-'.repeat(40));
-  const funnelOrder = ['evaluated', 'applied', 'responded', 'interview', 'offer', 'rejected', 'discarded', 'skip'];
+  const funnelOrder = ['evaluated', 'applied', 'response_received', 'interview', 'offer', 'rejected', 'discarded', 'skip'];
   for (const status of funnelOrder) {
     if (funnel[status]) {
       const pct = Math.round((funnel[status] / metadata.total) * 100);

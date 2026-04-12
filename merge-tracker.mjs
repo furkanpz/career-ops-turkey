@@ -9,7 +9,7 @@
  *
  * Dedup: company normalized + role fuzzy match + report number match
  * If duplicate with higher score → update in-place, update report link
- * Validates status against states.yml (rejects non-canonical, logs warning)
+ * Validates status against tracker-status-registry.json (rejects non-canonical, logs warning)
  *
  * Run: node career-ops/merge-tracker.mjs [--dry-run] [--verify]
  */
@@ -17,6 +17,8 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, existsSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { normalizeCompanyKey, normalizeRoleTitle } from './company-name-utils.mjs';
+import { looksLikeTrackerStatus, normalizeTrackerStatus } from './tracker-status-utils.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -28,47 +30,17 @@ const MERGED_DIR = join(ADDITIONS_DIR, 'merged');
 const DRY_RUN = process.argv.includes('--dry-run');
 const VERIFY = process.argv.includes('--verify');
 
-// Canonical states and aliases
-const CANONICAL_STATES = ['Evaluated', 'Applied', 'Responded', 'Interview', 'Offer', 'Rejected', 'Discarded', 'SKIP'];
-
 function validateStatus(status) {
-  const clean = status.replace(/\*\*/g, '').replace(/\s+\d{4}-\d{2}-\d{2}.*$/, '').trim();
-  const lower = clean.toLowerCase();
-
-  for (const valid of CANONICAL_STATES) {
-    if (valid.toLowerCase() === lower) return valid;
+  const normalized = normalizeTrackerStatus(status);
+  if (!normalized.status) {
+    throw new Error(normalized.error);
   }
-
-  // Aliases
-  const aliases = {
-    // Spanish → English
-    'evaluada': 'Evaluated', 'condicional': 'Evaluated', 'hold': 'Evaluated', 'evaluar': 'Evaluated', 'verificar': 'Evaluated',
-    'aplicado': 'Applied', 'enviada': 'Applied', 'aplicada': 'Applied', 'applied': 'Applied', 'sent': 'Applied',
-    'respondido': 'Responded',
-    'entrevista': 'Interview',
-    'oferta': 'Offer',
-    'rechazado': 'Rejected', 'rechazada': 'Rejected',
-    'descartado': 'Discarded', 'descartada': 'Discarded', 'cerrada': 'Discarded', 'cancelada': 'Discarded',
-    'no aplicar': 'SKIP', 'no_aplicar': 'SKIP', 'skip': 'SKIP', 'monitor': 'SKIP',
-    'geo blocker': 'SKIP',
-  };
-
-  if (aliases[lower]) return aliases[lower];
-
-  // DUPLICADO/Repost → Discarded
-  if (/^(duplicado|dup|repost)/i.test(lower)) return 'Discarded';
-
-  console.warn(`⚠️  Non-canonical status "${status}" → defaulting to "Evaluated"`);
-  return 'Evaluated';
-}
-
-function normalizeCompany(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return normalized.status;
 }
 
 function roleFuzzyMatch(a, b) {
-  const wordsA = a.toLowerCase().split(/\s+/).filter(w => w.length > 3);
-  const wordsB = b.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  const wordsA = normalizeRoleTitle(a).split(/\s+/).filter(w => w.length > 3);
+  const wordsB = normalizeRoleTitle(b).split(/\s+/).filter(w => w.length > 3);
   const overlap = wordsA.filter(w => wordsB.some(wb => wb.includes(w) || w.includes(wb)));
   return overlap.length >= 2;
 }
@@ -139,8 +111,8 @@ function parseTsvContent(content, filename) {
     const col5 = parts[5].trim();
     const col4LooksLikeScore = /^\d+\.?\d*\/5$/.test(col4) || col4 === 'N/A' || col4 === 'DUP';
     const col5LooksLikeScore = /^\d+\.?\d*\/5$/.test(col5) || col5 === 'N/A' || col5 === 'DUP';
-    const col4LooksLikeStatus = /^(evaluated|applied|responded|interview|offer|rejected|discarded|skip|evaluada|aplicado|respondido|entrevista|oferta|rechazado|descartado|no aplicar|cerrada|duplicado|repost|condicional|hold|monitor)/i.test(col4);
-    const col5LooksLikeStatus = /^(evaluated|applied|responded|interview|offer|rejected|discarded|skip|evaluada|aplicado|respondido|entrevista|oferta|rechazado|descartado|no aplicar|cerrada|duplicado|repost|condicional|hold|monitor)/i.test(col5);
+    const col4LooksLikeStatus = looksLikeTrackerStatus(col4);
+    const col5LooksLikeStatus = looksLikeTrackerStatus(col5);
 
     let statusCol, scoreCol;
     if (col4LooksLikeStatus && !col4LooksLikeScore) {
@@ -227,10 +199,17 @@ let added = 0;
 let updated = 0;
 let skipped = 0;
 const newLines = [];
+const invalidAdditions = [];
 
 for (const file of tsvFiles) {
   const content = readFileSync(join(ADDITIONS_DIR, file), 'utf-8').trim();
-  const addition = parseTsvContent(content, file);
+  let addition;
+  try {
+    addition = parseTsvContent(content, file);
+  } catch (err) {
+    invalidAdditions.push({ file, error: err.message });
+    continue;
+  }
   if (!addition) { skipped++; continue; }
 
   // Check for duplicate by:
@@ -254,9 +233,9 @@ for (const file of tsvFiles) {
 
   if (!duplicate) {
     // Company + role fuzzy match
-    const normCompany = normalizeCompany(addition.company);
+    const normCompany = normalizeCompanyKey(addition.company);
     duplicate = existingApps.find(app => {
-      if (normalizeCompany(app.company) !== normCompany) return false;
+      if (normalizeCompanyKey(app.company) !== normCompany) return false;
       return roleFuzzyMatch(addition.role, app.role);
     });
   }
@@ -287,6 +266,15 @@ for (const file of tsvFiles) {
     added++;
     console.log(`➕ Add #${entryNum}: ${addition.company} — ${addition.role} (${addition.score})`);
   }
+}
+
+if (invalidAdditions.length > 0) {
+  console.error(`\n❌ ${invalidAdditions.length} invalid tracker addition(s) found:`);
+  for (const invalid of invalidAdditions) {
+    console.error(`  - ${invalid.file}: ${invalid.error}`);
+  }
+  console.error('Fix the invalid statuses before merging tracker additions.');
+  process.exit(1);
 }
 
 // Insert new lines after the header (line index of first data row)

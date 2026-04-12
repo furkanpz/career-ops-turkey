@@ -1,5 +1,9 @@
 # Turkey Localization Review Findings
 
+> Historical review snapshot. The findings below describe issues found before the current Turkey
+> fork completion work. They are preserved for traceability and should not be treated as the active
+> product contract.
+
 ## Scope
 
 This review covers the current uncommitted Turkey-localization changes in the working tree, with emphasis on:
@@ -22,7 +26,7 @@ I did not apply fixes.
 
 ### 1. Release-blocker: new TR docs/modes introduce absolute filesystem links and fail the repo test suite
 
-The repo already treats absolute paths as invalid in tracked code/docs via `test-all.mjs:165-178`. New Turkey files contain `/Users/...` links, for example:
+The repo already treats absolute paths as invalid in tracked code/docs via `test-all.mjs:165-178`. New Turkey files contained absolute home-directory links, for example:
 
 - `docs/tr-normalization-spec.md:5`
 - `docs/tr-source-adapter-contract.md:11,32-34,268`
@@ -213,7 +217,7 @@ The highest-risk Turkey-specific collisions with existing pipeline behavior are:
 
 Do not broaden scope yet. A minimal safe patch set is:
 
-1. Remove all absolute `/Users/...` links from the new TR docs and modes.
+1. Remove all absolute path links from the new TR docs and modes.
    Use repo-relative plain references instead.
 
 2. Freeze one parser-safe report row syntax for TR reports.

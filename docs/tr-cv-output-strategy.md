@@ -1,5 +1,9 @@
 # Turkey-Ready Bilingual CV Output Strategy
 
+> Supporting design note. This document captures the design rationale behind the current bilingual
+> PDF layer. Treat `cv-template-utils.mjs`, `generate-pdf.mjs`, `README.md`, and
+> `docs/CUSTOMIZATION.md` as the active contract for template selection and file naming.
+
 ## Purpose
 
 This document proposes a safe, additive architecture for bilingual ATS CV output in `career-ops`:
@@ -125,22 +129,24 @@ Exception:
 
 ### 4. Profile language preference
 
-This should align with the proposed profile direction in [docs/tr-profile-schema.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-profile-schema.md).
+This should align with the proposed profile direction in `docs/tr-profile-schema.md`.
 
 Recommended optional profile block:
 
 ```yaml
 language:
-  cv_language_preferences:
+  cv_preferences:
     default: "en"
-    supported: ["tr", "en"]
-    auto_select_by_posting_language: true
+    supported: ["tr", "en", "es"]
+    by_listing_language:
+      tr: "tr"
+      en: "en"
     notes: "Use Turkish CV for Turkish-language local roles; English CV for international roles."
 ```
 
 Recommended fallback behavior:
 
-- if `auto_select_by_posting_language: true`, use JD language unless overridden
+- if `by_listing_language` has a matching explicit entry, use it unless overridden
 - otherwise use `default`
 
 ### 5. Safe default
@@ -196,32 +202,22 @@ An English ATS CV for a Turkey-based candidate can still retain Turkey-specific 
 
 ## Naming Conventions
 
-Use additive naming, not replacement naming.
+Use one canonical naming contract consistently.
 
 ## Recommended output files
 
-New bilingual flow should prefer:
+Canonical output files:
 
 - `output/cv-candidate-{company-slug}-tr-{YYYY-MM-DD}.pdf`
 - `output/cv-candidate-{company-slug}-en-{YYYY-MM-DD}.pdf`
+- `output/cv-candidate-{company-slug}-es-{YYYY-MM-DD}.pdf`
 
 Temporary HTML:
 
 - `/tmp/cv-candidate-{company-slug}-tr.html`
 - `/tmp/cv-candidate-{company-slug}-en.html`
 
-## Compatibility rule
-
-The current naming must remain accepted:
-
-- `output/cv-candidate-{company-slug}-{YYYY-MM-DD}.pdf`
-
-Recommended interpretation:
-
-- legacy flow: continue producing the old filename
-- bilingual-aware flow: produce the language-suffixed filename
-
-This avoids breaking old automation or user expectations while making bilingual artifacts unambiguous.
+The repo should now use the language-suffixed filename everywhere so prompts, helpers, reports, and generated files stay aligned.
 
 ## Template Selection Naming
 
@@ -229,6 +225,7 @@ Recommended explicit mapping:
 
 - language `en` -> `templates/cv-template.en.html`
 - language `tr` -> `templates/cv-template.tr.html`
+- language `es` -> `templates/cv-template.html`
 - fallback -> `templates/cv-template.html`
 
 ## Validation Concerns

@@ -44,18 +44,21 @@ The evaluation uses 6 blocks (A-F) with a global score of 1-5:
 
 ## Archetype Detection
 
-Classify every offer into one of these types (or hybrid of 2):
+Prefer the user's own archetypes from `modes/_profile.md` and `config/profile.yml`.
+If the user has not defined clear archetypes yet, classify every offer into one
+of these fallback families (or a hybrid of 2):
 
 | Archetype | Key signals in JD |
 |-----------|-------------------|
-| AI Platform / LLMOps | "observability", "evals", "pipelines", "monitoring", "reliability" |
-| Agentic / Automation | "agent", "HITL", "orchestration", "workflow", "multi-agent" |
-| Technical AI PM | "PRD", "roadmap", "discovery", "stakeholder", "product manager" |
-| AI Solutions Architect | "architecture", "enterprise", "integration", "design", "systems" |
-| AI Forward Deployed | "client-facing", "deploy", "prototype", "fast delivery", "field" |
-| AI Transformation | "change management", "adoption", "enablement", "transformation" |
+| Software / Backend / Platform | "backend", "platform", "api", "distributed systems", "reliability", "infra", "site reliability" |
+| Data / Analytics | "sql", "reporting", "dashboard", "experimentation", "analytics", "data engineer", "data scientist" |
+| Product / Program | "roadmap", "discovery", "prioritization", "stakeholder", "product manager", "program manager" |
+| Solutions / Customer Engineering | "implementation", "integration", "solutions", "customer", "client-facing", "pre-sales", "deploy" |
+| Design / UX | "designer", "ux", "ui", "research", "interaction", "visual", "product design" |
+| Business Systems / Operations | "automation", "revops", "business systems", "internal tools", "ops", "enablement", "workflow" |
 
-After detecting archetype, read `modes/_profile.md` for the user's specific framing and proof points for that archetype.
+After detecting the best-fit family, read `modes/_profile.md` for the user's
+specific framing, proof points, and target-role preferences.
 
 ## Global Rules
 

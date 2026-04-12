@@ -1,6 +1,6 @@
 # Career-Ops
 
-[English](README.md) | [Español](README.es.md)
+[English](README.md) | [Español](README.es.md) | `Turkey locale fork`
 
 <p align="center">
   <a href="https://x.com/santifer"><img src="docs/hero-banner.jpg" alt="Career-Ops — Multi-Agent Job Search System" width="800"></a>
@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
   <img src="https://img.shields.io/badge/OpenCode-111827?style=flat&logo=terminal&logoColor=white" alt="OpenCode">
-  <img src="https://img.shields.io/badge/Codex_(soon)-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
+  <img src="https://img.shields.io/badge/Codex-10A37F?style=flat&logo=openai&logoColor=white" alt="Codex">
   <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
@@ -27,6 +27,7 @@
   <img src="https://img.shields.io/badge/DE-grey?style=flat" alt="DE">
   <img src="https://img.shields.io/badge/FR-blue?style=flat" alt="FR">
   <img src="https://img.shields.io/badge/PT--BR-green?style=flat" alt="PT-BR">
+  <img src="https://img.shields.io/badge/TR-red?style=flat" alt="TR">
 </p>
 
 ---
@@ -45,7 +46,7 @@ Career-Ops turns any AI coding CLI into a full job search command center. Instea
 
 - **Evaluates offers** with a structured A-F scoring system (10 weighted dimensions)
 - **Generates tailored PDFs** -- ATS-optimized CVs customized per job description
-- **Scans portals** automatically (Greenhouse, Ashby, Lever, company pages)
+- **Scans portals** automatically (tracked company pages + LinkedIn Jobs, Kariyer.net, Indeed Turkiye, Eleman.net, Secretcv, Yenibiris, ISKUR)
 - **Processes in batch** -- evaluate 10+ offers in parallel with sub-agents
 - **Tracks everything** in a single source of truth with integrity checks
 
@@ -66,7 +67,7 @@ Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored
 | **Interview Story Bank** | Accumulates STAR+Reflection stories across evaluations -- 5-10 master stories that answer any behavioral question |
 | **Negotiation Scripts** | Salary negotiation frameworks, geographic discount pushback, competing offer leverage |
 | **ATS PDF Generation** | Keyword-injected CVs with Space Grotesk + DM Sans design |
-| **Portal Scanner** | 45+ companies pre-configured (Anthropic, OpenAI, ElevenLabs, Retool, n8n...) + custom queries across Ashby, Greenhouse, Lever, Wellfound |
+| **Portal Scanner** | Single `scan.mjs` runtime for tracked companies, Turkish boards, and EMEA ATS discovery with Playwright liveness checks |
 | **Batch Processing** | Parallel evaluation with `claude -p` workers |
 | **Dashboard TUI** | Terminal UI to browse, filter, and sort your pipeline |
 | **Human-in-the-Loop** | AI evaluates and recommends, you decide and act. The system never submits an application -- you always have the final call |
@@ -76,16 +77,19 @@ Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/santifer/career-ops.git
-cd career-ops && npm install
-npx playwright install chromium   # Required for PDF generation
+git clone https://github.com/furkanpz/career-ops-turkey.git
+cd career-ops-turkey && npm install
+npx playwright install chromium   # Required for PDF generation and scanner liveness checks
 
 # 2. Check setup
 npm run doctor                     # Validates all prerequisites
 
 # 3. Configure
-cp config/profile.example.yml config/profile.yml  # Edit with your details
-cp templates/portals.example.yml portals.yml       # Customize companies
+cp config/profile.tr.example.yml config/profile.yml
+cp templates/portals.tr.example.yml portals.yml
+# Fallback global starters:
+# cp config/profile.example.yml config/profile.yml
+# cp templates/portals.example.yml portals.yml
 
 # 4. Add your CV
 # Create cv.md in the project root with your CV in markdown
@@ -103,9 +107,18 @@ claude   # Open Claude Code in this directory
 # Paste a job URL or run /career-ops
 ```
 
-> **The system is designed to be customized by Claude itself.** Modes, archetypes, scoring weights, negotiation scripts -- just ask Claude to change them. It reads the same files it uses, so it knows exactly what to edit.
+> **The system is designed to be customized by Claude itself.** The Turkey fork changes locale behavior, market heuristics, and board coverage. Your own target roles, keywords, company list, and narrative still belong in `config/profile.yml`, `modes/_profile.md`, `article-digest.md`, or `portals.yml`.
 
 See [docs/SETUP.md](docs/SETUP.md) for the full setup guide.
+
+Turkey-oriented usage is first-class in this fork: set `language.modes_dir: modes/tr` in `config/profile.yml` or tell Claude to use `modes/tr/` for Turkey-market workflows. This is a locale adaptation, not a fixed role pack. Canonical commands stay stable, and the documented Turkish aliases are supported: `teklif` → evaluation, `basvur` → live application help.
+
+Parity scope in this fork is the canonical product surface plus the Turkey locale layer. Upstream
+locales such as `modes/ja/` or `modes/ru/`, and upstream repository marketing assets such as docs
+images, are intentionally outside the Turkey completion scope.
+
+Parser-safe report keys stay canonical and English even in Turkish workflows:
+`Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`.
 
 ## Usage
 
@@ -122,11 +135,22 @@ Career-ops is a single slash command with multiple modes:
 /career-ops pipeline       → Process pending URLs
 /career-ops contacto       → LinkedIn outreach message
 /career-ops deep           → Deep company research
+/career-ops interview-prep → Company-specific interview research
 /career-ops training       → Evaluate a course/cert
 /career-ops project        → Evaluate a portfolio project
+/career-ops patterns       → Analyze rejection patterns
+/career-ops followup       → Track follow-up cadence and draft follow-ups
+/career-ops teklif         → Turkish alias for single evaluation
+/career-ops basvur         → Turkish alias for live application help
 ```
 
 Or just paste a job URL or description directly -- career-ops auto-detects it and runs the full pipeline.
+
+For the scanner runtime, the CLI and slash-command paths now match:
+
+```bash
+npm run scan
+```
 
 ## How It Works
 
@@ -135,7 +159,7 @@ You paste a job URL or description
         │
         ▼
 ┌──────────────────┐
-│  Archetype       │  Classifies: LLMOps / Agentic / PM / SA / FDE / Transformation
+│  Archetype       │  Classifies: best-fit role family for the user
 │  Detection       │
 └────────┬─────────┘
          │
@@ -152,18 +176,34 @@ You paste a job URL or description
 
 ## Pre-configured Portals
 
-The scanner comes with **45+ companies** ready to scan and **19 search queries** across major job boards. Copy `templates/portals.example.yml` to `portals.yml` and add your own:
+This fork defaults to `templates/portals.tr.example.yml` for Turkey / EMEA discovery. The global template remains available, but the TR starter is the supported default here.
 
-**AI Labs:** Anthropic, OpenAI, Mistral, Cohere, LangChain, Pinecone
-**Voice AI:** ElevenLabs, PolyAI, Parloa, Hume AI, Deepgram, Vapi, Bland AI
-**AI Platforms:** Retool, Airtable, Vercel, Temporal, Glean, Arize AI
-**Contact Center:** Ada, LivePerson, Sierra, Decagon, Talkdesk, Genesys
-**Enterprise:** Salesforce, Twilio, Gong, Dialpad
-**LLMOps:** Langfuse, Weights & Biases, Lindy, Cognigy, Speechmatics
-**Automation:** n8n, Zapier, Make.com
-**European:** Factorial, Attio, Tinybird, Clarity AI, Travelperk
+The TR starter is intentionally tech-first and generic. It is meant to be customized for your own role families rather than treated as a fixed default candidate profile.
 
-**Job boards searched:** Ashby, Greenhouse, Lever, Wellfound, Workable, RemoteFront
+The scanner now uses one runtime (`scan.mjs`) for both `/career-ops scan` and `npm run scan`. It combines:
+
+- tracked company scans via ATS APIs or direct careers pages
+- search-query discovery for Turkish and EMEA job boards
+- Playwright liveness checks for public search results before they enter the pipeline
+
+Primary Turkey board coverage in the template:
+
+- LinkedIn Jobs
+- Kariyer.net
+- Indeed Turkiye
+- Eleman.net
+
+Secondary Turkey board coverage in the template:
+
+- Secretcv
+- Yenibiris
+- ISKUR
+
+LinkedIn is discovery-only in this fork. Login-gated or authenticated scraping is intentionally out of scope.
+
+Upstream behavior still applies: scanner coverage and locale heuristics live in system files, but the actual target roles, keywords, and tracked companies belong in your user-layer `portals.yml`.
+
+Updates never auto-merge your `portals.yml`. If your file predates the current TR template, `doctor` and `scan` will warn and tell you which parser keys are missing.
 
 ## Dashboard TUI
 
@@ -182,21 +222,28 @@ Features: 6 filter tabs, 4 sort modes, grouped/flat view, lazy-loaded previews, 
 ```
 career-ops/
 ├── CLAUDE.md                    # Agent instructions
+├── followup-cadence.mjs         # Follow-up cadence analysis
 ├── cv.md                        # Your CV (create this)
 ├── article-digest.md            # Your proof points (optional)
 ├── config/
-│   └── profile.example.yml      # Template for your profile
-├── modes/                       # 14 skill modes
-│   ├── _shared.md               # Shared context (customize this)
+│   ├── profile.example.yml      # Default/global profile template
+│   └── profile.tr.example.yml   # Turkey-oriented profile template
+├── modes/                       # Root canonical mode set
+│   ├── _shared.md               # Shared system context (not user customization)
 │   ├── oferta.md                # Single evaluation
 │   ├── pdf.md                   # PDF generation
 │   ├── scan.md                  # Portal scanner
 │   ├── batch.md                 # Batch processing
+│   ├── tr/                      # Turkey / EMEA override layer
 │   └── ...
+├── tracker-status-registry.json # Canonical machine status registry
 ├── templates/
-│   ├── cv-template.html         # ATS-optimized CV template
-│   ├── portals.example.yml      # Scanner config template
-│   └── states.yml               # Canonical statuses
+│   ├── cv-template.html         # Legacy/Spanish-compatible CV template
+│   ├── cv-template.en.html      # English ATS template
+│   ├── cv-template.tr.html      # Turkish ATS template
+│   ├── portals.example.yml      # Default/global scanner config
+│   ├── portals.tr.example.yml   # Turkey / EMEA scanner config
+│   └── states.yml               # Human-readable status mirror
 ├── batch/
 │   ├── batch-prompt.md          # Self-contained worker prompt
 │   └── batch-runner.sh          # Orchestrator script
@@ -237,11 +284,11 @@ My portfolio and other open source projects → [santifer.io](https://santifer.i
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=santifer%2Fcareer-ops&type=timeline&legend=top-left">
+<a href="https://www.star-history.com/?repos=furkanpz%2Fcareer-ops-turkey&type=timeline&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=furkanpz/career-ops-turkey&type=timeline&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=furkanpz/career-ops-turkey&type=timeline&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=furkanpz/career-ops-turkey&type=timeline&legend=top-left" />
  </picture>
 </a>
 

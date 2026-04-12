@@ -1,0 +1,29 @@
+[
+  {
+    "name": "blocked-linkedin-authwall",
+    "input": {
+      "status": 200,
+      "finalUrl": "https://www.linkedin.com/checkpoint/challenge/",
+      "bodyText": "Sign in to view more jobs on LinkedIn"
+    },
+    "expected": "blocked"
+  },
+  {
+    "name": "expired-turkish-posting",
+    "input": {
+      "status": 200,
+      "finalUrl": "https://jobs.example.com/closed-role",
+      "bodyText": "Bu ilan kaldirildi. Basvurular kapandi. Ilan suresi doldu."
+    },
+    "expected": "expired"
+  },
+  {
+    "name": "active-turkish-posting",
+    "input": {
+      "status": 200,
+      "finalUrl": "https://jobs.example.com/data-engineer",
+      "bodyText": "Data Engineer Basvur Sorumluluklar Veri platformlari ETL surecleri Dagitim gozlemlenebilirlik Takim calismasi Test otomasyonu Bulut mimarisi Uretim sistemleri Sorun giderme Is birligi Paydas yonetimi Teknik liderlik Kariyer gelisimi"
+    },
+    "expected": "active"
+  }
+]

@@ -1,5 +1,10 @@
 # Turkey Dashboard Plan
 
+> Historical planning note. This document describes the dashboard design space explored before the
+> current Turkey dashboard hardening landed. It is no longer the active contract for current
+> behavior; use the runtime code, `README.md`, and `docs/ARCHITECTURE.md` for the implemented
+> surface.
+
 ## Goal
 
 Plan a Turkey-specific dashboard filtering and presentation layer for `career-ops` without broad UI rewrites.
@@ -17,11 +22,11 @@ The first iteration should be:
 
 Relevant dashboard files:
 
-- [dashboard/main.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/main.go)
-- [dashboard/internal/model/career.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/internal/model/career.go)
-- [dashboard/internal/data/career.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/internal/data/career.go)
-- [dashboard/internal/ui/screens/pipeline.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/internal/ui/screens/pipeline.go)
-- [dashboard/internal/ui/screens/viewer.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/internal/ui/screens/viewer.go)
+- `dashboard/main.go`
+- `dashboard/internal/model/career.go`
+- `dashboard/internal/data/career.go`
+- `dashboard/internal/ui/screens/pipeline.go`
+- `dashboard/internal/ui/screens/viewer.go`
 
 ### Current data flow
 
@@ -286,8 +291,8 @@ Why this bridge works well:
 
 Files:
 
-- [dashboard/internal/data/career.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/internal/data/career.go)
-- [dashboard/internal/model/career.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/internal/model/career.go)
+- `dashboard/internal/data/career.go`
+- `dashboard/internal/model/career.go`
 
 Plan:
 
@@ -313,7 +318,7 @@ But this is optional for v1; helper functions alone may be enough.
 
 Primary file:
 
-- [dashboard/internal/ui/screens/pipeline.go](/Users/furkan/Desktop/Proje/career-ops/dashboard/internal/ui/screens/pipeline.go)
+- `dashboard/internal/ui/screens/pipeline.go`
 
 Plan:
 

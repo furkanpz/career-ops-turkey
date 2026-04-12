@@ -11,8 +11,8 @@
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/santifer/career-ops.git
-cd career-ops
+git clone https://github.com/furkanpz/career-ops-turkey.git
+cd career-ops-turkey
 npm install
 npx playwright install chromium   # Required for PDF generation
 ```
@@ -20,10 +20,12 @@ npx playwright install chromium   # Required for PDF generation
 ### 2. Configure your profile
 
 ```bash
-cp config/profile.example.yml config/profile.yml
+cp config/profile.tr.example.yml config/profile.yml
+# Fallback global starter:
+# cp config/profile.example.yml config/profile.yml
 ```
 
-Edit `config/profile.yml` with your personal details: name, email, target roles, narrative, proof points.
+Edit `config/profile.yml` with your personal details: name, email, target roles, narrative, proof points. The Turkey profile starter is only a locale-aware scaffold; it is not a recommended default persona.
 
 ### 3. Add your CV
 
@@ -34,13 +36,31 @@ Create `cv.md` in the project root with your full CV in markdown format. This is
 ### 4. Configure portals
 
 ```bash
-cp templates/portals.example.yml portals.yml
+cp templates/portals.tr.example.yml portals.yml
+# Fallback global starter:
+# cp templates/portals.example.yml portals.yml
 ```
 
 Edit `portals.yml`:
 - Update `title_filter.positive` with keywords matching your target roles
 - Add companies you want to track in `tracked_companies`
 - Customize `search_queries` for your preferred job boards
+
+The Turkey starter now includes primary board coverage for LinkedIn Jobs, Kariyer.net, Indeed Turkiye, and Eleman.net, plus secondary coverage for Secretcv, Yenibiris, and ISKUR.
+Treat this file as a customizable starter for Turkey-market discovery, not as a fixed role pack. Keep the locale defaults, then narrow or widen the role families yourself.
+If your existing `portals.yml` was created before these parser keys existed, keep your custom file and merge the missing query entries manually from `templates/portals.tr.example.yml`.
+
+If you are Turkey-based, also add this profile convention:
+
+```yaml
+language:
+  modes_dir: "modes/tr"
+```
+
+Canonical commands stay the same. The Turkish aliases `teklif` and `basvur` are supported, but they resolve back to the canonical evaluation/apply flows.
+`followup` is also available for application follow-up cadence once you start tracking live applications.
+
+Parser-safe report keys stay English even in Turkish workflows: `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`.
 
 ### 5. Start using
 
@@ -63,12 +83,16 @@ Then paste a job offer URL or description. Career-ops will automatically evaluat
 | Batch evaluate | `/career-ops batch` |
 | Check tracker status | `/career-ops tracker` |
 | Fill application form | `/career-ops apply` |
+| Prepare for interviews | `/career-ops interview-prep` |
+| Analyze rejection patterns | `/career-ops patterns` |
+| Track follow-up cadence | `/career-ops followup` |
 
 ## Verify Setup
 
 ```bash
 node cv-sync-check.mjs      # Check configuration
 node verify-pipeline.mjs     # Check pipeline integrity
+npm run scan -- --dry-run    # Preview scanner behavior without writing files
 ```
 
 ## Build Dashboard (Optional)

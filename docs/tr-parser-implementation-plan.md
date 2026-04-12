@@ -1,5 +1,10 @@
 # Turkey Parser Implementation Plan
 
+> Historical implementation note. This document records the sequencing used to arrive at the
+> current scanner/parser architecture. It is not the active runtime contract; current behavior is
+> defined by `scan.mjs`, `docs/tr-portal-config.md`, `docs/tr-source-adapter-contract.md`, and the
+> scanner fixtures in `tests/fixtures/scan`.
+
 ## Goal
 
 Implement Turkey-aware source adapters in a way that preserves one stable downstream schema and avoids per-site parser sprawl.
@@ -35,7 +40,7 @@ Suggested output:
 
 Responsibility:
 
-- canonical enum mapping using [docs/tr-normalization-spec.md](/Users/furkan/Desktop/Proje/career-ops/docs/tr-normalization-spec.md)
+- canonical enum mapping using `docs/tr-normalization-spec.md`
 - company/title/location cleanup
 - URL cleanup and fingerprint preparation
 
@@ -70,9 +75,13 @@ The first implementation only needs deterministic fingerprints and precedence hi
 
 Initial parser keys:
 
+- `linkedin_jobs_search`
 - `kariyernet_search`
+- `indeed_tr_search`
+- `elemannet_search`
 - `secretcv_search`
 - `yenibiris_search`
+- `iskur_search`
 - `youthall_search`
 
 ### Primary fetch mode

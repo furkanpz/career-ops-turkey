@@ -1,6 +1,8 @@
 # career-ops -- Turkce Modlar (`modes/tr/`)
 
-Bu klasor, Turkiye pazarina gore ayarlanmis career-ops modlarini tutar.
+Bu klasor, Turkiye pazarina gore ayarlanmis career-ops override katmanini tutar.
+Router `modes/tr/` aktif oldugunda her zaman kok `modes/` dosyasini da okur; `modes/tr/*` sadece locale-specific override ekler. Bu sayede feature parity korunur.
+Bu katman, kullanicinin hedef rol ailesini sistem katmanina gommez. Hedef roller, keywordler ve company tercihleri kullanici katmaninda tanimlanir.
 
 ## Ne zaman kullanilir?
 
@@ -11,7 +13,7 @@ Bu klasor, Turkiye pazarina gore ayarlanmis career-ops modlarini tutar.
 - ilan dili Turkce veya Ingilizce olabilir, ama karar mantigi Turkiye pazari gercegine gore calismalidir
 - sehir, hibrit politika, maas seffafligi, sirket netligi ve basvuru eforu kritik filtrelerse
 
-Bu katman yalnizca Turkce ilanlar icin degil, Turkiye bazli is arama akisi icindir.
+Bu katman yalnizca Turkce ilanlar icin degil, Turkiye bazli is arama akisi icindir. Ilan dili Ingilizce olabilir; locale behavior yine Turkiye-market lensi ile calisir.
 
 ## Nasil aktive edilir?
 
@@ -35,7 +37,7 @@ language:
   modes_dir: modes/tr
 ```
 
-## Bu ilk iterasyonda ne var?
+## Bu katmanda ne var?
 
 | Dosya | Amac |
 |---|---|
@@ -43,6 +45,19 @@ language:
 | `teklif.md` | Tek ilan A-F degerlendirmesi + final score output |
 | `basvur.md` | Canli basvuru akisi, TR evaluation output'una gore daha ihtiyatli cevap uretimi |
 | `pipeline.md` | Pipeline URL isleme akisi, TR scoring sonucuna gore ozetleme |
+| `auto-pipeline.md` | Koku bozmadan TR evaluation/PDF/apply override zinciri |
+| `pdf.md` | CV language secimi ve TR profile wiring |
+| `scan.md` | Turkiye portal metadata ve dedup heuristics |
+| `batch.md` | Worker locale parity ve template secimi |
+| `tracker.md` | Canonical status kontrati + Turkce operator aciklamasi |
+| `contacto.md` | Turkiye/EMEA outreach dil secimi |
+| `ofertas.md` | Turkiye-market compare heuristics |
+| `deep.md` | Turkiye/EMEA arastirma lensi |
+| `project.md` | Turkiye pazari signal lensi |
+| `training.md` | Yerel signal degeri lensi |
+| `patterns.md` | Canonical status/funnel override |
+| `interview-prep.md` | Turkiye/EMEA interview research lensi |
+| `followup.md` | Follow-up cadence ve draft generation icin Turkiye operator override |
 
 ## Tasarim notu
 
@@ -55,12 +70,15 @@ Bu katman, mevcut repo ruhunu korur:
 
 ## Parser uyumlulugu
 
-Turkce raporlar olusturulurken, dashboard ve mevcut parser riskini azaltmak icin bazi header alanlari makine-dostu tutulmalidir:
+Turkce raporlar olusturulurken, dashboard ve parser icin bazi header alanlari canonical English kalmalidir:
 
-- `**Arquetipo:**`
+- `**Archetype** |`
+- `**Remote** |`
 - `**Score:**`
 - `**URL:**`
 - `**PDF:**`
-- `**TL;DR:**`
+- `**TL;DR** |`
+- `**Date:**`
+- `**Batch ID:**`
 
-Gorunen metin Turkce olabilir, ama bu anahtarlar sabit kalmalidir.
+Gorunen govde Turkce olabilir, ama bu anahtarlar sabit kalmalidir.

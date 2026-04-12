@@ -30,7 +30,7 @@ To reduce downstream breakage risk, keep these machine-stable keys in the report
 # Degerlendirme: {Company} -- {Role}
 
 **Date:** {YYYY-MM-DD}
-**Arquetipo:** {detected archetype}
+**Archetype** | {detected archetype}
 **Score:** {final score}/5
 **URL:** {original posting URL}
 **PDF:** {pdf path or pending}
@@ -39,7 +39,7 @@ To reduce downstream breakage risk, keep these machine-stable keys in the report
 Notes:
 
 - `**URL:**` is required.
-- `**Arquetipo:**` stays fixed intentionally for compatibility with current parser assumptions.
+- `**Archetype** |` stays fixed intentionally for parser-safe dashboard extraction.
 - `**Score:**` should be the final score after any red-flag cap, not the raw weighted score.
 
 ## Required Body Structure

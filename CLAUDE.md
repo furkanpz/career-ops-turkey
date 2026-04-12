@@ -59,6 +59,8 @@ AI-powered job search automation built on Claude Code: pipeline tracking, offer 
 | `interview-prep/story-bank.md` | Accumulated STAR+R stories across evaluations |
 | `interview-prep/{company}-{role}.md` | Company-specific interview intel reports |
 | `analyze-patterns.mjs` | Pattern analysis script (JSON output) |
+| `followup-cadence.mjs` | Follow-up cadence calculator (JSON output) |
+| `data/follow-ups.md` | Follow-up history tracker |
 | `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`) |
 
 ### OpenCode Commands
@@ -81,6 +83,7 @@ When using [OpenCode](https://opencode.ai), the following slash commands are ava
 | `/career-ops-scan` | `/career-ops scan` | Scan portals for new offers |
 | `/career-ops-batch` | `/career-ops batch` | Batch processing with parallel workers |
 | `/career-ops-patterns` | `/career-ops patterns` | Analyze rejection patterns and improve targeting |
+| `/career-ops-followup` | `/career-ops followup` | Follow-up cadence tracker |
 
 **Note:** OpenCode commands invoke the same `.claude/skills/career-ops/SKILL.md` skill used by Claude Code. The `modes/*` files are shared between both platforms.
 
@@ -91,7 +94,7 @@ When using [OpenCode](https://opencode.ai), the following slash commands are ava
 1. Does `cv.md` exist?
 2. Does `config/profile.yml` exist (not just profile.example.yml)?
 3. Does `modes/_profile.md` exist (not just _profile.template.md)?
-4. Does `portals.yml` exist (not just templates/portals.example.yml)?
+4. Does `portals.yml` exist (not just `templates/portals.tr.example.yml` or `templates/portals.example.yml`)?
 
 If `modes/_profile.md` is missing, copy from `modes/_profile.template.md` silently. This is the user's customization file — it will never be overwritten by updates.
 
@@ -109,11 +112,11 @@ If `cv.md` is missing, ask:
 Create `cv.md` from whatever they provide. Make it clean markdown with standard sections (Summary, Experience, Projects, Education, Skills).
 
 #### Step 2: Profile (required)
-If `config/profile.yml` is missing, copy from `config/profile.example.yml` and then ask:
+If `config/profile.yml` is missing, copy from `config/profile.tr.example.yml` when the user is Turkey-based or wants Turkish workflows; otherwise fall back to `config/profile.example.yml`. The TR starter is locale-aware only; it must still be customized to the user's own targets. Then ask:
 > "I need a few details to personalize the system:
 > - Your full name and email
 > - Your location and timezone
-> - What roles are you targeting? (e.g., 'Senior Backend Engineer', 'AI Product Manager')
+> - What roles are you targeting? (e.g., 'Software Engineer', 'Product Manager', 'Data Analyst')
 > - Your salary target range
 >
 > I'll set everything up for you."
@@ -124,7 +127,7 @@ Fill in `config/profile.yml` with their answers. For archetypes and targeting na
 If `portals.yml` is missing:
 > "I'll set up the job scanner with 45+ pre-configured companies. Want me to customize the search keywords for your target roles?"
 
-Copy `templates/portals.example.yml` → `portals.yml`. If they gave target roles in Step 2, update `title_filter.positive` to match.
+Copy `templates/portals.tr.example.yml` → `portals.yml` when Turkish mode is active; otherwise fall back to `templates/portals.example.yml`. The TR starter gives Turkey-market board coverage, not a fixed role pack. If they gave target roles in Step 2, update `title_filter.positive` to match.
 
 #### Step 4: Tracker
 If `data/applications.md` doesn't exist, create it:
@@ -163,6 +166,8 @@ Once all files exist, confirm:
 >
 > Tip: Having a personal portfolio dramatically improves your job search. If you don't have one yet, the author's portfolio is also open source: github.com/santifer/cv-santiago — feel free to fork it and make it yours."
 
+If Turkish mode is active, also mention that `teklif` maps to `oferta` and `basvur` maps to `apply` for command compatibility.
+
 Then suggest automation:
 > "Want me to scan for new offers automatically? I can set up a recurring scan every few days so you don't miss anything. Just say 'scan every 3 days' and I'll configure it."
 
@@ -186,6 +191,7 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 
 - **German (DACH market):** `modes/de/` — native German translations with DACH-specific vocabulary (13. Monatsgehalt, Probezeit, Kündigungsfrist, AGG, Tarifvertrag, etc.). Includes `_shared.md`, `angebot.md` (evaluation), `bewerben.md` (apply), `pipeline.md`.
 - **French (Francophone market):** `modes/fr/` — native French translations with France/Belgium/Switzerland/Luxembourg-specific vocabulary (CDI/CDD, convention collective SYNTEC, RTT, mutuelle, prévoyance, 13e mois, intéressement/participation, titres-restaurant, CSE, portage salarial, etc.). Includes `_shared.md`, `offre.md` (evaluation), `postuler.md` (apply), `pipeline.md`.
+- **Turkish (Turkey market):** `modes/tr/` — Turkish-market override layer for Turkey-based candidates, including mixed-language Turkey/EMEA hiring context. Load the canonical root mode from `modes/` first, then overlay the Turkish file when it exists. The Turkey layer changes locale behavior, board coverage, and scoring heuristics; user role targeting still belongs in `config/profile.yml`, `modes/_profile.md`, and `portals.yml`. Includes `_shared.md`, `teklif.md` (evaluation), `basvur.md` (apply), `pipeline.md`, and Turkish overrides for the other workflow entrypoints.
 
 **When to use German modes:** If the user is targeting German-language job postings, lives in DACH, or asks for German output. Either:
 1. User says "use German modes" → read from `modes/de/` instead of `modes/`
@@ -197,7 +203,14 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 2. User sets `language.modes_dir: modes/fr` in `config/profile.yml` → always use French modes
 3. You detect a French JD → suggest switching to French modes
 
+**When to use Turkish modes:** If the user is Turkey-based, is targeting roles in Turkey or realistic Turkey/EMEA opportunities, or asks for Turkish output. Either:
+1. User says "use Turkish modes" → read from `modes/tr/` instead of `modes/`
+2. User sets `language.modes_dir: modes/tr` in `config/profile.yml` → prefer Turkish modes for career workflows
+3. You detect a Turkey-market hiring context → suggest switching to Turkish modes
+
 **When NOT to:** If the user applies to English-language roles, even at French or German companies, use the default English modes.
+
+**Turkish command compatibility:** Keep canonical subcommands stable. In Turkish workflows only, `teklif` is an alias for `oferta` and `basvur` is an alias for `apply`. Other commands keep their canonical names and simply load Turkish overrides when `language.modes_dir` points at `modes/tr`.
 
 ### Skill Modes
 
@@ -218,6 +231,7 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 | Processes pending URLs | `pipeline` |
 | Batch processes offers | `batch` |
 | Asks about rejection patterns or wants to improve targeting | `patterns` |
+| Asks about follow-ups or application cadence | `followup` |
 
 ### CV Source of Truth
 
@@ -273,7 +287,7 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 2. `date` -- YYYY-MM-DD
 3. `company` -- short company name
 4. `role` -- job title
-5. `status` -- canonical status (e.g., `Evaluated`)
+5. `status` -- canonical status (e.g., `EVALUATED`)
 6. `score` -- format `X.X/5` (e.g., `4.2/5`)
 7. `pdf` -- `✅` or `❌`
 8. `report` -- markdown link `[num](reports/...)`
@@ -286,27 +300,41 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 1. **NEVER edit applications.md to ADD new entries** -- Write TSV in `batch/tracker-additions/` and `merge-tracker.mjs` handles the merge.
 2. **YES you can edit applications.md to UPDATE status/notes of existing entries.**
 3. All reports MUST include `**URL:**` in the header (between Score and PDF).
-4. All statuses MUST be canonical (see `templates/states.yml`).
+4. All statuses MUST be canonical (see `tracker-status-registry.json`; `templates/states.yml` is only a readable mirror).
 5. Health check: `node verify-pipeline.mjs`
 6. Normalize statuses: `node normalize-statuses.mjs`
 7. Dedup: `node dedup-tracker.mjs`
 
 ### Canonical States (applications.md)
 
-**Source of truth:** `templates/states.yml`
+**Source of truth:** `tracker-status-registry.json`
 
 | State | When to use |
 |-------|-------------|
-| `Evaluated` | Report completed, pending decision |
-| `Applied` | Application sent |
-| `Responded` | Company responded |
-| `Interview` | In interview process |
-| `Offer` | Offer received |
-| `Rejected` | Rejected by company |
-| `Discarded` | Discarded by candidate or offer closed |
+| `EVALUATED` | Report completed, pending decision |
+| `APPLIED` | Application sent |
+| `RESPONSE_RECEIVED` | Company-side response received, not yet interview |
+| `INTERVIEW` | In interview process |
+| `OFFER` | Offer received |
+| `REJECTED` | Rejected by company |
+| `DISCARDED` | Discarded by candidate or offer closed |
 | `SKIP` | Doesn't fit, don't apply |
 
 **RULES:**
 - No markdown bold (`**`) in status field
 - No dates in status field (use the date column)
 - No extra text (use the notes column)
+
+### Canonical Report Keys
+
+Parser-safe report headers stay English across all locales:
+
+- `Archetype`
+- `TL;DR`
+- `Remote`
+- `Comp`
+- `Date`
+- `Score`
+- `URL`
+- `PDF`
+- `Batch ID`

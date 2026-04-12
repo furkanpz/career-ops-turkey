@@ -25,6 +25,7 @@ const TEMPLATE_MAP = {
   legacy: 'templates/cv-template.html',
   en: 'templates/cv-template.en.html',
   tr: 'templates/cv-template.tr.html',
+  es: 'templates/cv-template.html',
 };
 
 const SECTION_LABELS = {
@@ -46,19 +47,34 @@ const SECTION_LABELS = {
     SECTION_CERTIFICATIONS: 'Sertifikalar',
     SECTION_SKILLS: 'Yetenekler',
   },
+  es: {
+    SECTION_SUMMARY: 'Resumen Profesional',
+    SECTION_COMPETENCIES: 'Competencias Clave',
+    SECTION_EXPERIENCE: 'Experiencia Profesional',
+    SECTION_PROJECTS: 'Proyectos',
+    SECTION_EDUCATION: 'Educación',
+    SECTION_CERTIFICATIONS: 'Certificaciones',
+    SECTION_SKILLS: 'Habilidades',
+  },
 };
 
 export function normalizeCvLanguage(value = 'en') {
   const raw = String(value || '').trim().toLowerCase();
 
+  if (!raw) return 'en';
   if (['tr', 'tr-tr', 'turkish', 'turkce', 'türkçe'].includes(raw)) return 'tr';
   if (['en', 'en-us', 'en-gb', 'english'].includes(raw)) return 'en';
-  return 'en';
+  if (['es', 'es-es', 'spanish', 'espanol', 'español'].includes(raw)) return 'es';
+  return null;
 }
 
 export function resolveCvTemplate({ language = 'en', template = null } = {}) {
   const normalizedLanguage = normalizeCvLanguage(language);
   const legacyPath = resolve(__dirname, TEMPLATE_MAP.legacy);
+
+  if (!normalizedLanguage) {
+    throw new Error(`Unsupported CV language: ${language}`);
+  }
 
   if (template) {
     if (template in TEMPLATE_MAP) {
@@ -84,11 +100,11 @@ export function resolveCvTemplate({ language = 'en', template = null } = {}) {
     }
   }
 
-  const preferredPath = resolve(__dirname, TEMPLATE_MAP[normalizedLanguage]);
+  const preferredPath = resolve(__dirname, TEMPLATE_MAP[normalizedLanguage] || TEMPLATE_MAP.legacy);
   if (existsSync(preferredPath)) {
     return {
       language: normalizedLanguage,
-      templateKey: normalizedLanguage,
+      templateKey: normalizedLanguage === 'es' ? 'legacy' : normalizedLanguage,
       templatePath: preferredPath,
       usedFallback: false,
     };
@@ -104,6 +120,9 @@ export function resolveCvTemplate({ language = 'en', template = null } = {}) {
 
 export function resolveCvSectionLabels(language = 'en', overrides = {}) {
   const normalizedLanguage = normalizeCvLanguage(language);
+  if (!normalizedLanguage) {
+    throw new Error(`Unsupported CV language: ${language}`);
+  }
   const base = SECTION_LABELS[normalizedLanguage] || SECTION_LABELS.en;
 
   return {
@@ -136,6 +155,9 @@ export function resolveCvOutputPaths({
     .replace(/^-|-$/g, '');
 
   const normalizedLanguage = normalizeCvLanguage(language);
+  if (!normalizedLanguage) {
+    throw new Error(`Unsupported CV language: ${language}`);
+  }
   const stem = legacyName
     ? `cv-candidate-${safeCompanySlug}-${date}`
     : `cv-candidate-${safeCompanySlug}-${normalizedLanguage}-${date}`;
@@ -170,25 +192,30 @@ function parseCliArgs(argv) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const options = parseCliArgs(process.argv.slice(2));
-  const template = resolveCvTemplate({
-    language: options.language,
-    template: options.template,
-  });
-
-  const result = {
-    template,
-    sections: resolveCvSectionLabels(template.language),
-  };
-
-  if (options.companySlug && options.date) {
-    result.output = resolveCvOutputPaths({
-      companySlug: options.companySlug,
-      date: options.date,
-      language: template.language,
-      legacyName: options.legacyName,
+  try {
+    const options = parseCliArgs(process.argv.slice(2));
+    const template = resolveCvTemplate({
+      language: options.language,
+      template: options.template,
     });
-  }
 
-  console.log(JSON.stringify(result, null, 2));
+    const result = {
+      template,
+      sections: resolveCvSectionLabels(template.language),
+    };
+
+    if (options.companySlug && options.date) {
+      result.output = resolveCvOutputPaths({
+        companySlug: options.companySlug,
+        date: options.date,
+        language: template.language,
+        legacyName: options.legacyName,
+      });
+    }
+
+    console.log(JSON.stringify(result, null, 2));
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
 }

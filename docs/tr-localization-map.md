@@ -1,5 +1,10 @@
 # Turkey Localization Change Map
 
+> Historical analysis note. This document records the pre-hardening repository map used during the
+> Turkey localization effort. It is preserved for implementation traceability, not as the active
+> product contract. Current behavior and guarantees live in `README.md`, `CLAUDE.md`,
+> `DATA_CONTRACT.md`, `docs/tr-portal-config.md`, and the runtime/test suite.
+
 ## Scope
 
 This document maps the repository areas that matter for a Turkey-specific version of `career-ops`.
@@ -8,21 +13,22 @@ This document maps the repository areas that matter for a Turkey-specific versio
 - The analysis is conservative: a file is listed only if it clearly participates in Turkish-market behavior, localized output, parser stability, or release safety.
 - Categories intentionally overlap. For example, one file can be both `system-layer` and `tracking/status`.
 
-## Executive Summary
+## Historical Executive Summary
 
-The Turkey version is not a simple prompt translation.
+At the time of the original audit, the Turkey version was not a simple prompt translation.
 
-Three production risks are already visible in the current repo:
+The following production risks were visible before the current hardening pass:
 
-1. Status handling is internally inconsistent. `templates/states.yml` uses English labels, while `normalize-statuses.mjs`, `verify-pipeline.mjs`, several modes, and dashboard parsing still assume Spanish statuses such as `Evaluada` and `Aplicado`.
-2. Dashboard report parsing is label-coupled. `dashboard/internal/data/career.go` looks for report headers such as `**Arquetipo:**` and `**TL;DR:**`; Turkish report headings would stop enriching the dashboard unless parsing becomes locale-safe.
-3. The updater is fork-hostile. `update-system.mjs` still points to `santifer/career-ops` upstream. A Turkey fork that keeps this behavior risks pulling upstream system files that do not know about Turkish modes or Turkish market defaults.
+1. Status handling was internally inconsistent across scripts and dashboard parsing.
+2. Dashboard report parsing was too coupled to legacy label variants.
+3. The updater targeted upstream behavior that was unsafe for a Turkey fork.
 
-The safest implementation path is:
+Those risks are now addressed in the current implementation via:
 
-- keep one stable internal canonical layer for statuses and machine-readable report keys, preferably English
-- add Turkey-facing prompts/output as a dedicated locale layer, preferably `modes/tr/`
-- localize display labels, search heuristics, and form handling on top of that stable internal layer
+- `tracker-status-registry.json` as the machine-readable status source of truth
+- locale routing through `modes/tr/` on top of the canonical root mode surface
+- a Turkey-safe update channel in `update-system.mjs`
+- parser-safe canonical English report keys for dashboard/report interoperability
 
 ## Repository Classification
 
@@ -124,9 +130,9 @@ These are system-owned files and directories that define behavior, parsing, docs
 - `check-liveness.mjs`
 - `examples/ats-normalization-test.md`
 
-## Files Likely Needing Changes for a Turkey Version
+## Files Originally Identified As Change Targets
 
-### MVP-required
+### Originally marked MVP-required
 
 | File | Why it matters | MVP or later | Main risk |
 |---|---|---|---|
@@ -145,14 +151,14 @@ These are system-owned files and directories that define behavior, parsing, docs
 | `templates/states.yml` | Canonical state design has to be settled before Turkish aliases or Turkish UI labels are added. This is the status contract between scripts and dashboard. | MVP | Adding Turkish labels on top of the current EN/ES split will make state handling brittle and error-prone. |
 | `normalize-statuses.mjs` | Status cleanup currently knows Spanish and some English aliases, not Turkish ones. | MVP | Turkish tracker rows will remain non-canonical and break verification/dashboard views. |
 | `merge-tracker.mjs` | Merge logic validates and coerces statuses during TSV ingestion. | MVP | Batch or auto-pipeline tracker writes can silently collapse to the wrong status. |
-| `verify-pipeline.mjs` | Verification still checks Spanish-centric canonical statuses. | MVP | The validation tool will flag correct Turkish-localized data as broken, or miss real issues. |
+| `verify-pipeline.mjs` | Verification was still checked against legacy canonical assumptions. | MVP | The validation tool could flag correct Turkish-localized data as broken, or miss real issues. |
 | `check-liveness.mjs` | Expired/apply signal detection already knows EN/DE/FR patterns, but not Turkish ones. | MVP | Turkish ATS pages can be misclassified as expired or uncertain, reducing scan quality. |
 | `dashboard/internal/data/career.go` | Dashboard parsing normalizes statuses and extracts report metadata using Spanish/English markers. | MVP | Turkish reports and statuses will stop enriching previews and can break filtering/grouping quality. |
 | `dashboard/internal/ui/screens/pipeline.go` | Dashboard tabs, status options, preview labels, and user-facing text are currently English plus a few Spanish report labels. | MVP | The TUI becomes a mixed-language surface even if the rest of the system is localized. |
-| `update-system.mjs` | The updater still targets upstream `santifer/career-ops` and does not know about a Turkish mode namespace. | MVP | A production Turkey fork can re-import upstream behavior that ignores or overwrites the localized system surface. |
+| `update-system.mjs` | The updater originally targeted non-TR upstream behavior and lacked a Turkish mode namespace. | MVP | A production Turkey fork could re-import upstream behavior that ignores or overwrites the localized system surface. |
 | `test-all.mjs` | The test suite hardcodes expected system files, status assumptions, and structure. | MVP | The repo can pass tests while Turkey support is partially broken, or fail for the wrong reasons after localization. |
 
-### Later or conditional
+### Originally marked later or conditional
 
 | File | Why it matters | MVP or later | Main risk |
 |---|---|---|---|
@@ -181,9 +187,9 @@ These files are useful as implementation references, but they do not themselves 
 
 They already demonstrate the repo’s preferred pattern for market-specific mode forks: keep a separate locale directory instead of rewriting all defaults in place.
 
-## Recommended Implementation Boundary
+## Historical Decision Boundary
 
-Before any code changes, lock these decisions:
+Before the implementation work started, these were the decisions that needed to be locked:
 
 1. Canonical internal statuses
    Recommendation: keep canonical machine statuses and report keys in English, localize aliases and UI labels separately.

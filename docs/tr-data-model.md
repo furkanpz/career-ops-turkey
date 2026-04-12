@@ -22,7 +22,7 @@ Non-goals:
 2. Normalized core, flat projection for consumers. Storage can be relational; downstream tools can still consume a flattened record.
 3. Preserve raw evidence. Keep original JD text and raw location/compensation text.
 4. Normalize only what is operationally useful for filtering, scoring, and tracking.
-5. Turkey-specific defaults. `country_code = TR` is implicit for this schema unless explicitly overridden.
+5. Turkey-specific defaults should not overwrite listing facts. Candidate targeting may be Turkey-based even when the listing is EMEA-wide or outside Turkey.
 
 ## Compatibility With Existing Career-Ops Concepts
 
@@ -30,14 +30,14 @@ Current repo concepts:
 
 - `data/pipeline.md` is the inbox for discovered URLs.
 - `data/applications.md` is the canonical application tracker.
-- `templates/states.yml` defines tracker-safe canonical statuses:
-  - `Evaluated`
-  - `Applied`
-  - `Responded`
-  - `Interview`
-  - `Offer`
-  - `Rejected`
-  - `Discarded`
+- `tracker-status-registry.json` defines tracker-safe canonical statuses (`templates/states.yml` is only a human-readable mirror):
+  - `EVALUATED`
+  - `APPLIED`
+  - `RESPONSE_RECEIVED`
+  - `INTERVIEW`
+  - `OFFER`
+  - `REJECTED`
+  - `DISCARDED`
   - `SKIP`
 
 Recommended compatibility rule:
@@ -113,16 +113,16 @@ Normalized Turkey location reference.
 | Column | Type | Required | Notes |
 |---|---|---:|---|
 | `id` | uuid | yes | Primary key |
-| `country_code` | char(2) | yes | Default `TR` |
-| `city` | text | no | Canonical Turkish city name, e.g. `Istanbul`, `Ankara`, `Izmir`; nullable for country-wide remote or unknown cases |
+| `country_code` | char(2) | no | Actual listing country when known; do not derive from candidate default |
+| `city` | text | no | Canonical city name; nullable for country-wide remote, multi-country, or unknown cases |
 | `district` | text | no | e.g. `Kadikoy`, `Cankaya`, `Gebze` |
+| `region_scope` | text | no | Optional hiring geography such as `TR`, `EMEA`, `GLOBAL`, `MULTI_COUNTRY` |
 | `location_text` | text | yes | Original or cleaned display string from listing |
 | `created_at` | timestamptz | yes | Audit |
 | `updated_at` | timestamptz | yes | Audit |
 
 Constraints:
 
-- `check(country_code = 'TR')` for Turkey-specific mode
 - `index(city)`
 - `index(district)`
 
@@ -130,7 +130,8 @@ Notes:
 
 - `city` is normalized for filtering.
 - `location_text` is preserved as shown in the listing.
-- If the listing says `Remote - Turkey` and no concrete city is present, keep `city = null` and let `work_model` carry the remote meaning.
+- If the listing says `Remote - Turkey` and no concrete city is present, keep `city = null`, `country_code = 'TR'`, and let `work_model` carry the remote meaning.
+- If the listing is `EMEA remote` or similar, keep `country_code = null` unless a concrete country is explicit and use `region_scope` to preserve the hiring geography.
 
 ## 4. `tr_job_listings`
 
@@ -302,7 +303,7 @@ Tracker-safe statuses already in the repo are preserved. Pre-tracker stages are 
 - `evaluation_in_progress`
 - `evaluated`
 - `applied`
-- `responded`
+- `response_received`
 - `interview`
 - `offer`
 - `rejected`
@@ -314,7 +315,7 @@ Tracker-safe statuses already in the repo are preserved. Pre-tracker stages are 
 
 Compatibility note:
 
-- Only `evaluated`, `applied`, `responded`, `interview`, `offer`, `rejected`, `discarded`, and `skip` should round-trip into `applications.md` without changing existing repo behavior.
+- Only `evaluated`, `applied`, `response_received`, `interview`, `offer`, `rejected`, `discarded`, and `skip` should round-trip into `applications.md`.
 
 ## Field-Level Definitions
 
@@ -376,8 +377,8 @@ These are explicitly additive and can be added later without breaking this model
 
 ```json
 {
-  "title": "Senior Backend Engineer",
-  "company": "Trendyol",
+  "title": "Software Engineer",
+  "company": "ExampleTech",
   "source": "LinkedIn",
   "source_type": "job_board",
   "city": "Istanbul",

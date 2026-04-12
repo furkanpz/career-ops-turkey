@@ -1,0 +1,95 @@
+[
+  {
+    "name": "company-careers-beats-linkedin",
+    "offers": [
+      {
+        "title": "Data Engineer",
+        "company": "Papara",
+        "location": "Istanbul",
+        "url": "https://www.linkedin.com/jobs/view/123456789",
+        "source": "LinkedIn",
+        "sourceType": "job_board",
+        "sourcePriority": 80,
+        "queryName": "LinkedIn Jobs — Turkey AI & Data",
+        "requiresLivenessCheck": true
+      },
+      {
+        "title": "Data Engineer",
+        "company": "Papara",
+        "location": "Istanbul",
+        "url": "https://careers.papara.com/jobs/data-engineer",
+        "source": "Company Careers",
+        "sourceType": "company_careers",
+        "sourcePriority": 100,
+        "queryName": "Papara",
+        "requiresLivenessCheck": false
+      }
+    ],
+    "expected": {
+      "url": "https://careers.papara.com/jobs/data-engineer",
+      "source": "Company Careers"
+    }
+  },
+  {
+    "name": "linkedin-beats-kariyernet",
+    "offers": [
+      {
+        "title": "Senior Backend Engineer",
+        "company": "Hepsiburada",
+        "location": "Istanbul",
+        "url": "https://www.kariyer.net/is-ilani/hepsiburada-senior-backend-engineer-1",
+        "source": "Kariyer.net",
+        "sourceType": "job_board",
+        "sourcePriority": 70,
+        "queryName": "Kariyer.net — Data & Platform",
+        "requiresLivenessCheck": true
+      },
+      {
+        "title": "Senior Backend Engineer",
+        "company": "Hepsiburada",
+        "location": "Istanbul",
+        "url": "https://www.linkedin.com/jobs/view/99887766",
+        "source": "LinkedIn",
+        "sourceType": "job_board",
+        "sourcePriority": 80,
+        "queryName": "LinkedIn Jobs — Turkey AI & Data",
+        "requiresLivenessCheck": true
+      }
+    ],
+    "expected": {
+      "url": "https://www.linkedin.com/jobs/view/99887766",
+      "source": "LinkedIn"
+    }
+  },
+  {
+    "name": "indeed-beats-elemannet",
+    "offers": [
+      {
+        "title": "Analytics Engineer",
+        "company": "Trendyol Group",
+        "location": "Istanbul",
+        "url": "https://www.eleman.net/is-ilani/analytics-engineer-trendyol",
+        "source": "Eleman.net",
+        "sourceType": "job_board",
+        "sourcePriority": 50,
+        "queryName": "Eleman.net — AI & Data",
+        "requiresLivenessCheck": true
+      },
+      {
+        "title": "Analytics Engineer",
+        "company": "Trendyol Group",
+        "location": "Istanbul",
+        "url": "https://tr.indeed.com/viewjob?jk=analytics-123",
+        "source": "Indeed",
+        "sourceType": "aggregator",
+        "sourcePriority": 60,
+        "queryName": "Indeed Türkiye — AI & Data",
+        "requiresLivenessCheck": true
+      }
+    ],
+    "expected": {
+      "url": "https://tr.indeed.com/viewjob?jk=analytics-123",
+      "source": "Indeed"
+    }
+  }
+]

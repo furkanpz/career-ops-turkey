@@ -1,0 +1,110 @@
+[
+  {
+    "name": "linkedin_jobs_search",
+    "query": {
+      "name": "LinkedIn Jobs — Turkey AI & Data",
+      "parser_key": "linkedin_jobs_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Senior Data Engineer - Papara - Istanbul | LinkedIn",
+      "url": "https://www.linkedin.com/jobs/view/123456789"
+    },
+    "expected": {
+      "title": "Senior Data Engineer",
+      "company": "Papara",
+      "source": "LinkedIn",
+      "sourceType": "job_board"
+    }
+  },
+  {
+    "name": "kariyernet_search",
+    "query": {
+      "name": "Kariyer.net — AI & Data",
+      "parser_key": "kariyernet_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Veri Bilimci - Sisecam Is Ilani - Kariyer.net",
+      "url": "https://www.kariyer.net/is-ilani/sisecam-veri-bilimci-123"
+    },
+    "expected": {
+      "title": "Veri Bilimci",
+      "company": "Sisecam",
+      "source": "Kariyer.net",
+      "sourceType": "job_board"
+    }
+  },
+  {
+    "name": "indeed_tr_search",
+    "query": {
+      "name": "Indeed Türkiye — AI & Data",
+      "parser_key": "indeed_tr_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Data Engineer - Trendyol Group - Istanbul - Indeed.com",
+      "url": "https://tr.indeed.com/viewjob?jk=indeed-123"
+    },
+    "expected": {
+      "title": "Data Engineer",
+      "company": "Trendyol Group",
+      "source": "Indeed",
+      "sourceType": "aggregator"
+    }
+  },
+  {
+    "name": "elemannet_search",
+    "query": {
+      "name": "Eleman.net — AI & Data",
+      "parser_key": "elemannet_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Backend Engineer - Hepsiburada - Istanbul - Eleman.net",
+      "url": "https://www.eleman.net/is-ilani/backend-engineer-hepsiburada"
+    },
+    "expected": {
+      "title": "Backend Engineer",
+      "company": "Hepsiburada",
+      "source": "Eleman.net",
+      "sourceType": "job_board"
+    }
+  },
+  {
+    "name": "iskur_search",
+    "query": {
+      "name": "ISKUR — Technology & Analytics",
+      "parser_key": "iskur_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Yazilim Gelistirme Uzmani - Turk Telekom - Ankara - ISKUR",
+      "url": "https://esube.iskur.gov.tr/Ilan/IlanDetay/987654"
+    },
+    "expected": {
+      "title": "Yazilim Gelistirme Uzmani",
+      "company": "Turk Telekom",
+      "source": "ISKUR",
+      "sourceType": "job_board"
+    }
+  },
+  {
+    "name": "greenhouse_board",
+    "query": {
+      "name": "Greenhouse — Turkey / EMEA AI & Data",
+      "parser_key": "greenhouse_board",
+      "adapter_family": "global_ats"
+    },
+    "result": {
+      "title": "Machine Learning Engineer at Insider | Greenhouse",
+      "url": "https://job-boards.greenhouse.io/insider/jobs/123"
+    },
+    "expected": {
+      "title": "Machine Learning Engineer",
+      "company": "Insider",
+      "source": "Greenhouse",
+      "sourceType": "company_careers"
+    }
+  }
+]

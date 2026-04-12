@@ -23,17 +23,22 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
 
-const CANONICAL_REPO = 'https://github.com/santifer/career-ops.git';
-const RAW_VERSION_URL = 'https://raw.githubusercontent.com/santifer/career-ops/main/VERSION';
-const RELEASES_API = 'https://api.github.com/repos/santifer/career-ops/releases/latest';
+const UPDATE_REF = process.env.CAREER_OPS_UPDATE_REF || 'turkiye-core-localization';
+const CANONICAL_REPO = 'https://github.com/furkanpz/career-ops-turkey.git';
+const RAW_VERSION_URL = `https://raw.githubusercontent.com/furkanpz/career-ops-turkey/${UPDATE_REF}/VERSION`;
+const RELEASES_API = 'https://api.github.com/repos/furkanpz/career-ops-turkey/releases/latest';
 
 // System layer paths — ONLY these files get updated
 const SYSTEM_PATHS = [
+  '.opencode/commands/',
+  'scan.mjs',
+  'followup-cadence.mjs',
   'modes/_shared.md',
   'modes/_profile.template.md',
   'modes/oferta.md',
   'modes/pdf.md',
   'modes/scan.md',
+  'modes/followup.md',
   'modes/batch.md',
   'modes/apply.md',
   'modes/auto-pipeline.md',
@@ -45,19 +50,30 @@ const SYSTEM_PATHS = [
   'modes/tracker.md',
   'modes/training.md',
   'modes/de/',
+  'modes/tr/',
   'CLAUDE.md',
   'AGENTS.md',
+  'doctor.mjs',
   'generate-pdf.mjs',
+  'check-liveness.mjs',
   'merge-tracker.mjs',
   'verify-pipeline.mjs',
   'dedup-tracker.mjs',
   'normalize-statuses.mjs',
   'cv-sync-check.mjs',
+  'cv-template-utils.mjs',
+  'tracker-status-utils.mjs',
+  'company-name-utils.mjs',
+  'test-all.mjs',
+  'analyze-patterns.mjs',
   'update-system.mjs',
+  'tracker-status-registry.json',
   'batch/batch-prompt.md',
   'batch/batch-runner.sh',
   'dashboard/',
   'templates/',
+  'config/profile.example.yml',
+  'config/profile.tr.example.yml',
   'fonts/',
   '.claude/skills/',
   'docs/',
@@ -80,6 +96,7 @@ const USER_PATHS = [
   'article-digest.md',
   'interview-prep/story-bank.md',
   'data/',
+  'data/follow-ups.md',
   'reports/',
   'output/',
   'jds/',
@@ -152,18 +169,19 @@ async function check() {
     return;
   }
 
-  // Fetch changelog from GitHub releases
   let changelog = '';
-  try {
-    const res = await fetch(RELEASES_API, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (res.ok) {
-      const release = await res.json();
-      changelog = release.body || '';
+  if (UPDATE_REF === 'main') {
+    try {
+      const res = await fetch(RELEASES_API, {
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (res.ok) {
+        const release = await res.json();
+        changelog = release.body || '';
+      }
+    } catch {
+      // No changelog available, that's OK
     }
-  } catch {
-    // No changelog available, that's OK
   }
 
   console.log(JSON.stringify({
@@ -201,8 +219,8 @@ async function apply() {
     }
 
     // 2. Fetch from canonical repo
-    console.log('Fetching latest from upstream...');
-    git('fetch', CANONICAL_REPO, 'main');
+    console.log(`Fetching latest from fork upstream (${UPDATE_REF})...`);
+    git('fetch', CANONICAL_REPO, UPDATE_REF);
 
     // 3. Checkout system files only
     console.log('Updating system files...');

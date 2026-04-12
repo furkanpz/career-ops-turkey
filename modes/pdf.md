@@ -18,11 +18,12 @@
 12. Selecciona template de forma segura:
     - `tr` → `templates/cv-template.tr.html`
     - `en` → `templates/cv-template.en.html`
-    - fallback → `templates/cv-template.html`
-    - Puedes resolver path, labels y nombres con `node cv-template-utils.mjs --lang={tr|en} --company-slug={company} --date={YYYY-MM-DD}`
+    - `es` → `templates/cv-template.html` (legacy Spanish-compatible path)
+    - valores no soportados deben fallar de forma explicita
+    - Puedes resolver path, labels y nombres con `node cv-template-utils.mjs --lang={tr|en|es} --company-slug={company-slug} --date={YYYY-MM-DD}`
 13. Genera HTML completo desde template + contenido personalizado
-14. Escribe HTML a `/tmp/cv-candidate-{company}-{lang}.html`
-15. Ejecuta: `node generate-pdf.mjs /tmp/cv-candidate-{company}-{lang}.html output/cv-candidate-{company}-{lang}-{YYYY-MM-DD}.pdf --format={letter|a4}`
+14. Escribe HTML a `/tmp/cv-candidate-{company-slug}-{lang}.html`
+15. Ejecuta: `node generate-pdf.mjs /tmp/cv-candidate-{company-slug}-{lang}.html output/cv-candidate-{company-slug}-{lang}-{YYYY-MM-DD}.pdf --format={letter|a4}`
 16. Reporta: ruta del PDF, nº páginas, % cobertura de keywords
 
 ## Reglas ATS (parseo limpio)
@@ -67,7 +68,7 @@ Ejemplos de reformulación legítima:
 
 ## Template HTML
 
-Usar el template resuelto (`cv-template.tr.html`, `cv-template.en.html`, o fallback `cv-template.html`). Reemplazar los placeholders `{{...}}` con contenido personalizado:
+Usar el template resuelto (`cv-template.tr.html`, `cv-template.en.html`, o `cv-template.html` para `es`). Reemplazar los placeholders `{{...}}` con contenido personalizado:
 
 | Placeholder | Contenido |
 |-------------|-----------|

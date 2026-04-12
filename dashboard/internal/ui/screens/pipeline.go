@@ -83,11 +83,6 @@ var pipelineTabs = []pipelineTab{
 
 var sortCycle = []string{sortScore, sortDate, sortCompany, sortStatus}
 
-var statusOptions = []string{"Evaluated", "Applied", "Responded", "Interview", "Offer", "Rejected", "Discarded", "SKIP"}
-
-// statusGroupOrder defines display order for grouped view.
-var statusGroupOrder = []string{"interview", "offer", "responded", "applied", "evaluated", "skip", "rejected", "discarded"}
-
 // PipelineModel implements the career pipeline dashboard screen.
 type PipelineModel struct {
 	apps          []model.CareerApplication
@@ -290,9 +285,10 @@ func (m PipelineModel) handleStatusPicker(msg tea.KeyMsg) (PipelineModel, tea.Cm
 		return m, nil
 
 	case "down":
+		options := data.TrackerStatusOptions()
 		m.statusCursor++
-		if m.statusCursor >= len(statusOptions) {
-			m.statusCursor = len(statusOptions) - 1
+		if m.statusCursor >= len(options) {
+			m.statusCursor = len(options) - 1
 		}
 
 	case "up":
@@ -304,7 +300,8 @@ func (m PipelineModel) handleStatusPicker(msg tea.KeyMsg) (PipelineModel, tea.Cm
 	case "enter":
 		m.statusPicker = false
 		if app, ok := m.CurrentApp(); ok {
-			newStatus := statusOptions[m.statusCursor]
+			options := data.TrackerStatusOptions()
+			newStatus := options[m.statusCursor]
 			return m, func() tea.Msg {
 				return PipelineUpdateStatusMsg{
 					CareerOpsPath: m.careerOpsPath,
@@ -566,7 +563,7 @@ func (m PipelineModel) renderMetrics() string {
 	var parts []string
 	statusColors := m.statusColorMap()
 
-	for _, status := range statusGroupOrder {
+	for _, status := range data.TrackerStatusGroupOrder() {
 		count, ok := m.metrics.ByStatus[status]
 		if !ok || count == 0 {
 			continue
@@ -633,7 +630,7 @@ func (m PipelineModel) renderAppLine(app model.CareerApplication, selected bool)
 	padStyle := lipgloss.NewStyle().Padding(0, 2)
 
 	// Column widths
-	scoreW := 5   // "4.5  "
+	scoreW := 5 // "4.5  "
 	companyW := 20
 	statusW := 12
 	compW := 14
@@ -715,7 +712,7 @@ func (m PipelineModel) renderPreview() string {
 	if summary, ok := m.reportCache[app.ReportPath]; ok {
 		if summary.archetype != "" {
 			lines = append(lines, padStyle.Render(
-				labelStyle.Render("Arquetipo: ")+valueStyle.Render(summary.archetype)))
+				labelStyle.Render("Archetype: ")+valueStyle.Render(summary.archetype)))
 		}
 		if summary.tldr != "" {
 			lines = append(lines, padStyle.Render(
@@ -792,7 +789,7 @@ func (m PipelineModel) overlayStatusPicker(body string) string {
 	var picker []string
 	picker = append(picker, padStyle.Render(borderStyle.Render("Change status:")))
 
-	for i, opt := range statusOptions {
+	for i, opt := range data.TrackerStatusOptions() {
 		style := lipgloss.NewStyle().Foreground(m.theme.Text).Width(pickerWidth)
 		if i == m.statusCursor {
 			style = style.Background(m.theme.Overlay).Bold(true)
@@ -826,14 +823,14 @@ func (m PipelineModel) scoreStyle(score float64) lipgloss.Style {
 
 func (m PipelineModel) statusColorMap() map[string]lipgloss.Color {
 	return map[string]lipgloss.Color{
-		"interview": m.theme.Green,
-		"offer":     m.theme.Green,
-		"applied":   m.theme.Sky,
-		"responded": m.theme.Blue,
-		"evaluated": m.theme.Text,
-		"skip":      m.theme.Red,
-		"rejected":  m.theme.Subtext,
-		"discarded": m.theme.Subtext,
+		"interview":         m.theme.Green,
+		"offer":             m.theme.Green,
+		"applied":           m.theme.Sky,
+		"response_received": m.theme.Blue,
+		"evaluated":         m.theme.Text,
+		"skip":              m.theme.Red,
+		"rejected":          m.theme.Subtext,
+		"discarded":         m.theme.Subtext,
 	}
 }
 
@@ -848,24 +845,5 @@ func (m PipelineModel) countByNormStatus(status string) int {
 }
 
 func statusLabel(norm string) string {
-	switch norm {
-	case "interview":
-		return "Interview"
-	case "offer":
-		return "Offer"
-	case "responded":
-		return "Responded"
-	case "applied":
-		return "Applied"
-	case "evaluated":
-		return "Evaluated"
-	case "skip":
-		return "Skip"
-	case "rejected":
-		return "Rejected"
-	case "discarded":
-		return "Discarded"
-	default:
-		return norm
-	}
+	return data.TrackerStatusLabel(norm)
 }

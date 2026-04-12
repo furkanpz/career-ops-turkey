@@ -1,56 +1,56 @@
-# Career-Ops — Canonical States
-# Source of truth for career-ops (writer) and dashboard (reader).
-# Both systems MUST use these exact states.
+# Career-Ops — Canonical States Mirror
+# Machine-readable source of truth: tracker-status-registry.json
+# This file is only a human-readable mirror for documentation and manual inspection.
 #
 # Rule: The status field in applications.md must contain EXACTLY
-# one of these values (case-insensitive). No markdown bold (**),
-# no dates, no extra text. Dates go in the date column.
+# one canonical label from tracker-status-registry.json (case-insensitive when ingesting).
+# No markdown bold (**), no dates, no extra text. Dates go in the date column.
 
 states:
   - id: evaluated
-    label: Evaluated
-    aliases: [evaluada]
+    label: EVALUATED
+    aliases: [evaluated, evaluada, degerlendirildi, değerlendirildi, condicional, hold, evaluar, verificar]
     description: Offer evaluated with report, pending decision
     dashboard_group: evaluated
 
   - id: applied
-    label: Applied
-    aliases: [aplicado, enviada, aplicada, sent]
+    label: APPLIED
+    aliases: [applied, aplicado, enviada, aplicada, sent, application sent, basvuruldu, başvuruldu, basvuru yapildi, başvuru yapıldı]
     description: Application submitted
     dashboard_group: applied
 
-  - id: responded
-    label: Responded
-    aliases: [respondido]
-    description: Company has responded (not yet interview)
-    dashboard_group: responded
+  - id: response_received
+    label: RESPONSE_RECEIVED
+    aliases: [response_received, response received, responded, respondido, contacted, contacto, recruiter reached out, recruiter replied, company responded, geri donus alindi, geri dönüş alındı, donus geldi, dönüş geldi, iletisim kuruldu, iletişim kuruldu, recruiter dondu, recruiter döndü]
+    description: Company-side response received, not yet clearly in interview stage
+    dashboard_group: response_received
 
   - id: interview
-    label: Interview
-    aliases: [entrevista]
+    label: INTERVIEW
+    aliases: [interview, entrevista, mulakat, mülakat, telefon gorusmesi, telefon görüşmesi, ik mulakati, ik mülakatı, teknik mulakat, teknik mülakat, teknik interview, case interview, case study]
     description: Active interview process
     dashboard_group: interview
 
   - id: offer
-    label: Offer
-    aliases: [oferta]
+    label: OFFER
+    aliases: [offer, oferta, teklif, verbal offer, yazili teklif, yazılı teklif]
     description: Offer received
     dashboard_group: offer
 
   - id: rejected
-    label: Rejected
-    aliases: [rechazado, rechazada]
+    label: REJECTED
+    aliases: [rejected, rechazado, rechazada, red, olumsuz, ret]
     description: Rejected by company
     dashboard_group: rejected
 
   - id: discarded
-    label: Discarded
-    aliases: [descartado, descartada, cerrada, cancelada]
+    label: DISCARDED
+    aliases: [discarded, descartado, descartada, cerrada, cancelada, vazgecildi, vazgeçildi, aday geri cekildi, aday geri çekildi]
     description: Discarded by candidate or offer closed
     dashboard_group: discarded
 
   - id: skip
     label: SKIP
-    aliases: [no_aplicar, no aplicar, skip, monitor]
-    description: Doesn't fit, don't apply
+    aliases: [skip, no_aplicar, no aplicar, uygun degil, uygun değil, pas, takip etme, monitor, monitor only, geo blocker]
+    description: Does not fit, do not apply
     dashboard_group: skip

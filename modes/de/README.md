@@ -64,7 +64,7 @@ Bewusst nicht eingedeutscht, weil Standard-Tech-Vokabular:
 
 - `cv.md`, `pipeline`, `tracker`, `report`, `score`, `archetype`, `proof point`
 - Tool-Namen (`Playwright`, `WebSearch`, `WebFetch`, `Read`, `Write`, `Edit`, `Bash`)
-- Status-Werte im Tracker (`Evaluated`, `Applied`, `Interview`, `Offer`, `Rejected`)
+- Status-Werte im Tracker (`EVALUATED`, `APPLIED`, `INTERVIEW`, `OFFER`, `REJECTED`)
 - Code-Snippets, Pfade, Befehle
 
 Die Modi verwenden deutsches Tech-Deutsch, wie es in echten Engineering-Teams in Berlin, München oder Zürich gesprochen wird: deutscher Fließtext, englische Fachbegriffe da, wo sie üblich sind. Keine erzwungene Eindeutschung von "Pipeline" zu "Förderband", kein "Lebenslauf-Datei" für `cv.md`.

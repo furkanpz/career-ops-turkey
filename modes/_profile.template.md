@@ -13,35 +13,35 @@
 ## Your Target Roles
 
 <!-- Replace these with YOUR target roles. Examples:
-     - Senior Backend Engineer / Staff Platform Engineer
-     - AI Product Manager / Technical PM
-     - Data Engineer / ML Engineer
-     - DevOps / SRE / Platform
+     - Software Engineer / Backend Engineer
+     - Product Manager / Technical Program Manager
+     - Data Engineer / Analytics Engineer
+     - Mobile Engineer / QA Automation
      Whatever you're optimizing for. -->
 
 | Archetype | Thematic axes | What they buy |
 |-----------|---------------|---------------|
-| **AI Platform / LLMOps Engineer** | Evaluation, observability, reliability, pipelines | Someone who puts AI in production with metrics |
-| **Agentic Workflows / Automation** | HITL, tooling, orchestration, multi-agent | Someone who builds reliable agent systems |
-| **Technical AI Product Manager** | GenAI/Agents, PRDs, discovery, delivery | Someone who translates business to AI product |
-| **AI Solutions Architect** | Hyperautomation, enterprise, integrations | Someone who designs end-to-end AI architectures |
-| **AI Forward Deployed Engineer** | Client-facing, fast delivery, prototyping | Someone who delivers AI solutions to clients fast |
-| **AI Transformation Lead** | Change management, adoption, org enablement | Someone who leads AI transformation in an org |
+| **Software / Backend Engineer** | APIs, systems, reliability, delivery | Someone who ships and maintains core product systems |
+| **Data / Analytics Engineer** | Pipelines, reporting, experimentation, insights | Someone who turns raw data into useful decisions or products |
+| **Product / Program Manager** | Discovery, prioritization, roadmap, delivery | Someone who turns ambiguity into execution |
+| **Solutions / Customer Engineer** | Integrations, implementation, client-facing delivery | Someone who solves real customer problems with technical depth |
+| **Design / UX** | Research, workflows, interaction quality, craft | Someone who improves the user experience end to end |
+| **Business Systems / Operations** | Automation, internal tools, enablement, RevOps | Someone who removes operational friction with systems |
 
 ## Your Adaptive Framing
 
 <!-- Map YOUR projects to each archetype. Example:
-     | Platform / LLMOps | My monitoring dashboard project | article-digest.md |
-     | Agentic | My chatbot with HITL escalation | cv.md section 3 | -->
+     | Software / Backend | My API or infra project | article-digest.md |
+     | Product / Program | My launch or roadmap story | cv.md section 3 | -->
 
 | If the role is... | Emphasize about you... | Proof point sources |
 |-------------------|------------------------|---------------------|
-| Platform / LLMOps | Production systems builder, observability, evals | article-digest.md + cv.md |
-| Agentic / Automation | Multi-agent orchestration, HITL, reliability | article-digest.md + cv.md |
-| Technical AI PM | Product discovery, PRDs, metrics | cv.md + article-digest.md |
-| Solutions Architect | System design, integrations, enterprise-ready | article-digest.md + cv.md |
-| Forward Deployed Engineer | Fast delivery, client-facing, prototype to prod | cv.md + article-digest.md |
-| AI Transformation Lead | Change management, team enablement, adoption | cv.md + article-digest.md |
+| Software / Backend | Systems depth, delivery, reliability, debugging | article-digest.md + cv.md |
+| Data / Analytics | Reporting, experimentation, measurement, data tooling | article-digest.md + cv.md |
+| Product / Program | Discovery, prioritization, stakeholder alignment | cv.md + article-digest.md |
+| Solutions / Customer Engineering | Integrations, client context, implementation speed | article-digest.md + cv.md |
+| Design / UX | Research, flow design, product taste | cv.md + article-digest.md |
+| Business Systems / Operations | Automation, internal tooling, process improvement | article-digest.md + cv.md |
 
 ## Your Exit Narrative
 
@@ -56,14 +56,14 @@ Use the candidate's exit story from `config/profile.yml` to frame ALL content:
 
 <!-- What's your "signature move"? What do you do that others can't? -->
 
-Frame profile as **"Technical builder with real-world proof"** that adapts framing to the role.
+Frame profile as **"Practical builder with real-world proof"** that adapts framing to the role.
 
 ## Your Portfolio / Demo
 
 <!-- If you have a live demo, dashboard, or public project:
      url: https://yoursite.dev/demo
      password: demo-2026
-     when_to_share: "LLMOps, AI Platform roles" -->
+     when_to_share: "roles where a live demo actually strengthens the application" -->
 
 If you have a live demo/dashboard (check profile.yml), offer access in applications for relevant roles.
 

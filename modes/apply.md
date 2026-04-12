@@ -73,7 +73,7 @@ Para cada pregunta, generar la respuesta siguiendo:
 ```
 ## Respuestas para [Empresa] — [Rol]
 
-Basado en: Report #NNN | Score: X.X/5 | Arquetipo: [tipo]
+Basado en: Report #NNN | Score: X.X/5 | Archetype: [tipo]
 
 ---
 
@@ -95,7 +95,7 @@ Notas:
 ## Paso 6 — Post-apply (opcional)
 
 Si el candidato confirma que envió la aplicación:
-1. Actualizar estado en `applications.md` de "Evaluada" a "Aplicado"
+1. Actualizar estado en `applications.md` de `EVALUATED` a `APPLIED`
 2. Actualizar Section G del report con las respuestas finales
 3. Sugerir siguiente paso: `/career-ops contacto` para LinkedIn outreach
 

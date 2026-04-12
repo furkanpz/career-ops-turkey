@@ -14,7 +14,7 @@
 import { execSync } from 'child_process';
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -38,6 +38,33 @@ function run(cmd, opts = {}) {
 
 function fileExists(path) { return existsSync(join(ROOT, path)); }
 function readFile(path) { return readFileSync(join(ROOT, path), 'utf-8'); }
+function readJson(path) { return JSON.parse(readFile(path)); }
+
+function parseStatesMirror(content) {
+  const entries = [];
+  const blocks = content.split(/\n(?=  - id: )/).filter((block) => block.includes('- id: '));
+
+  for (const block of blocks) {
+    const id = block.match(/- id:\s+([^\n]+)/)?.[1]?.trim();
+    const label = block.match(/\n\s+label:\s+([^\n]+)/)?.[1]?.trim();
+    const aliasesRaw = block.match(/\n\s+aliases:\s+\[([^\]]*)\]/)?.[1] ?? '';
+    const description = block.match(/\n\s+description:\s+([^\n]+)/)?.[1]?.trim();
+    const dashboardGroup = block.match(/\n\s+dashboard_group:\s+([^\n]+)/)?.[1]?.trim();
+
+    if (!id || !label || !description || !dashboardGroup) {
+      return null;
+    }
+
+    const aliases = aliasesRaw
+      .split(',')
+      .map((alias) => alias.trim())
+      .filter(Boolean);
+
+    entries.push({ id, label, aliases, description, dashboard_group: dashboardGroup });
+  }
+
+  return entries;
+}
 
 console.log('\n🧪 career-ops test suite\n');
 
@@ -65,6 +92,7 @@ const scripts = [
   { name: 'normalize-statuses.mjs', expectExit: 0 },
   { name: 'dedup-tracker.mjs', expectExit: 0 },
   { name: 'merge-tracker.mjs', expectExit: 0 },
+  { name: 'followup-cadence.mjs', expectExit: 0 },
   { name: 'update-system.mjs check', expectExit: 0 },
 ];
 
@@ -80,30 +108,160 @@ for (const { name, allowFail } of scripts) {
 }
 
 // ── 3. DASHBOARD BUILD ──────────────────────────────────────────
+console.log('\n3. Scanner contract');
+
+let scanModule = null;
+let livenessModule = null;
+const packageJson = readJson('package.json');
+const readme = readFile('README.md');
+const claudeDoc = readFile('CLAUDE.md');
+
+if (fileExists('scan.mjs')) {
+  pass('scan.mjs exists');
+} else {
+  fail('scan.mjs is missing');
+}
+
+if (packageJson.scripts?.scan === 'node scan.mjs') {
+  pass('package.json exposes npm run scan');
+} else {
+  fail('package.json is missing the scan script');
+}
+
+if (packageJson.dependencies?.['js-yaml']) {
+  pass('package.json declares js-yaml dependency');
+} else {
+  fail('package.json is missing js-yaml dependency');
+}
+
+if (packageJson.scripts?.followup === 'node followup-cadence.mjs --summary') {
+  pass('package.json exposes npm run followup');
+} else {
+  fail('package.json is missing the followup script');
+}
+
+const updateSystemSource = readFile('update-system.mjs');
+if (
+  updateSystemSource.includes('CAREER_OPS_UPDATE_REF') &&
+  updateSystemSource.includes('turkiye-core-localization')
+) {
+  pass('update-system.mjs uses the Turkey update channel ref');
+} else {
+  fail('update-system.mjs is not pinned to the Turkey update channel contract');
+}
+
+try {
+  scanModule = await import(pathToFileURL(join(ROOT, 'scan.mjs')).href);
+  pass('scan.mjs imports cleanly');
+} catch (err) {
+  fail(`scan.mjs import failed: ${err.message}`);
+}
+
+try {
+  livenessModule = await import(pathToFileURL(join(ROOT, 'check-liveness.mjs')).href);
+  pass('check-liveness.mjs imports cleanly');
+} catch (err) {
+  fail(`check-liveness.mjs import failed: ${err.message}`);
+}
+
+if (scanModule) {
+  const normalizeCases = readJson('tests/fixtures/scan/normalize-search-results.json');
+  for (const testCase of normalizeCases) {
+    const normalized = scanModule.normalizeSearchResult(testCase.result, testCase.query);
+    if (
+      normalized &&
+      normalized.title === testCase.expected.title &&
+      normalized.company === testCase.expected.company &&
+      normalized.source === testCase.expected.source &&
+      normalized.sourceType === testCase.expected.sourceType
+    ) {
+      pass(`Scanner fixture OK: ${testCase.name}`);
+    } else {
+      fail(`Scanner fixture mismatch: ${testCase.name}`);
+    }
+  }
+
+  const dedupCases = readJson('tests/fixtures/scan/dedup-precedence.json');
+  for (const testCase of dedupCases) {
+    const deduped = scanModule.dedupeOffers(testCase.offers).offers;
+    if (
+      deduped.length === 1 &&
+      deduped[0].url === testCase.expected.url &&
+      deduped[0].source === testCase.expected.source
+    ) {
+      pass(`Dedup precedence fixture OK: ${testCase.name}`);
+    } else {
+      fail(`Dedup precedence mismatch: ${testCase.name}`);
+    }
+  }
+
+  const missingPrimary = scanModule.findMissingTrPrimarySources({
+    search_queries: [{ parser_key: 'kariyernet_search' }],
+  });
+  if (
+    missingPrimary.includes('linkedin_jobs_search') &&
+    missingPrimary.includes('indeed_tr_search') &&
+    missingPrimary.includes('elemannet_search')
+  ) {
+    pass('Missing Turkey parser key detection works');
+  } else {
+    fail('Missing Turkey parser key detection failed');
+  }
+
+  const companyTitleCases = readJson('tests/fixtures/scan/company-title-cleanup.json');
+  for (const testCase of companyTitleCases) {
+    const normalized = scanModule.normalizeCompanyListingTitle(testCase.input);
+    if (normalized === testCase.expected) {
+      pass(`Company title cleanup fixture OK: ${testCase.name}`);
+    } else {
+      fail(`Company title cleanup mismatch: ${testCase.name}`);
+    }
+  }
+}
+
+if (livenessModule) {
+  const signalCases = readJson('tests/fixtures/scan/liveness-signals.json');
+  for (const testCase of signalCases) {
+    const result = livenessModule.classifyLivenessSignals(testCase.input);
+    if (result.result === testCase.expected) {
+      pass(`Liveness fixture OK: ${testCase.name}`);
+    } else {
+      fail(`Liveness fixture mismatch: ${testCase.name}`);
+    }
+  }
+}
+
+// ── 4. DASHBOARD BUILD ──────────────────────────────────────────
 
 if (!QUICK) {
-  console.log('\n3. Dashboard build');
-  const goBuild = run('cd dashboard && go build -o /tmp/career-dashboard-test . 2>&1');
+  console.log('\n4. Dashboard build');
+  const goBuild = run('cd dashboard && env GOCACHE=/tmp/career-ops-go-build-cache go build -o /tmp/career-dashboard-test . 2>&1');
   if (goBuild !== null) {
     pass('Dashboard compiles');
   } else {
     fail('Dashboard build failed');
   }
 } else {
-  console.log('\n3. Dashboard build (skipped --quick)');
+  console.log('\n4. Dashboard build (skipped --quick)');
 }
 
-// ── 4. DATA CONTRACT ────────────────────────────────────────────
+// ── 5. DATA CONTRACT ────────────────────────────────────────────
 
-console.log('\n4. Data contract validation');
+console.log('\n5. Data contract validation');
 
 // Check system files exist
 const systemFiles = [
-  'CLAUDE.md', 'VERSION', 'DATA_CONTRACT.md',
+  'AGENTS.md', 'CLAUDE.md', 'VERSION', 'DATA_CONTRACT.md', 'docs/CODEX.md',
   'modes/_shared.md', 'modes/_profile.template.md',
-  'modes/oferta.md', 'modes/pdf.md', 'modes/scan.md',
-  'templates/states.yml', 'templates/cv-template.html',
-  '.claude/skills/career-ops/SKILL.md',
+  'modes/oferta.md', 'modes/pdf.md', 'modes/scan.md', 'scan.mjs',
+  'modes/followup.md', 'followup-cadence.mjs',
+  'modes/tr/_shared.md', 'modes/tr/teklif.md', 'modes/tr/basvur.md',
+  'modes/tr/followup.md',
+  'templates/states.yml', 'templates/cv-template.html', 'templates/portals.tr.example.yml',
+  'config/profile.tr.example.yml', 'tracker-status-registry.json',
+  'tracker-status-utils.mjs', 'cv-template-utils.mjs', 'company-name-utils.mjs',
+  '.claude/skills/career-ops/SKILL.md', '.opencode/commands/career-ops.md',
+  '.opencode/commands/career-ops-patterns.md', '.opencode/commands/career-ops-followup.md',
 ];
 
 for (const f of systemFiles) {
@@ -129,9 +287,174 @@ for (const f of userFiles) {
   }
 }
 
-// ── 5. PERSONAL DATA LEAK CHECK ─────────────────────────────────
+const registryRaw = readFile('tracker-status-registry.json');
+const registry = JSON.parse(registryRaw);
+const statesMirror = parseStatesMirror(readFile('templates/states.yml'));
 
-console.log('\n5. Personal data leak check');
+if (!statesMirror) {
+  fail('templates/states.yml could not be parsed as a registry mirror');
+} else if (statesMirror.length !== registry.tracker_statuses.length) {
+  fail('templates/states.yml does not match tracker-status-registry.json entry count');
+} else {
+  let mirrorMismatch = false;
+  const byId = new Map(statesMirror.map((entry) => [entry.id, entry]));
+
+  for (const status of registry.tracker_statuses) {
+    const mirrorEntry = byId.get(status.group);
+    if (!mirrorEntry) {
+      fail(`templates/states.yml missing mirror entry for ${status.group}`);
+      mirrorMismatch = true;
+      continue;
+    }
+
+    const expectedAliases = status.aliases.join('||');
+    const actualAliases = mirrorEntry.aliases.join('||');
+
+    if (
+      mirrorEntry.label !== status.label ||
+      mirrorEntry.dashboard_group !== status.group ||
+      mirrorEntry.description !== status.description ||
+      actualAliases !== expectedAliases
+    ) {
+      fail(`templates/states.yml drift detected for ${status.group}`);
+      mirrorMismatch = true;
+    }
+  }
+
+if (!mirrorMismatch) {
+  pass('templates/states.yml mirrors tracker-status-registry.json');
+  }
+}
+
+const trProfileTemplate = readFile('config/profile.tr.example.yml');
+if (
+  !trProfileTemplate.includes('Ayse Yilmaz') &&
+  !trProfileTemplate.includes('Senior Backend Engineer') &&
+  !trProfileTemplate.includes('Staff Platform Engineer') &&
+  trProfileTemplate.includes('Deniz Kaya') &&
+  trProfileTemplate.includes('Software / Backend Engineer') &&
+  trProfileTemplate.includes('Product / Program Manager')
+) {
+  pass('TR profile starter is persona-neutral');
+} else {
+  fail('TR profile starter still looks tied to a specific default candidate');
+}
+
+const trPortalTemplate = readFile('templates/portals.tr.example.yml');
+if (
+  trPortalTemplate.includes('Software Engineer') &&
+  trPortalTemplate.includes('Product Manager') &&
+  trPortalTemplate.includes('QA') &&
+  trPortalTemplate.includes('UX Designer') &&
+  trPortalTemplate.includes('Data Engineer')
+) {
+  pass('TR portal starter covers multiple tech role families');
+} else {
+  fail('TR portal starter still looks too role-biased');
+}
+
+const trCompletionDocs =
+  readFile('DATA_CONTRACT.md') +
+  readFile('docs/tr-profile-schema.md') +
+  readFile('docs/tr-data-model.md') +
+  readFile('docs/tr-validation-plan.md') +
+  readFile('docs/tr-task-breakdown.md') +
+  readFile('docs/tr-review-findings.md') +
+  readFile('docs/tr-portal-config.md');
+if (
+  trCompletionDocs.includes('Turkey locale profile starter') &&
+  trCompletionDocs.includes('Historical planning note') &&
+  trCompletionDocs.includes('Historical review snapshot') &&
+  !trCompletionDocs.includes('Turkey-first') &&
+  !trCompletionDocs.includes('Ayse Yilmaz') &&
+  !trCompletionDocs.includes('Senior Backend Engineer')
+) {
+  pass('TR docs are aligned with the generic locale contract');
+} else {
+  fail('TR docs still contain stale persona markers or outdated locale wording');
+}
+
+const trHistoricalDocs =
+  readFile('docs/tr-localization-map.md') +
+  readFile('docs/tr-dashboard-plan.md') +
+  readFile('docs/tr-cv-output-strategy.md') +
+  readFile('docs/tr-parser-implementation-plan.md') +
+  readFile('docs/tr-pdf-validation-checklist.md') +
+  readFile('docs/tr-status-map.md');
+if (
+  trHistoricalDocs.includes('Historical analysis note') &&
+  trHistoricalDocs.includes('Historical planning note') &&
+  trHistoricalDocs.includes('Supporting design note') &&
+  trHistoricalDocs.includes('Supporting validation note') &&
+  trHistoricalDocs.includes('Historical design note')
+) {
+  pass('Historical TR planning docs are clearly scoped as non-contract references');
+} else {
+  fail('Historical TR planning docs still read like active product contracts');
+}
+
+const trActiveContractDocs =
+  readFile('docs/tr-data-model.md') +
+  readFile('docs/tr-evaluation-output-spec.md') +
+  readFile('docs/tr-normalization-spec.md') +
+  readFile('docs/tr-portal-config.md') +
+  readFile('docs/tr-profile-schema.md') +
+  readFile('docs/tr-scoring-framework.md') +
+  readFile('docs/tr-source-adapter-contract.md') +
+  readFile('docs/tr-validation-plan.md');
+if (
+  !trActiveContractDocs.includes('update-system.mjs still points to `santifer/career-ops`') &&
+  !trActiveContractDocs.includes('Verification still checks Spanish-centric canonical statuses') &&
+  !trActiveContractDocs.includes('Dashboard report parsing is label-coupled') &&
+  !trActiveContractDocs.includes('MVP-required')
+) {
+  pass('Active TR contract docs no longer contain stale pre-fix claims');
+} else {
+  fail('Active TR contract docs still contain stale pre-fix or planning-only claims');
+}
+
+const localizedSharedModes =
+  readFile('modes/de/_shared.md') +
+  readFile('modes/fr/_shared.md') +
+  readFile('modes/pt/_shared.md');
+if (
+  localizedSharedModes.includes('modes/_profile.md') &&
+  localizedSharedModes.includes('Software / Backend / Platform') &&
+  !localizedSharedModes.includes('ANPASSEN DIESER DATEI') &&
+  !localizedSharedModes.includes('PERSONNALISATION DE CE FICHIER') &&
+  !localizedSharedModes.includes('AI Platform / LLMOps Engineer')
+) {
+  pass('Localized shared modes follow the generic system-layer contract');
+} else {
+  fail('Localized shared modes still imply persona-biased or user-editable system defaults');
+}
+
+if (
+  readme.includes('locale adaptation') &&
+  readme.includes('user-layer `portals.yml`') &&
+  readme.includes('Parity scope in this fork is the canonical product surface plus the Turkey locale layer') &&
+  claudeDoc.includes('locale-aware only; it must still be customized') &&
+  claudeDoc.includes('role targeting still belongs')
+) {
+  pass('README and CLAUDE preserve the user-layer customization rule');
+} else {
+  fail('README and CLAUDE drift from the generic customization model');
+}
+
+if (
+  readme.includes('/career-ops followup') &&
+  claudeDoc.includes('/career-ops-followup') &&
+  fileExists('modes/followup.md') &&
+  fileExists('modes/tr/followup.md')
+) {
+  pass('Followup surface is wired across docs and mode files');
+} else {
+  fail('Followup parity is incomplete');
+}
+
+// ── 6. PERSONAL DATA LEAK CHECK ─────────────────────────────────
+
+console.log('\n6. Personal data leak check');
 
 const leakPatterns = [
   'Santiago', 'santifer.io', 'Santifer iRepair', 'Zinkee', 'ALMAS',
@@ -185,6 +508,13 @@ const expectedModes = [
   '_shared.md', '_profile.template.md', 'oferta.md', 'pdf.md', 'scan.md',
   'batch.md', 'apply.md', 'auto-pipeline.md', 'contacto.md', 'deep.md',
   'ofertas.md', 'pipeline.md', 'project.md', 'tracker.md', 'training.md',
+  'patterns.md', 'interview-prep.md', 'followup.md',
+];
+const expectedTurkishModes = [
+  '_shared.md', 'README.md', 'teklif.md', 'basvur.md', 'pipeline.md',
+  'auto-pipeline.md', 'pdf.md', 'scan.md', 'batch.md', 'tracker.md',
+  'contacto.md', 'ofertas.md', 'deep.md', 'project.md', 'training.md',
+  'patterns.md', 'interview-prep.md', 'followup.md',
 ];
 
 for (const mode of expectedModes) {
@@ -192,6 +522,14 @@ for (const mode of expectedModes) {
     pass(`Mode exists: ${mode}`);
   } else {
     fail(`Missing mode: ${mode}`);
+  }
+}
+
+for (const mode of expectedTurkishModes) {
+  if (fileExists(`modes/tr/${mode}`)) {
+    pass(`Turkish mode exists: ${mode}`);
+  } else {
+    fail(`Missing Turkish mode: ${mode}`);
   }
 }
 
@@ -232,6 +570,15 @@ if (fileExists('VERSION')) {
     pass(`VERSION is valid semver: ${version}`);
   } else {
     fail(`VERSION is not valid semver: "${version}"`);
+  }
+
+  if (fileExists('package.json')) {
+    const packageVersion = JSON.parse(readFile('package.json')).version;
+    if (packageVersion === version) {
+      pass(`package.json version matches VERSION: ${version}`);
+    } else {
+      fail(`package.json version (${packageVersion}) does not match VERSION (${version})`);
+    }
   }
 } else {
   fail('VERSION file missing');

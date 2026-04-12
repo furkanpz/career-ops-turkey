@@ -76,15 +76,23 @@ The orchestrator manages parallelism, state, retries, and resume.
 cv.md                    →  Evaluation context
 article-digest.md        →  Proof points for matching
 config/profile.yml       →  Candidate identity
+tracker-status-registry.json → Canonical tracker status contract
 portals.yml              →  Scanner configuration
-templates/states.yml     →  Canonical status values
+templates/states.yml     →  Human-readable status mirror
 templates/cv-template.html → PDF generation template
 ```
+
+## Locale Routing
+
+- Root `modes/` files are the canonical feature surface.
+- Localized directories such as `modes/tr/` are override layers loaded on top of the root modes.
+- Turkish mode keeps canonical commands stable and adds the documented aliases `teklif` and `basvur`.
+- Parser-safe report keys stay English even when the visible body is Turkish.
 
 ## File Naming Conventions
 
 - Reports: `{###}-{company-slug}-{YYYY-MM-DD}.md` (3-digit zero-padded)
-- PDFs: `cv-candidate-{company-slug}-{YYYY-MM-DD}.pdf`
+- PDFs: `cv-candidate-{company-slug}-{lang}-{YYYY-MM-DD}.pdf`
 - Tracker TSVs: `batch/tracker-additions/{id}.tsv`
 
 ## Pipeline Integrity
@@ -103,8 +111,9 @@ Scripts maintain data consistency:
 
 The `dashboard/` directory contains a standalone Go TUI application that visualizes the pipeline:
 
-- Filter tabs: All, Evaluada, Aplicado, Entrevista, Top >=4, No Aplicar
+- Filter tabs: All, EVALUATED, APPLIED, INTERVIEW, Top >=4, SKIP
 - Sort modes: Score, Date, Company, Status
 - Grouped/flat view
 - Lazy-loaded report previews
 - Inline status picker
+- Report enrichment depends on canonical report keys: `Archetype`, `TL;DR`, `Remote`, `Comp`, `URL`, `Batch ID`

@@ -8,6 +8,8 @@ If arguments contain a job description or URL (keywords like "responsibilities",
 
 Otherwise, the discovery menu will be shown.
 
+The skill must respect `config/profile.yml -> language.modes_dir` when it exists and keep Turkish aliases `teklif` and `basvur` compatible with the canonical command set.
+
 Load the career-ops skill:
 ```
 skill({ name: "career-ops" })

@@ -1,0 +1,174 @@
+{
+  "report_machine_keys": [
+    "Archetype",
+    "TL;DR",
+    "Remote",
+    "Comp",
+    "Date",
+    "Score",
+    "URL",
+    "PDF",
+    "Batch ID"
+  ],
+  "listing_layer_statuses": [
+    "discovered",
+    "queued",
+    "evaluation_in_progress",
+    "closed",
+    "duplicate",
+    "error"
+  ],
+  "tracker_statuses": [
+    {
+      "label": "EVALUATED",
+      "group": "evaluated",
+      "rank": 2,
+      "display_order": 4,
+      "description": "Offer evaluated with report, pending decision",
+      "aliases": [
+        "evaluated",
+        "evaluada",
+        "degerlendirildi",
+        "değerlendirildi",
+        "condicional",
+        "hold",
+        "evaluar",
+        "verificar"
+      ]
+    },
+    {
+      "label": "APPLIED",
+      "group": "applied",
+      "rank": 3,
+      "display_order": 3,
+      "description": "Application submitted",
+      "aliases": [
+        "applied",
+        "aplicado",
+        "enviada",
+        "aplicada",
+        "sent",
+        "application sent",
+        "basvuruldu",
+        "başvuruldu",
+        "basvuru yapildi",
+        "başvuru yapıldı"
+      ]
+    },
+    {
+      "label": "RESPONSE_RECEIVED",
+      "group": "response_received",
+      "rank": 4,
+      "display_order": 2,
+      "description": "Company-side response received, not yet clearly in interview stage",
+      "aliases": [
+        "response_received",
+        "response received",
+        "responded",
+        "respondido",
+        "contacted",
+        "contacto",
+        "recruiter reached out",
+        "recruiter replied",
+        "company responded",
+        "geri donus alindi",
+        "geri dönüş alındı",
+        "donus geldi",
+        "dönüş geldi",
+        "iletisim kuruldu",
+        "iletişim kuruldu",
+        "recruiter dondu",
+        "recruiter döndü"
+      ]
+    },
+    {
+      "label": "INTERVIEW",
+      "group": "interview",
+      "rank": 5,
+      "display_order": 0,
+      "description": "Active interview process",
+      "aliases": [
+        "interview",
+        "entrevista",
+        "mulakat",
+        "mülakat",
+        "telefon gorusmesi",
+        "telefon görüşmesi",
+        "ik mulakati",
+        "ik mülakatı",
+        "teknik mulakat",
+        "teknik mülakat",
+        "teknik interview",
+        "case interview",
+        "case study"
+      ]
+    },
+    {
+      "label": "OFFER",
+      "group": "offer",
+      "rank": 6,
+      "display_order": 1,
+      "description": "Offer received",
+      "aliases": [
+        "offer",
+        "oferta",
+        "teklif",
+        "verbal offer",
+        "yazili teklif",
+        "yazılı teklif"
+      ]
+    },
+    {
+      "label": "REJECTED",
+      "group": "rejected",
+      "rank": 1,
+      "display_order": 6,
+      "description": "Rejected by company",
+      "aliases": [
+        "rejected",
+        "rechazado",
+        "rechazada",
+        "red",
+        "olumsuz",
+        "ret"
+      ]
+    },
+    {
+      "label": "DISCARDED",
+      "group": "discarded",
+      "rank": 0,
+      "display_order": 7,
+      "description": "Discarded by candidate or offer closed",
+      "aliases": [
+        "discarded",
+        "descartado",
+        "descartada",
+        "cerrada",
+        "cancelada",
+        "vazgecildi",
+        "vazgeçildi",
+        "aday geri cekildi",
+        "aday geri çekildi"
+      ]
+    },
+    {
+      "label": "SKIP",
+      "group": "skip",
+      "rank": 0,
+      "display_order": 5,
+      "description": "Does not fit, do not apply",
+      "aliases": [
+        "skip",
+        "no_aplicar",
+        "no aplicar",
+        "uygun degil",
+        "uygun değil",
+        "pas",
+        "takip etme",
+        "monitor",
+        "monitor only",
+        "geo blocker"
+      ]
+    }
+  ]
+}
