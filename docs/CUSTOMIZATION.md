@@ -48,6 +48,8 @@ Customize:
 3. **search_queries**: WebSearch queries for job boards (LinkedIn Jobs, Kariyer.net, Indeed Turkiye, Eleman.net, Ashby, Greenhouse, Lever, Workable, Teamtailor)
 4. **tracked_companies**: Companies to check directly
 
+The TR starter already includes a shared tracked-company layer for Turkey tech employers plus a Bilişim Vadisi discovery query. Treat that as the baseline locale surface, then add or remove employers based on your own targets.
+
 The TR template is deliberately a tech-first generic starter. Do not treat it as the "correct" default role list; trim it to your own target families.
 
 ## CV Templates (`templates/cv-template*.html`)

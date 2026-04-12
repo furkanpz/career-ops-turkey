@@ -47,6 +47,7 @@ Edit `portals.yml`:
 - Customize `search_queries` for your preferred job boards
 
 The Turkey starter now includes primary board coverage for LinkedIn Jobs, Kariyer.net, Indeed Turkiye, and Eleman.net, plus secondary coverage for Secretcv, Yenibiris, and ISKUR.
+It also ships with a tracked-company starter for public Turkey tech employers and a Bilişim Vadisi careers discovery query, so the company-scan layer is available out of the box rather than being user-only.
 Treat this file as a customizable starter for Turkey-market discovery, not as a fixed role pack. Keep the locale defaults, then narrow or widen the role families yourself.
 If your existing `portals.yml` was created before these parser keys existed, keep your custom file and merge the missing query entries manually from `templates/portals.tr.example.yml`.
 

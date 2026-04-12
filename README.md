@@ -199,6 +199,8 @@ Secondary Turkey board coverage in the template:
 - Yenibiris
 - ISKUR
 
+The TR starter also includes a tracked-company layer for Turkey-founded employers and public careers surfaces such as Trendyol, Getir, Dream Games, Insider, Papara, iyzico, Logo Yazılım, Etiya, Yemeksepeti, and Çiçeksepeti, plus a Bilişim Vadisi careers discovery query and a letgo fallback query.
+
 LinkedIn is discovery-only in this fork. Login-gated or authenticated scraping is intentionally out of scope.
 
 Upstream behavior still applies: scanner coverage and locale heuristics live in system files, but the actual target roles, keywords, and tracked companies belong in your user-layer `portals.yml`.

@@ -181,6 +181,18 @@ search_queries:
     query: 'site:esube.iskur.gov.tr OR site:iskur.gov.tr "Yazılım" OR "Veri" OR "QA" OR "Tasarım" OR "Ürün"'
     enabled: true
 
+  - name: Bilişim Vadisi Kariyer — Tech Roles
+    adapter_family: turkish_job_board
+    parser_key: custom_careers_hub
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "bilisim-vadisi-kariyer"
+      normalize_company_from_result: true
+      strip_title_suffixes: ["Kocaeli", "İstanbul", "Izmir", "Türkiye", "Turkey"]
+    query: 'site:kariyer.bilisimvadisi.com.tr/job-ad "Software Engineer" OR "Software Developer" OR "Backend Engineer" OR "Platform Engineer" OR "Data Engineer" OR "Yazılım Mühendisi" OR "Yazılım Uzmanı" OR "Ürün Yöneticisi"'
+    enabled: true
+
   - name: Youthall — New Grad Product & Tech
     adapter_family: turkish_job_board
     parser_key: youthall_search
@@ -249,6 +261,19 @@ search_queries:
     query: 'site:career.teamtailor.com OR site:jobs.teamtailor.com "Software" OR "Data" OR "Product" OR "Design" "EMEA" OR "Turkey"'
     enabled: true
 
+  - name: letgo — Platform & Backend
+    adapter_family: global_ats
+    parser_key: lever_board
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      canonical_source: "lever"
+      normalize_company_from_result: true
+      prefer_url_job_id: true
+      strip_title_suffixes: ["İstanbul", "Istanbul", "Turkey", "Hybrid"]
+    query: 'site:jobs.lever.co/letgo "Platform Engineer" OR "System Engineer" OR "Backend Engineer" OR "Backend Developer" OR "Software Engineer" OR "Data Engineer"'
+    enabled: true
+
 tracked_companies:
   # [CUSTOMIZE] This list is a locale starter, not an exhaustive directory.
   # Add or remove companies based on your own targets.
@@ -274,9 +299,9 @@ tracked_companies:
     anti_duplication:
       company_aliases: ["D-Market", "HepsiBurada"]
       prefer_company_page_over_job_board: true
-    careers_url: https://careers.hepsiburada.com/
-    notes: "Turkey-founded commerce platform with broad tech hiring."
-    enabled: true
+    careers_url: https://kurumsal.hepsiburada.com/en/career
+    notes: "Public careers content exists, but live openings are more reliable via job-board discovery than direct company-page scraping."
+    enabled: false
 
   - name: Getir
     adapter_family: company_careers
@@ -289,14 +314,28 @@ tracked_companies:
     notes: "Product, operations, and engineering roles across Turkey and EMEA."
     enabled: true
 
+  - name: Etiya
+    adapter_family: company_careers
+    parser_key: custom_careers_hub
+    locale: en-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["Etiya Information Technologies"]
+      prefer_company_page_over_job_board: true
+    careers_url: https://www.etiya.com/en/career/all-open-positions
+    notes: "Turkey-founded enterprise software company with public open positions."
+    enabled: true
+
   - name: Dream Games
     adapter_family: company_careers
     parser_key: custom_careers_hub
     locale: en-TR
     language: [en]
     anti_duplication:
+      company_aliases: ["Dream Games Dijital Teknolojiler A.Ş."]
       prefer_company_page_over_job_board: true
-    careers_url: https://www.dreamgames.com/careers
+      strip_title_suffixes: ["Istanbul", "İstanbul"]
+    careers_url: https://www.dreamgames.com/open-positions
     notes: "Turkey-founded gaming company with product and data hiring."
     enabled: true
 
@@ -306,22 +345,35 @@ tracked_companies:
     locale: en-TR
     language: [en]
     anti_duplication:
+      company_aliases: ["useInsider", "Insider."]
       prefer_company_page_over_job_board: true
-    careers_url: https://useinsider.com/careers/
+    careers_url: https://useinsider.com/careers/open-positions/
     notes: "Turkey-founded SaaS company with engineering, product, and go-to-market roles."
+    enabled: true
+
+  - name: Logo Yazılım
+    adapter_family: company_careers
+    parser_key: custom_careers_hub
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["Logo Software"]
+      prefer_company_page_over_job_board: true
+      strip_title_suffixes: ["İstanbul", "Istanbul", "Kocaeli", "Gebze"]
+    careers_url: https://live.peoplise.com/logo/career
+    notes: "Public software company with official career portal and engineering openings."
     enabled: true
 
   - name: iyzico
     adapter_family: company_careers
-    parser_key: greenhouse_board
+    parser_key: lever_board
     locale: tr-TR
     language: [tr, en]
     anti_duplication:
       company_aliases: ["Iyzico", "PayU Turkey"]
       prefer_company_page_over_job_board: true
-    careers_url: https://www.iyzico.com/en/career/
-    api: https://boards-api.greenhouse.io/v1/boards/iyzico/jobs
-    notes: "Payments and fintech roles in Turkey."
+    careers_url: https://jobs.lever.co/iyzico
+    notes: "Payments and fintech roles in Turkey via public Lever board."
     enabled: true
 
   - name: Papara
@@ -331,8 +383,33 @@ tracked_companies:
     language: [tr, en]
     anti_duplication:
       prefer_company_page_over_job_board: true
-    careers_url: https://www.papara.com/en/career
+    careers_url: https://careers.papara.com/en/all-jobs/
     notes: "Fintech roles spanning engineering, product, and design."
+    enabled: true
+
+  - name: Yemeksepeti
+    adapter_family: company_careers
+    parser_key: custom_careers_hub
+    locale: en-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["Delivery Hero", "Yemek Sepeti"]
+      prefer_company_page_over_job_board: true
+      strip_title_suffixes: ["Istanbul", "İstanbul", "Turkey", "Hybrid"]
+    careers_url: https://careers.deliveryhero.com/yemeksepeti
+    notes: "Turkey delivery platform within Delivery Hero with public careers surface."
+    enabled: true
+
+  - name: Çiçeksepeti
+    adapter_family: company_careers
+    parser_key: lever_board
+    locale: tr-TR
+    language: [tr, en]
+    anti_duplication:
+      company_aliases: ["Ciceksepeti"]
+      prefer_company_page_over_job_board: true
+    careers_url: https://jobs.lever.co/ciceksepeti
+    notes: "Turkey e-commerce marketplace with public Lever board."
     enabled: true
 
   - name: Peak
@@ -341,7 +418,9 @@ tracked_companies:
     locale: en-TR
     language: [en]
     anti_duplication:
+      company_aliases: ["Peak Games"]
       prefer_company_page_over_job_board: true
-    careers_url: https://peak.com/career/
+      strip_title_suffixes: ["Istanbul", "İstanbul", "On-site"]
+    careers_url: https://peak.com/jobs
     notes: "Gaming company with engineering, art, and product roles."
     enabled: true
