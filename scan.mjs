@@ -58,6 +58,9 @@ const VERIFICATION_TIMEOUTS = {
   companyCareers: { timeoutMs: 11_000, waitMs: 1_500 },
 };
 
+// Ensure required directories exist (fresh setup)
+mkdirSync(DATA_DIR, { recursive: true });
+
 const HISTORY_SEEN_STATUSES = new Set([
   'added',
   'review_public_unverified',

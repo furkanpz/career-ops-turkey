@@ -9,7 +9,7 @@
  * Run: node career-ops/dedup-tracker.mjs [--dry-run]
  */
 
-import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCompanyKey, normalizeRoleTitle } from './company-name-utils.mjs';
@@ -22,6 +22,8 @@ const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
   : join(CAREER_OPS, 'applications.md');
 const DRY_RUN = process.argv.includes('--dry-run');
 
+// Ensure required directories exist (fresh setup)
+mkdirSync(join(CAREER_OPS, 'data'), { recursive: true });
 function roleMatch(a, b) {
   const wordsA = normalizeRoleTitle(a).split(/\s+/).filter(w => w.length > 3);
   const wordsB = normalizeRoleTitle(b).split(/\s+/).filter(w => w.length > 3);

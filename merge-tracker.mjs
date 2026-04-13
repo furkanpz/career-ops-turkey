@@ -30,6 +30,9 @@ const MERGED_DIR = join(ADDITIONS_DIR, 'merged');
 const DRY_RUN = process.argv.includes('--dry-run');
 const VERIFY = process.argv.includes('--verify');
 
+// Ensure required directories exist (fresh setup)
+mkdirSync(join(CAREER_OPS, 'data'), { recursive: true });
+mkdirSync(ADDITIONS_DIR, { recursive: true });
 function validateStatus(status) {
   const normalized = normalizeTrackerStatus(status);
   if (!normalized.status) {

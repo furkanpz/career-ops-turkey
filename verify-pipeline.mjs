@@ -14,7 +14,7 @@
  * Run: node career-ops/verify-pipeline.mjs
  */
 
-import { readFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { TRACKER_CANONICAL_STATUSES, normalizeTrackerStatus } from './tracker-status-utils.mjs';
@@ -26,6 +26,13 @@ const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
   : join(CAREER_OPS, 'applications.md');
 const ADDITIONS_DIR = join(CAREER_OPS, 'batch/tracker-additions');
 const REPORTS_DIR = join(CAREER_OPS, 'reports');
+const STATES_FILE = existsSync(join(CAREER_OPS, 'templates/states.yml'))
+  ? join(CAREER_OPS, 'templates/states.yml')
+  : join(CAREER_OPS, 'states.yml');
+
+// Ensure required directories exist (fresh setup)
+mkdirSync(join(CAREER_OPS, 'data'), { recursive: true });
+mkdirSync(REPORTS_DIR, { recursive: true });
 
 let errors = 0;
 let warnings = 0;
