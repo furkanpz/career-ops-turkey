@@ -40,6 +40,7 @@ In the Turkey fork, start from `templates/portals.tr.example.yml` unless you exp
 Important distinction:
 - System layer = Turkey market behavior, locale-aware scoring, parser coverage, aliases
 - User layer = your target roles, keywords, company list, compensation targets, and narrative
+- Scanner execution stays script-first: customize discovery in `portals.yml`, not by editing agent prompts.
 
 Customize:
 

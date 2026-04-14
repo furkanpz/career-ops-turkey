@@ -69,7 +69,7 @@ Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored
 | **ATS PDF Generation** | Keyword-injected CVs with Space Grotesk + DM Sans design |
 | **Portal Scanner** | Single `scan.mjs` runtime for tracked companies, Turkish boards, and EMEA ATS discovery with Playwright liveness checks |
 | **Batch Processing** | Parallel evaluation with `claude -p` workers |
-| **Dashboard TUI** | Terminal UI to browse, filter, and sort your pipeline |
+| **Dashboard TUI** | Terminal UI with progress analytics, light/dark Catppuccin themes, vim motions, and richer markdown/table viewing |
 | **Human-in-the-Loop** | AI evaluates and recommends, you decide and act. The system never submits an application -- you always have the final call |
 | **Pipeline Integrity** | Automated merge, dedup, status normalization, health checks |
 
@@ -217,7 +217,7 @@ go build -o career-dashboard .
 ./career-dashboard --path ..
 ```
 
-Features: 6 filter tabs, 4 sort modes, grouped/flat view, lazy-loaded previews, inline status changes.
+Features: 6 filter tabs, 4 sort modes, grouped/flat view, lazy-loaded previews, inline status changes, progress analytics, vim motions (`hjkl`, `g`, `G`), and automatic Catppuccin light/dark theme selection.
 
 ## Project Structure
 

@@ -3,6 +3,13 @@
 `/career-ops scan` ve `npm run scan` AYNI runtime'i kullanir: `node scan.mjs`.
 Bu modu manuel WebSearch/Playwright adimlariyla yeniden uygulama. Tarama mantiginin tek source of truth'u `scan.mjs` dosyasidir.
 
+Runtime artik sadece query taramasi yapmaz:
+- tracked company careers sayfalari
+- ATS kaynaklari ve public board parser'lari
+- liveness dogrulamasi (`check-liveness.mjs`, `liveness-core.mjs`)
+
+Agent gorevi tarayiciyi yeniden yazmak degil, runtime cikisini dogru yorumlamaktir.
+
 ## Execution Rules
 
 1. Once `scan` mode is selected, run:
@@ -29,6 +36,7 @@ node scan.mjs --company "<company>"
 - Highlight warnings, especially:
   - missing primary Turkey parser keys in `portals.yml`
   - blocked sources such as LinkedIn auth walls
+  - liveness / expired-posting signals
   - source-level fetch failures
 - Tell the user to run `/career-ops pipeline` after new offers are added.
 

@@ -61,7 +61,10 @@ AI-powered job search automation built on Claude Code: pipeline tracking, offer 
 | `analyze-patterns.mjs` | Pattern analysis script (JSON output) |
 | `followup-cadence.mjs` | Follow-up cadence calculator (JSON output) |
 | `data/follow-ups.md` | Follow-up history tracker |
-| `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`) |
+| `scan.mjs` | Zero-token portal scanner runtime for tracked companies, ATS feeds, and public board discovery |
+| `check-liveness.mjs` | Job posting liveness checker used by scanner verification |
+| `liveness-core.mjs` | Shared liveness logic where expired signals win over generic Apply text |
+| `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`). Header must include parser-safe keys and posting legitimacy output when present |
 
 ### OpenCode Commands
 
@@ -263,6 +266,14 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 
 ---
 
+## CI/CD and Quality
+
+- GitHub Actions now validate the repo on pull requests.
+- Repo automation files (`.github/*`, release metadata, dependency bots) are system-layer and may be updated with upstream syncs.
+- `test-all.mjs` is the required pre-merge regression gate for this fork as well.
+
+---
+
 ## Stack and Conventions
 
 - Node.js (mjs modules), Playwright (PDF + scraping), YAML (config), HTML/CSS (template), Markdown (data), Canva MCP (optional visual CV)
@@ -299,7 +310,7 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 
 1. **NEVER edit applications.md to ADD new entries** -- Write TSV in `batch/tracker-additions/` and `merge-tracker.mjs` handles the merge.
 2. **YES you can edit applications.md to UPDATE status/notes of existing entries.**
-3. All reports MUST include `**URL:**` in the header (between Score and PDF).
+3. All reports MUST include `**URL:**` in the header (between Score and PDF). Keep `**Legitimacy:**` when the report includes posting-legitimacy analysis.
 4. All statuses MUST be canonical (see `tracker-status-registry.json`; `templates/states.yml` is only a readable mirror).
 5. Health check: `node verify-pipeline.mjs`
 6. Normalize statuses: `node normalize-statuses.mjs`

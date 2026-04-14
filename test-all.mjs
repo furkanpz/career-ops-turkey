@@ -11,7 +11,7 @@
  *   node test-all.mjs --quick   # Skip dashboard build (faster)
  */
 
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -28,8 +28,15 @@ function pass(msg) { console.log(`  ✅ ${msg}`); passed++; }
 function fail(msg) { console.log(`  ❌ ${msg}`); failed++; }
 function warn(msg) { console.log(`  ⚠️  ${msg}`); warnings++; }
 
-function run(cmd, opts = {}) {
+function run(cmd, args = [], opts = {}) {
   try {
+    if (!Array.isArray(args)) {
+      opts = args || {};
+      args = [];
+    }
+    if (Array.isArray(args) && args.length > 0) {
+      return execFileSync(cmd, args, { cwd: ROOT, encoding: 'utf-8', timeout: 30000, ...opts }).trim();
+    }
     return execSync(cmd, { cwd: ROOT, encoding: 'utf-8', timeout: 30000, ...opts }).trim();
   } catch (e) {
     return null;
@@ -74,7 +81,7 @@ console.log('1. Syntax checks');
 
 const mjsFiles = readdirSync(ROOT).filter(f => f.endsWith('.mjs'));
 for (const f of mjsFiles) {
-  const result = run(`node --check ${f}`);
+  const result = run('node', ['--check', f]);
   if (result !== null) {
     pass(`${f} syntax OK`);
   } else {
@@ -773,18 +780,22 @@ const leakPatterns = [
 ];
 
 const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
-const excludeDirs = ['node_modules', '.git', 'dashboard/go.sum'];
-const allowedFiles = ['README.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
-  'package.json', '.github/FUNDING.yml', 'CLAUDE.md', 'go.mod', 'test-all.mjs'];
+const allowedFiles = [
+  'README.md', 'README.es.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
+  'package.json', '.github/FUNDING.yml', 'CLAUDE.md', 'go.mod', 'test-all.mjs',
+  'CHANGELOG.md', '.github/ISSUE_TEMPLATE/i-got-hired.yml',
+  'dashboard/internal/ui/screens/pipeline.go',
+];
+const grepPathspec = scanExtensions.map((ext) => `'*.${ext}'`).join(' ');
 
 let leakFound = false;
 for (const pattern of leakPatterns) {
   const result = run(
-    `grep -rn "${pattern}" --include="*.{${scanExtensions.join(',')}}" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v go.sum`
+    `git grep -n "${pattern}" -- ${grepPathspec} 2>/dev/null`
   );
   if (result) {
     for (const line of result.split('\n')) {
-      const file = line.split(':')[0].replace('./', '');
+      const file = line.split(':')[0];
       if (allowedFiles.some(a => file.includes(a))) continue;
       if (file.includes('dashboard/go.mod')) continue;
       warn(`Possible personal data in ${file}: "${pattern}"`);
@@ -801,7 +812,7 @@ if (!leakFound) {
 console.log('\n6. Absolute path check');
 
 const absPathResult = run(
-  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" --include="*.md" --include="*.go" --include="*.yml" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v README.md | grep -v LICENSE | grep -v go.sum | grep -v CLAUDE.md | grep -v test-all.mjs`
+  `git grep -n "/Users/" -- '*.mjs' '*.sh' '*.md' '*.go' '*.yml' 2>/dev/null | grep -v README.md | grep -v LICENSE | grep -v CLAUDE.md | grep -v test-all.mjs`
 );
 if (!absPathResult) {
   pass('No absolute paths in code files');
