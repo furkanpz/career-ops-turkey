@@ -784,7 +784,10 @@ const allowedFiles = [
   'README.md', 'README.es.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
   'package.json', '.github/FUNDING.yml', 'CLAUDE.md', 'go.mod', 'test-all.mjs',
   'CHANGELOG.md', '.github/ISSUE_TEMPLATE/i-got-hired.yml',
+  '.github/ISSUE_TEMPLATE/bug_report.yml',
+  '.github/ISSUE_TEMPLATE/feature_request.yml',
   'dashboard/internal/ui/screens/pipeline.go',
+  'dashboard/internal/ui/screens/progress.go',
 ];
 const grepPathspec = scanExtensions.map((ext) => `'*.${ext}'`).join(' ');
 

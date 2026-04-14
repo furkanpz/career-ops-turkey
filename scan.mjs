@@ -764,7 +764,7 @@ function isLikelyJobUrl(url, parserKey = '', adapterFamily = '') {
 function makeFetchOptions(extra = {}) {
   return {
     headers: {
-      'user-agent': 'career-ops/1.2.0 (+https://github.com/furkanpz/career-ops-turkey)',
+      'user-agent': 'career-ops/1.4.0 (+https://github.com/furkanpz/career-ops-turkey)',
       'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
       ...extra.headers,
     },
