@@ -2482,8 +2482,10 @@ async function main() {
     const duplicateCount = historyEntries.filter((entry) => entry.status === 'skipped_dup').length;
     const filteredCount = historyEntries.filter((entry) => entry.status === 'skipped_title').length;
     const quotaSkippedCount = historyEntries.filter((entry) => entry.status === 'skipped_source_quota').length;
-    const unverifiedPublicCount = reviewOffers.filter((offer) => String(offer.reviewReason).includes('public_unverified')).length;
-    const reviewOnlyCount = reviewOffers.length - unverifiedPublicCount;
+    const unverifiedPublicSeenCount = historyEntries.filter((entry) => (
+      entry.status === 'review_public_unverified' || entry.status === 'review_public_unverified_cached'
+    )).length;
+    const reviewOnlySeenCount = historyEntries.filter((entry) => entry.status === 'review_review_only').length;
     const topReviewQueries = [...verificationResult.stats.reviewByQuery.entries()]
       .sort((left, right) => right[1] - left[1])
       .slice(0, 5);
@@ -2512,11 +2514,11 @@ async function main() {
     console.log(`Expired skipped:          ${expiredCount}`);
     console.log(`Live from direct:         ${verificationResult.stats.liveDirectSources}`);
     console.log(`Promoted to direct:       ${verificationResult.stats.promotedDirectSources}`);
-    console.log(`Unverified public:        ${unverifiedPublicCount}`);
-    console.log(`Review-only candidates:   ${reviewOnlyCount}`);
+    console.log(`Unverified public seen:   ${unverifiedPublicSeenCount}`);
+    console.log(`Review-only seen:         ${reviewOnlySeenCount}`);
     console.log(`Authwall dropped:         ${verificationResult.stats.authwallDropped}`);
     console.log(`New offers added:         ${addedOffers.length}`);
-    console.log(`Review candidates:        ${reviewOffers.length}`);
+    console.log(`New review candidates:    ${reviewOffers.length}`);
 
     if (warnings.length > 0) {
       console.log('\nWarnings:');
