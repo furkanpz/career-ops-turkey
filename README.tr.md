@@ -43,6 +43,8 @@
 
 <p align="center"><a href="https://discord.gg/8pRpHETxa4"><img src="https://img.shields.io/badge/Topluluğa_Katıl-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a></p>
 
+> **Durum uyarısı:** Türkiye fork'u henüz tamamlanmış kabul edilmemelidir. Dil/locale katmanı, Türkiye iş panoları, fork kimliği ve update davranışı üzerinde çalışmalar ilerlese de manuel kontroller bitmedi. Production kullanımından önce `npm run doctor`, örnek tarama/değerlendirme akışları ve başvuru çıktıları kendi ortamınızda ayrıca doğrulanmalıdır.
+
 ## Bu Nedir
 
 Career-Ops, herhangi bir yapay zekâ kodlama CLI'ını tam teşekküllü bir iş arama komuta merkezine dönüştürür. Başvuruları bir tabloda manuel takip etmek yerine, size şunları sunan bir yapay zekâ iş akışı elde edersiniz:
