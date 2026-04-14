@@ -240,8 +240,7 @@ const ROLE_FAMILY_STOPWORDS = new Set([
   'engineer', 'developer', 'specialist', 'consultant', 'architect', 'administrator', 'analyst',
   'software', 'yazilim', 'yazılım', 'muhendisi', 'mühendisi', 'geliştirici', 'gelistirici',
   'uzmani', 'uzmanı', 'yoneticisi', 'yöneticisi', 'danismani', 'danışmanı', 'senior', 'junior',
-  'lead', 'principal', 'staff', 'mid', 'core', 'full', 'stack', 'backend', 'frontend', 'application',
-  'uygulama', 'systems', 'system', 'platform',
+  'lead', 'principal', 'staff', 'mid', 'core',
 ]);
 
 const SEARCH_TITLE_PATTERNS = [
@@ -426,7 +425,7 @@ function normalizeReviewReasonTags(value = '') {
   return unique;
 }
 
-function normalizeLegacyReviewEntryReason(reason = '') {
+export function normalizeLegacyReviewEntryReason(reason = '') {
   const tags = normalizeReviewReasonTags(reason);
   if (tags.length === 0) return '';
   const canonical = [];
@@ -442,7 +441,7 @@ function normalizeLegacyReviewEntryReason(reason = '') {
   return canonical.join('; ');
 }
 
-function shouldKeepVisibleReviewReason(reason = '') {
+export function shouldKeepVisibleReviewReason(reason = '') {
   const tags = normalizeReviewReasonTags(reason);
   return tags.includes('public_unverified') || tags.some((tag) => tag.startsWith('review_only:'));
 }
@@ -467,7 +466,7 @@ function roleFamilySimilarity(left, right) {
   return union === 0 ? 0 : intersection / union;
 }
 
-function isLikelyCareersNoiseEntry(item = {}) {
+export function isLikelyCareersNoiseEntry(item = {}) {
   const title = normalizeWhitespace(item.title || '');
   const href = String(item.href || '');
   const context = normalizeWhitespace(item.context || '');
@@ -499,7 +498,7 @@ function buildDirectPromotionIndex(groups) {
   return index;
 }
 
-function findDirectPromotionCandidate(groupOffers, promotionIndex, existingUrlSet) {
+export function findDirectPromotionCandidate(groupOffers, promotionIndex, existingUrlSet) {
   const discoveryCandidate = groupOffers.find((offer) => isDiscoveryOnlyOffer(offer));
   if (!discoveryCandidate) return null;
 
@@ -1054,8 +1053,6 @@ function renderReviewQueue(mergedEntries) {
 }
 
 function appendToReviewPipeline(offers) {
-  if (offers.length === 0) return;
-
   ensureDataFiles();
   const current = existsSync(REVIEW_PIPELINE_PATH) ? readFileSync(REVIEW_PIPELINE_PATH, 'utf-8') : '';
   const existingEntries = parseReviewPipelineEntries(current);
@@ -1964,7 +1961,7 @@ async function scanCompanyCareersPage(browser, company, titleFilter) {
     const firstSeen = new Date().toISOString().slice(0, 10);
 
     for (const item of rawItems) {
-      if (!looksLikeJobHref(item.href)) continue;
+      if (isLikelyCareersNoiseEntry(item)) continue;
       const title = normalizeCompanyListingTitle(item.title);
       if (!title || seen.has(`${item.href}::${title}`)) continue;
       seen.add(`${item.href}::${title}`);
@@ -2104,6 +2101,7 @@ async function verifySearchOffers(browser, dedupedResult, existingUrlSet, existi
   const groups = dedupedResult?.groups instanceof Map
     ? dedupedResult.groups
     : new Map(offers.map((offer) => [offer.identityKey || makeCompanyRoleKey(offer.company, offer.title, offer.roleFamilyKey), [offer]]));
+  const promotionIndex = buildDirectPromotionIndex(groups);
   const needsLivenessPage = offers.some((offer) => offer.requiresLivenessCheck);
   const page = needsLivenessPage ? await browser.newPage() : null;
   const added = [];
@@ -2113,6 +2111,7 @@ async function verifySearchOffers(browser, dedupedResult, existingUrlSet, existi
   const verificationStartedAt = Date.now();
   const stats = {
     liveDirectSources: 0,
+    promotedDirectSources: 0,
     unverifiedPublic: 0,
     cachedPublicReview: 0,
     authwallDropped: 0,
@@ -2147,8 +2146,13 @@ async function verifySearchOffers(browser, dedupedResult, existingUrlSet, existi
         continue;
       }
 
+      const promotedOffer = findDirectPromotionCandidate(groupOffers, promotionIndex, existingUrlSet);
+      const verificationCandidates = promotedOffer
+        ? sortOffersForVerification([promotedOffer, ...groupOffers.filter((candidate) => candidate.url !== promotedOffer.url)])
+        : groupOffers;
+
       const blockedCache = findBlockedHistoryCache(groupOffers, identityKey, historyIndex);
-      if (blockedCache) {
+      if (blockedCache && !groupHasCurrentRunDirectCandidate(verificationCandidates)) {
         const cachedOffer = blockedCache.candidate;
         if (blockedCache.kind === 'public') {
           existingUrlSet.add(cachedOffer.canonicalUrl || canonicalizeOfferUrl(cachedOffer.url));
@@ -2182,7 +2186,7 @@ async function verifySearchOffers(browser, dedupedResult, existingUrlSet, existi
       let publicRepresentative = null;
       let authwallRepresentative = null;
 
-      for (const candidate of groupOffers) {
+      for (const candidate of verificationCandidates) {
         if (!candidate.requiresLivenessCheck) {
           selectedOffer = candidate;
           break;
@@ -2264,6 +2268,9 @@ async function verifySearchOffers(browser, dedupedResult, existingUrlSet, existi
           added.push(selectedOffer);
           if (!isDiscoveryOnlyOffer(selectedOffer)) {
             stats.liveDirectSources += 1;
+            if (promotedOffer && selectedOffer.url === promotedOffer.url) {
+              stats.promotedDirectSources += 1;
+            }
           }
         }
 
@@ -2463,7 +2470,7 @@ async function main() {
     if (!dryRun && addedOffers.length > 0) {
       appendToPipeline(addedOffers);
     }
-    if (!dryRun && reviewOffers.length > 0) {
+    if (!dryRun) {
       appendToReviewPipeline(reviewOffers);
     }
     if (!dryRun) {
@@ -2480,6 +2487,15 @@ async function main() {
     const topReviewQueries = [...verificationResult.stats.reviewByQuery.entries()]
       .sort((left, right) => right[1] - left[1])
       .slice(0, 5);
+    const quotaByPortal = historyEntries
+      .filter((entry) => entry.status === 'skipped_source_quota')
+      .reduce((acc, entry) => {
+        acc.set(entry.portal, (acc.get(entry.portal) || 0) + 1);
+        return acc;
+      }, new Map());
+    const topQuotaSources = [...quotaByPortal.entries()]
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 3);
     const slowestOperations = [...phaseTimings, ...verificationResult.stats.timings]
       .sort((left, right) => right.durationMs - left.durationMs)
       .slice(0, 5);
@@ -2495,6 +2511,7 @@ async function main() {
     console.log(`Source quota skipped:     ${quotaSkippedCount}`);
     console.log(`Expired skipped:          ${expiredCount}`);
     console.log(`Live from direct:         ${verificationResult.stats.liveDirectSources}`);
+    console.log(`Promoted to direct:       ${verificationResult.stats.promotedDirectSources}`);
     console.log(`Unverified public:        ${unverifiedPublicCount}`);
     console.log(`Review-only candidates:   ${reviewOnlyCount}`);
     console.log(`Authwall dropped:         ${verificationResult.stats.authwallDropped}`);
@@ -2539,6 +2556,13 @@ async function main() {
       console.log('\nTop review queries:');
       for (const [queryName, count] of topReviewQueries) {
         console.log(`  ~ ${queryName}: ${count}`);
+      }
+    }
+
+    if (topQuotaSources.length > 0) {
+      console.log('\nTop quota sources:');
+      for (const [portalName, count] of topQuotaSources) {
+        console.log(`  ~ ${portalName}: ${count}`);
       }
     }
 
