@@ -25,4 +25,5 @@ Pratik kural:
 
 - Template seçimi ve output naming için `cv-template-utils.mjs` ana çözümleyicidir.
 - Batch ve interactive akışlarda aynı çözümleyiciyi kullan.
+- `config/profile.yml` içinde `candidate.phone` boşsa CV header'da telefon alanını ve ona ait ayırıcıyı tamamen çıkar; boş `{{PHONE}}` placeholder'ı bırakma.
 - Türkçe CV oluşturulsa bile machine kontratı bozulmaz; report header key'leri English kalır.

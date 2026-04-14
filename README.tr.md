@@ -309,6 +309,14 @@ Portföyüm ve diğer açık kaynak projelerim → [santifer.io](https://santife
 
 Detaylar için [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) dosyasına bakın. Bu yazılım, [MIT License](LICENSE) kapsamında "olduğu gibi" ve hiçbir garanti olmaksızın sunulur.
 
+## Katkıda Bulunanlar
+
+<a href="https://github.com/furkanpz/career-ops-turkey/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=furkanpz/career-ops-turkey" />
+</a>
+
+Career-Ops ile işe girdiyseniz [hikayenizi paylaşın](https://github.com/santifer/career-ops/issues/new?template=i-got-hired.yml).
+
 ## Lisans
 
 MIT
