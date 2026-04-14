@@ -467,6 +467,67 @@ if (scanModule) {
       fail(`Latest history fixture mismatch: ${testCase.name}`);
     }
   }
+
+  const normalizedLegacyReason = scanModule.normalizeLegacyReviewEntryReason('review_only:Veri Bilimi Danışmanı; blocked_source_cached');
+  if (normalizedLegacyReason === 'review_only:Veri Bilimi Danışmanı; authwall_blocked') {
+    pass('Legacy review reason normalization works');
+  } else {
+    fail('Legacy review reason normalization failed');
+  }
+
+  if (
+    !scanModule.shouldKeepVisibleReviewReason('authwall_blocked') &&
+    scanModule.shouldKeepVisibleReviewReason('public_unverified') &&
+    scanModule.shouldKeepVisibleReviewReason('review_only:Application Support Engineer')
+  ) {
+    pass('Visible review reason filter works');
+  } else {
+    fail('Visible review reason filter failed');
+  }
+
+  if (
+    scanModule.isLikelyCareersNoiseEntry({ title: 'Privacy policy', href: 'https://example.com/privacy-policy', context: '' }) &&
+    scanModule.isLikelyCareersNoiseEntry({ title: 'Join Us!', href: 'https://example.com/careers', context: 'Careers page' }) &&
+    !scanModule.isLikelyCareersNoiseEntry({ title: 'Senior Backend Engineer', href: 'https://example.com/careers/jobs/senior-backend-engineer', context: 'Engineering Team Backend Platform' })
+  ) {
+    pass('Careers noise filter works');
+  } else {
+    fail('Careers noise filter failed');
+  }
+
+  const promotionIndex = new Map([
+    ['papara', [
+      {
+        title: 'Senior Backend Developer',
+        company: 'Papara',
+        url: 'https://careers.papara.com/jobs/senior-backend-developer',
+        canonicalUrl: 'https://careers.papara.com/jobs/senior-backend-developer',
+        sourceType: 'company_careers',
+        sourcePriority: 100,
+        parserKey: 'custom_careers_hub',
+        roleFamilyKey: 'backend',
+        identityKey: 'papara::senior::backend',
+      },
+    ]],
+  ]);
+  const promoted = scanModule.findDirectPromotionCandidate([
+    {
+      title: 'Senior Backend Engineer',
+      company: 'Papara',
+      url: 'https://tr.linkedin.com/jobs/view/example',
+      canonicalUrl: 'https://tr.linkedin.com/jobs/view/example',
+      parserKey: 'linkedin_jobs_search',
+      sourceType: 'job_board',
+      sourcePriority: 80,
+      roleFamilyKey: 'backend engineer',
+      identityKey: 'papara::senior::backend engineer',
+    },
+  ], promotionIndex, new Set());
+  if (promoted?.url === 'https://careers.papara.com/jobs/senior-backend-developer') {
+    pass('Direct-source promotion match works');
+  } else {
+    fail('Direct-source promotion match failed');
+  }
 }
 
 if (livenessModule) {

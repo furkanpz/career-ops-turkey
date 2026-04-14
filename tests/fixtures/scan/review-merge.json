@@ -55,5 +55,23 @@
         }
       ]
     }
+  },
+  {
+    "name": "drops-legacy-authwall-only-entries-on-rewrite",
+    "existing": [
+      {
+        "checked": false,
+        "url": "https://old.example.com/job",
+        "company": "Old Corp",
+        "title": "Backend Developer",
+        "reviewReason": "blocked_source_cached",
+        "section": "review_only"
+      }
+    ],
+    "incoming": [],
+    "expected": {
+      "unverified_public": [],
+      "review_only": []
+    }
   }
 ]
