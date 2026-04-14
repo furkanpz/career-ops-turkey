@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Setup Help / How-to Questions
-    url: https://discord.gg/8pRpHETxa4
-    about: For setup help and general questions, ask in Discord instead of opening an issue.
+    url: https://github.com/furkanpz/career-ops-turkey/discussions
+    about: For setup help and general questions, ask in GitHub Discussions instead of opening an issue.
   - name: GitHub Discussions
-    url: https://github.com/santifer/career-ops/discussions
+    url: https://github.com/furkanpz/career-ops-turkey/discussions
     about: For ideas, Q&A, and community conversations.

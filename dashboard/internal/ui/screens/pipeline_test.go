@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/santifer/career-ops/dashboard/internal/model"
-	"github.com/santifer/career-ops/dashboard/internal/theme"
+	"github.com/furkanpz/career-ops-turkey/dashboard/internal/model"
+	"github.com/furkanpz/career-ops-turkey/dashboard/internal/theme"
 )
 
 func TestWithReloadedDataPreservesStateAndSelection(t *testing.T) {

@@ -4,14 +4,16 @@
 
 **Do NOT open a public issue for security vulnerabilities.**
 
-Instead, please email **hi@santifer.io** with:
+Use GitHub private vulnerability reporting for
+[`furkanpz/career-ops-turkey`](https://github.com/furkanpz/career-ops-turkey/security/advisories/new)
+with:
 
 1. Description of the vulnerability
 2. Steps to reproduce
 3. Potential impact
 4. Suggested fix (if any)
 
-You will receive a response within 72 hours. We will work with you to understand and address the issue before any public disclosure.
+We will work with you to understand and address the issue before any public disclosure.
 
 ## Scope
 

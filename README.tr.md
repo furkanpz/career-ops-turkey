@@ -1,15 +1,15 @@
-# Career-Ops
+# Career-Ops Turkey
 
 [Türkçe](README.md) | [English](README.en.md) | [Español](README.es.md) | [Português (Brasil)](README.pt-BR.md) | [한국어](README.ko-KR.md) | [日本語](README.ja.md) | [Русский](README.ru.md) | [繁體中文](README.zh-TW.md)
 
 <p align="center">
-  <a href="https://x.com/santifer"><img src="docs/hero-banner.jpg" alt="Career-Ops — Çok Ajanlı İş Arama Sistemi" width="800"></a>
+  <img src="docs/hero-banner.jpg" alt="Career-Ops — Çok Ajanlı İş Arama Sistemi" width="800">
 </p>
 
 <p align="center">
-  <em>Aylarca iş başvurularını zor yoldan yaptım. Sonra keşke en başta elimde olsaydı dediğim sistemi kendim kurdum.</em><br>
-  Şirketler adayları elemek için yapay zekâ kullanıyor. <strong>Ben de adaylara şirketleri <em>seçebilmeleri</em> için yapay zekâ verdim.</strong><br>
-  <em>Şimdi açık kaynak.</em>
+  <em>Türkiye ve EMEA odaklı iş arama pipeline'ı.</em><br>
+  Şirketler adayları elemek için yapay zekâ kullanıyor. <strong>Career-Ops adaylara şirketleri <em>seçebilmeleri</em> için yapay zekâ verir.</strong><br>
+  <em>Bu fork, Türkiye pazarı için sürdürülür.</em>
 </p>
 
 <p align="center">
@@ -20,7 +20,6 @@
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT">
-  <a href="https://discord.gg/8pRpHETxa4"><img src="https://img.shields.io/badge/Discord-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord"></a>
   <br>
   <img src="https://img.shields.io/badge/EN-blue?style=flat" alt="EN">
   <img src="https://img.shields.io/badge/ES-red?style=flat" alt="ES">
@@ -39,9 +38,8 @@
   <img src="docs/demo.gif" alt="Career-Ops Demo" width="800">
 </p>
 
-<p align="center"><strong>740+ iş ilanı değerlendirildi · 100+ kişiselleştirilmiş CV üretildi · 1 hedef rol kazanıldı</strong></p>
+<p align="center"><strong>Türkiye/EMEA odaklı iş arama pipeline'ı · MIT lisanslı Career-Ops fork'u · Furkan Uyar tarafından sürdürülür</strong></p>
 
-<p align="center"><a href="https://discord.gg/8pRpHETxa4"><img src="https://img.shields.io/badge/Topluluğa_Katıl-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a></p>
 
 > **Durum uyarısı:** Türkiye fork'u henüz tamamlanmış kabul edilmemelidir. Dil/locale katmanı, Türkiye iş panoları, fork kimliği ve update davranışı üzerinde çalışmalar ilerlese de manuel kontroller bitmedi. Production kullanımından önce `npm run doctor`, örnek tarama/değerlendirme akışları ve başvuru çıktıları kendi ortamınızda ayrıca doğrulanmalıdır.
 
@@ -61,7 +59,7 @@ Career-Ops ajaniktir: Claude Code, Playwright ile kariyer sayfalarında gezinir,
 
 > **İlk değerlendirmelerin kusursuz olmasını beklemeyin.** Sistem sizi başta yeterince tanımaz. Ona CV'nizi, kariyer anlatınızı, kanıt noktalarınızı, tercihlerinizi, güçlü olduğunuz alanları ve kaçınmak istediklerinizi verin. Ne kadar iyi beslerseniz, o kadar isabetli filtreler. Bunu yeni işe alınmış bir recruiter'ı eğitmek gibi düşünün: ilk hafta sizi öğrenir, sonrasında ciddi değer üretir.
 
-Bu sistem, 740+ iş ilanını değerlendirmek, 100+ kişiselleştirilmiş CV üretmek ve Head of Applied AI rolüne ulaşmak için onu bizzat kullanan biri tarafından geliştirildi. [Vaka çalışmasının tamamını okuyun](https://santifer.io/career-ops-system).
+Bu fork, Santiago Fernández de Valderrama tarafından geliştirilen MIT lisanslı [Career-Ops](https://github.com/santifer/career-ops) projesi üzerine kuruludur. Türkiye/EMEA iş panoları, Türkçe modlar, fork kimliği ve güncelleme davranışı Furkan Uyar tarafından sürdürülür.
 
 ## Özellikler
 
@@ -226,7 +224,7 @@ go build -o career-dashboard .
 ## Proje Yapısı
 
 ```text
-career-ops/
+career-ops-turkey/
 ├── CLAUDE.md                    # Ajan talimatları
 ├── followup-cadence.mjs         # Follow-up temposu analizi
 ├── cv.md                        # CV'niz (siz oluşturursunuz)
@@ -276,17 +274,9 @@ career-ops/
 - **Dashboard**: Go + Bubble Tea + Lipgloss (otomatik Catppuccin açık/koyu temaları)
 - **Veri**: Markdown tablolar + YAML yapılandırması + TSV batch dosyaları
 
-## Diğer Açık Kaynak Projeler
+## Krediler
 
-- **[cv-santiago](https://github.com/santifer/cv-santiago)** -- Yapay zekâ sohbet botu, LLMOps dashboard'u ve vaka çalışmaları içeren portföy sitesi (santifer.io). İş aramanıza eşlik edecek bir portföy gerekiyorsa forkladığınız anda iyi bir başlangıç noktası olur.
-
-## Yazar Hakkında
-
-Ben Santiago'yum: Head of Applied AI, eski kurucu. Kendi adımı taşıyan ve hâlâ çalışan bir işi kurup sattım. Career-Ops'u kendi iş arama sürecimi yönetmek için geliştirdim. İşe yaradı; şu anki rolümü bu sistemle aldım.
-
-Portföyüm ve diğer açık kaynak projelerim → [santifer.io](https://santifer.io)
-
-☕ Career-Ops iş aramanıza fayda sağladıysa [bana bir kahve ısmarlayabilirsiniz](https://buymeacoffee.com/santifer).
+Career-Ops Turkey, Santiago Fernández de Valderrama'nın MIT lisanslı [Career-Ops](https://github.com/santifer/career-ops) projesinden fork edilmiştir. Orijinal copyright bildirimi [LICENSE](LICENSE) içinde korunur; bu Türkiye fork'u Furkan Uyar tarafından sürdürülür.
 
 ## Yıldız Geçmişi
 
@@ -315,17 +305,14 @@ Detaylar için [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) dosyasına bakın. Bu 
   <img src="https://contrib.rocks/image?repo=furkanpz/career-ops-turkey" />
 </a>
 
-Career-Ops ile işe girdiyseniz [hikayenizi paylaşın](https://github.com/santifer/career-ops/issues/new?template=i-got-hired.yml).
+Career-Ops ile işe girdiyseniz [hikayenizi paylaşın](https://github.com/furkanpz/career-ops-turkey/issues/new?template=i-got-hired.yml).
 
 ## Lisans
 
-MIT
+MIT. Orijinal upstream copyright bildirimi korunur; Türkiye fork değişiklikleri için Furkan Uyar copyright satırı eklenmiştir.
 
-## İletişim
+## Destek
 
-[![Website](https://img.shields.io/badge/santifer.io-000?style=for-the-badge&logo=safari&logoColor=white)](https://santifer.io)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/santifer)
-[![X](https://img.shields.io/badge/X-000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/santifer)
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/8pRpHETxa4)
-[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:hi@santifer.io)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/santifer)
+- Hatalar ve özellik istekleri: [GitHub Issues](https://github.com/furkanpz/career-ops-turkey/issues)
+- Kullanım soruları: [GitHub Discussions](https://github.com/furkanpz/career-ops-turkey/discussions)
+- Güvenlik bildirimleri: [GitHub Security Advisories](https://github.com/furkanpz/career-ops-turkey/security/advisories/new)

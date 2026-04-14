@@ -1,19 +1,29 @@
 cff-version: 1.2.0
-message: "If you use career-ops, please cite it using these metadata."
-title: "Career-Ops: AI-Powered Job Search Pipeline"
+message: "If you use career-ops-turkey, please cite it using these metadata."
+title: "Career-Ops Turkey: AI-Powered Job Search Pipeline for Turkey"
 type: software
 authors:
-  - family-names: "Fernández de Valderrama"
-    given-names: "Santiago"
-    website: "https://santifer.io"
+  - family-names: "Uyar"
+    given-names: "Furkan"
+    alias: "furkanpz"
 url: "https://github.com/furkanpz/career-ops-turkey"
 repository-code: "https://github.com/furkanpz/career-ops-turkey"
 license: MIT
+abstract: "Maintained Turkey-market fork of Career-Ops with Turkish locale workflows, Turkey/EMEA scanner defaults, and fork-safe update metadata."
 keywords:
   - ai
   - job-search
   - claude-code
+  - codex
   - career
   - automation
-  - llmops
+  - turkey
   - go-tui
+references:
+  - type: software
+    title: "Career-Ops: AI-Powered Job Search Pipeline"
+    authors:
+      - family-names: "Fernández de Valderrama"
+        given-names: "Santiago"
+    repository-code: "https://github.com/santifer/career-ops"
+    license: MIT

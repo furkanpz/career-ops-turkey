@@ -14,5 +14,5 @@ jobs:
       - uses: googleapis/release-please-action@v4
         with:
           release-type: simple
-          package-name: career-ops
+          package-name: career-ops-turkey
           manifest-file: .release-please-manifest.json

@@ -2,7 +2,7 @@
 
 ## Overview
 
-career-ops is maintained by [@santifer](https://github.com/santifer) under a **BDFL (Benevolent Dictator for Life)** model with a clear path for community members to earn trust and take on responsibilities.
+career-ops-turkey is maintained by [@furkanpz](https://github.com/furkanpz) under a maintainer-led model with a clear path for community members to earn trust and take on responsibilities.
 
 The goal is to build a self-sustaining community where the project thrives even when the maintainer is offline.
 
@@ -22,7 +22,7 @@ Anyone can grow their role in the project. Roles are earned through sustained, q
 **Everyone starts here.**
 
 - Follow the [Code of Conduct](CODE_OF_CONDUCT.md)
-- Open issues, comment on PRs, help others in Discord
+- Open issues, comment on PRs, help others in GitHub Discussions
 - Submit bug reports with reproduction steps
 
 ### Contributor

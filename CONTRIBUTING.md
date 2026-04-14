@@ -68,7 +68,6 @@ cd dashboard && go build -o career-dashboard .
 
 ## Need Help?
 
-- [Join the Discord](https://discord.gg/8pRpHETxa4) — fastest way to get answers and connect with other contributors
 - [Open an issue](https://github.com/furkanpz/career-ops-turkey/issues)
 - [Read the architecture docs](docs/ARCHITECTURE.md)
-- Built by [santifer](https://santifer.io); Turkey fork maintained at [furkanpz/career-ops-turkey](https://github.com/furkanpz/career-ops-turkey)
+- Maintained by [Furkan Uyar](https://github.com/furkanpz). Based on the original MIT-licensed [Career-Ops](https://github.com/santifer/career-ops) project by Santiago Fernández de Valderrama.

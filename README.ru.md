@@ -1,10 +1,10 @@
-# Career-Ops
+# Career-Ops Turkey
 
 [Türkçe](README.md) | [English](README.en.md) | [Español](README.es.md) | [Português (Brasil)](README.pt-BR.md) | [한국어](README.ko-KR.md) | [日本語](README.ja.md) | [Русский](README.ru.md) | [繁體中文](README.zh-TW.md)
 
-> *Я месяцами откликался на вакансии вручную. И создал систему, которую хотел бы иметь с самого начала.*
-> Компании используют ИИ для фильтрации кандидатов. **Я дал кандидатам ИИ, чтобы *выбирать* компании.**
-> *Теперь это open source.*
+> *Career-Ops Turkey — fork для рабочих процессов поиска работы в Турции и EMEA.*
+> Компании используют ИИ для фильтрации кандидатов. **Career-Ops помогает кандидатам использовать ИИ, чтобы *выбирать* компании.**
+> *Этот fork поддерживает Furkan Uyar.*
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)](https://claude.ai)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
@@ -13,7 +13,7 @@
 
 ---
 
-**740+ вакансий оценено · 100+ персонализированных резюме · 1 позиция мечты получена**
+**Turkey/EMEA-oriented job search pipeline · MIT-licensed Career-Ops fork · Maintained by Furkan Uyar**
 
 ## Что это
 
@@ -46,8 +46,8 @@ Career-Ops превращает любой AI-CLI в полноценный ко
 
 ```bash
 # 1. Клонируй и установи
-git clone https://github.com/santifer/career-ops.git
-cd career-ops && npm install
+git clone https://github.com/furkanpz/career-ops-turkey.git
+cd career-ops-turkey && npm install
 npx playwright install chromium   # Для генерации PDF
 
 # 2. Проверь настройки
@@ -168,7 +168,7 @@ go build -o career-dashboard .
 ## Структура проекта
 
 ```
-career-ops/
+career-ops-turkey/
 ├── CLAUDE.md                    # Инструкции для агента
 ├── cv.md                        # Ваше CV (создайте)
 ├── config/
@@ -213,6 +213,10 @@ career-ops/
 4. **Нет гарантий.** Оценки — рекомендации, не истина. ИИ может галлюцинировать. Авторы не несут ответственности за результаты трудоустройства.
 
 Подробнее: [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md). ПО распространяется по [лицензии MIT](LICENSE) «как есть», без каких-либо гарантий.
+
+## Благодарности
+
+Career-Ops Turkey поддерживает [Furkan Uyar](https://github.com/furkanpz). Проект основан на MIT-лицензированном [Career-Ops](https://github.com/santifer/career-ops) Santiago Fernández de Valderrama. Оригинальное copyright-уведомление сохранено в [LICENSE](LICENSE).
 
 ## Лицензия
 

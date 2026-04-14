@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/santifer/career-ops/dashboard/internal/model"
+	"github.com/furkanpz/career-ops-turkey/dashboard/internal/model"
 )
 
 var (

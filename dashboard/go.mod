@@ -1,4 +1,4 @@
-module github.com/santifer/career-ops/dashboard
+module github.com/furkanpz/career-ops-turkey/dashboard
 
 go 1.24.2
 

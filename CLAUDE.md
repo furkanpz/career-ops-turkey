@@ -2,9 +2,7 @@
 
 ## Origin
 
-This system was built and used by [santifer](https://santifer.io) to evaluate 740+ job offers, generate 100+ tailored CVs, and land a Head of Applied AI role. The archetypes, scoring logic, negotiation scripts, and proof point structure all reflect his specific career search in AI/automation roles.
-
-The portfolio that goes with this system is also open source: [cv-santiago](https://github.com/santifer/cv-santiago).
+Career-Ops Turkey is maintained by Furkan Uyar as a Turkey/EMEA-oriented fork of the MIT-licensed Career-Ops project by Santiago Fernández de Valderrama. The upstream archetypes, scoring logic, negotiation scripts, and proof point structure originated from that original career search workflow; this fork adds Turkish locale behavior, Turkey board coverage, and fork-safe release metadata.
 
 **It will work out of the box, but it's designed to be made yours.** If the archetypes don't match your career, the modes are in the wrong language, or the scoring doesn't fit your priorities -- just ask. You (AI Agent) can edit the user's files. The user says "change the archetypes to data engineering roles" and you do it. That's the whole point.
 
@@ -167,7 +165,7 @@ Once all files exist, confirm:
 >
 > Everything is customizable — just ask me to change anything.
 >
-> Tip: Having a personal portfolio dramatically improves your job search. If you don't have one yet, the author's portfolio is also open source: github.com/santifer/cv-santiago — feel free to fork it and make it yours."
+> Tip: Having a personal portfolio dramatically improves your job search. If you don't have one yet, create a small portfolio that proves your strongest projects, outcomes, and writing."
 
 If Turkish mode is active, also mention that `teklif` maps to `oferta` and `basvur` maps to `apply` for command compatibility.
 

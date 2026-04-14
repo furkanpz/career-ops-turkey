@@ -1,15 +1,15 @@
-# Career-Ops
+# Career-Ops Turkey
 
 [Türkçe](README.md) | [English](README.en.md) | [Español](README.es.md) | [Português (Brasil)](README.pt-BR.md) | [한국어](README.ko-KR.md) | [日本語](README.ja.md) | [Русский](README.ru.md) | [繁體中文](README.zh-TW.md)
 
 <p align="center">
-  <a href="https://x.com/santifer"><img src="docs/hero-banner.jpg" alt="Career-Ops — 多代理求職系統" width="800"></a>
+  <img src="docs/hero-banner.jpg" alt="Career-Ops — 多代理求職系統" width="800">
 </p>
 
 <p align="center">
-  <em>我花了好幾個月用最費力的方式找工作。所以我打造了一個當初就希望能擁有的系統。</em><br>
-  企業用 AI 篩選候選人。<strong>我把 AI 交給候選人，讓他們來<em>挑選</em>企業。</strong><br>
-  <em>現在，它開源了。</em>
+  <em>Career-Ops Turkey 為土耳其與 EMEA 求職流程而維護。</em><br>
+  <strong>這是加入土耳其 locale 支援的 MIT 授權 Career-Ops 公開 fork。</strong><br>
+  <em>由 Furkan Uyar 維護。</em>
 </p>
 
 <p align="center">
@@ -20,7 +20,6 @@
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT">
-  <a href="https://discord.gg/8pRpHETxa4"><img src="https://img.shields.io/badge/Discord-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord"></a>
   <br>
   <img src="https://img.shields.io/badge/EN-blue?style=flat" alt="EN">
   <img src="https://img.shields.io/badge/ES-red?style=flat" alt="ES">
@@ -40,7 +39,6 @@
 
 <p align="center"><strong>評估超過 740 份職缺 · 生成超過 100 份個人化履歷 · 成功獲得理想職位</strong></p>
 
-<p align="center"><a href="https://discord.gg/8pRpHETxa4"><img src="https://img.shields.io/badge/加入社群-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a></p>
 
 ## 這是什麼
 
@@ -58,7 +56,7 @@ career-ops 具有代理能力：Claude Code 透過 Playwright 瀏覽求職頁面
 
 > **注意：最初幾次評估的品質可能不盡理想。** 因為系統還不了解你。請提供更多背景資訊 — 你的履歷、職涯故事、成就佐證、個人偏好、你的專長以及希望避免的事情。你餵給它的資訊越多，它就越準確。把它當作招募新人的招募顧問：第一週需要學習認識你，之後就會成為不可或缺的夥伴。
 
-這個系統由一位親身使用它評估超過 740 份職缺、生成超過 100 份客製化履歷、並成功獲得 Head of Applied AI 職位的人所打造。[閱讀完整案例研究](https://santifer.io/career-ops-system)。
+此 fork 由 [Furkan Uyar](https://github.com/furkanpz) 維護，基於 Santiago Fernández de Valderrama 的 MIT 授權 [Career-Ops](https://github.com/santifer/career-ops) 專案。
 
 ## 功能特色
 
@@ -79,8 +77,8 @@ career-ops 具有代理能力：Claude Code 透過 Playwright 瀏覽求職頁面
 
 ```bash
 # 1. 複製並安裝
-git clone https://github.com/santifer/career-ops.git
-cd career-ops && npm install
+git clone https://github.com/furkanpz/career-ops-turkey.git
+cd career-ops-turkey && npm install
 npx playwright install chromium   # PDF 生成所需
 
 # 2. 檢查設定
@@ -183,7 +181,7 @@ go build -o career-dashboard .
 ## 專案結構
 
 ```
-career-ops/
+career-ops-turkey/
 ├── CLAUDE.md                    # 代理指令
 ├── cv.md                        # 你的履歷（需自行建立）
 ├── article-digest.md            # 你的成就佐證（選填）
@@ -226,25 +224,17 @@ career-ops/
 - **儀表板**：Go + Bubble Tea + Lipgloss（Catppuccin Mocha 主題）
 - **資料**：Markdown 表格 + YAML 設定 + TSV 批次檔案
 
-## 同樣開源
+## 致謝
 
-- **[cv-santiago](https://github.com/santifer/cv-santiago)** — 作者的作品集網站（santifer.io），包含 AI 聊天機器人、LLMOps 儀表板與案例研究。如果你需要一個在求職過程中展示的作品集，可以 fork 它並改造成你自己的。
-
-## 關於作者
-
-我是 Santiago — Head of Applied AI，前創業者（創建並出售了一家至今仍以我名字營運的公司）。我打造 career-ops 是為了管理自己的求職過程，並成功用它找到了現在這份工作。
-
-個人作品集與其他開源專案 → [santifer.io](https://santifer.io)
-
-☕ 如果 career-ops 對你的求職有所幫助，歡迎[請我喝杯咖啡](https://buymeacoffee.com/santifer)。
+Career-Ops Turkey 由 [Furkan Uyar](https://github.com/furkanpz) 維護，基於 Santiago Fernández de Valderrama 的 MIT 授權 [Career-Ops](https://github.com/santifer/career-ops)。原始 copyright 聲明保留於 [LICENSE](LICENSE)。
 
 ## Star 歷史
 
-<a href="https://www.star-history.com/?repos=santifer%2Fcareer-ops&type=timeline&legend=top-left">
+<a href="https://www.star-history.com/?repos=furkanpz%2Fcareer-ops-turkey&type=timeline&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=furkanpz/career-ops-turkey&type=timeline&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=furkanpz/career-ops-turkey&type=timeline&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=furkanpz/career-ops-turkey&type=timeline&legend=top-left" />
  </picture>
 </a>
 
@@ -261,21 +251,18 @@ career-ops/
 
 ## 貢獻者
 
-<a href="https://github.com/santifer/career-ops/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=santifer/career-ops" />
+<a href="https://github.com/furkanpz/career-ops-turkey/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=furkanpz/career-ops-turkey" />
 </a>
 
-使用 career-ops 找到工作了嗎？[分享你的故事！](https://github.com/santifer/career-ops/issues/new?template=i-got-hired.yml)
+使用 career-ops 找到工作了嗎？[分享你的故事！](https://github.com/furkanpz/career-ops-turkey/issues/new?template=i-got-hired.yml)
 
 ## 授權條款
 
 MIT
 
-## 聯絡我
+## 支援
 
-[![Website](https://img.shields.io/badge/santifer.io-000?style=for-the-badge&logo=safari&logoColor=white)](https://santifer.io)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/santifer)
-[![X](https://img.shields.io/badge/X-000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/santifer)
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/8pRpHETxa4)
-[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:hi@santifer.io)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/santifer)
+- 錯誤與功能需求: [GitHub Issues](https://github.com/furkanpz/career-ops-turkey/issues)
+- 使用問題: [GitHub Discussions](https://github.com/furkanpz/career-ops-turkey/discussions)
+- 安全性回報: [GitHub Security Advisories](https://github.com/furkanpz/career-ops-turkey/security/advisories/new)
