@@ -121,6 +121,7 @@ let scanModule = null;
 let livenessModule = null;
 const packageJson = readJson('package.json');
 const readme = readFile('README.md');
+const englishReadme = fileExists('README.en.md') ? readFile('README.en.md') : readme;
 const claudeDoc = readFile('CLAUDE.md');
 
 if (fileExists('scan.mjs')) {
@@ -748,9 +749,9 @@ if (
 }
 
 if (
-  readme.includes('locale adaptation') &&
-  readme.includes('user-layer `portals.yml`') &&
-  readme.includes('Parity scope in this fork tracks the upstream `v1.4` product surface') &&
+  englishReadme.includes('locale adaptation') &&
+  englishReadme.includes('user-layer `portals.yml`') &&
+  englishReadme.includes('Parity scope in this fork tracks the upstream `v1.4` product surface') &&
   claudeDoc.includes('locale-aware only; it must still be customized') &&
   claudeDoc.includes('role targeting still belongs')
 ) {
@@ -781,7 +782,7 @@ const leakPatterns = [
 
 const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
 const allowedFiles = [
-  'README.md', 'README.tr.md', 'README.es.md', 'README.ja.md', 'README.ko-KR.md',
+  'README.md', 'README.en.md', 'README.tr.md', 'README.es.md', 'README.ja.md', 'README.ko-KR.md',
   'README.pt-BR.md', 'README.ru.md', 'README.zh-TW.md',
   'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
   'package.json', '.github/FUNDING.yml', 'CLAUDE.md', 'go.mod', 'test-all.mjs',
