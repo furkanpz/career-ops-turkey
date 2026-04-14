@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/santifer/career-ops/dashboard/internal/model"
 )
@@ -820,4 +821,122 @@ func StatusPriority(status string) int {
 		return len(statusGroupToDisplay) + 1
 	}
 	return order
+}
+
+// ComputeProgressMetrics computes progress-oriented analytics from applications.
+func ComputeProgressMetrics(apps []model.CareerApplication) model.ProgressMetrics {
+	pm := model.ProgressMetrics{}
+
+	statusCounts := make(map[string]int)
+	var totalScore float64
+	var scored int
+
+	for _, app := range apps {
+		norm := NormalizeStatus(app.Status)
+		statusCounts[norm]++
+
+		if app.Score > 0 {
+			totalScore += app.Score
+			scored++
+			if app.Score > pm.TopScore {
+				pm.TopScore = app.Score
+			}
+		}
+
+		if norm == "offer" {
+			pm.TotalOffers++
+		}
+		if norm != "skip" && norm != "rejected" && norm != "discarded" {
+			pm.ActiveApps++
+		}
+	}
+
+	if scored > 0 {
+		pm.AvgScore = totalScore / float64(scored)
+	}
+
+	total := len(apps)
+	applied := statusCounts["applied"] + statusCounts["response_received"] + statusCounts["interview"] + statusCounts["offer"] + statusCounts["rejected"]
+	responded := statusCounts["response_received"] + statusCounts["interview"] + statusCounts["offer"]
+	interview := statusCounts["interview"] + statusCounts["offer"]
+	offer := statusCounts["offer"]
+
+	pm.FunnelStages = []model.FunnelStage{
+		{Label: "Evaluated", Count: total, Pct: 100.0},
+		{Label: "Applied", Count: applied, Pct: safePct(applied, total)},
+		{Label: "Responded", Count: responded, Pct: safePct(responded, applied)},
+		{Label: "Interview", Count: interview, Pct: safePct(interview, applied)},
+		{Label: "Offer", Count: offer, Pct: safePct(offer, applied)},
+	}
+
+	if applied > 0 {
+		pm.ResponseRate = float64(responded) / float64(applied) * 100
+		pm.InterviewRate = float64(interview) / float64(applied) * 100
+		pm.OfferRate = float64(offer) / float64(applied) * 100
+	}
+
+	buckets := [5]int{}
+	for _, app := range apps {
+		if app.Score <= 0 {
+			continue
+		}
+		switch {
+		case app.Score >= 4.5:
+			buckets[0]++
+		case app.Score >= 4.0:
+			buckets[1]++
+		case app.Score >= 3.5:
+			buckets[2]++
+		case app.Score >= 3.0:
+			buckets[3]++
+		default:
+			buckets[4]++
+		}
+	}
+	pm.ScoreBuckets = []model.ScoreBucket{
+		{Label: "4.5-5.0", Count: buckets[0]},
+		{Label: "4.0-4.4", Count: buckets[1]},
+		{Label: "3.5-3.9", Count: buckets[2]},
+		{Label: "3.0-3.4", Count: buckets[3]},
+		{Label: "  <3.0", Count: buckets[4]},
+	}
+
+	weekCounts := make(map[string]int)
+	for _, app := range apps {
+		if app.Date == "" {
+			continue
+		}
+		t, err := time.Parse("2006-01-02", app.Date)
+		if err != nil {
+			continue
+		}
+		year, week := t.ISOWeek()
+		key := fmt.Sprintf("%d-W%02d", year, week)
+		weekCounts[key]++
+	}
+
+	var weeks []string
+	for w := range weekCounts {
+		weeks = append(weeks, w)
+	}
+	sort.Strings(weeks)
+	if len(weeks) > 8 {
+		weeks = weeks[len(weeks)-8:]
+	}
+
+	for _, w := range weeks {
+		pm.WeeklyActivity = append(pm.WeeklyActivity, model.WeekActivity{
+			Week:  w,
+			Count: weekCounts[w],
+		})
+	}
+
+	return pm
+}
+
+func safePct(part, whole int) float64 {
+	if whole == 0 {
+		return 0
+	}
+	return float64(part) / float64(whole) * 100
 }
