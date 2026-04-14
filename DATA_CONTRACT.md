@@ -42,6 +42,8 @@ These files contain system logic, scripts, templates, and instructions that impr
 | `modes/project.md` | Project evaluation instructions |
 | `modes/tracker.md` | Tracker instructions |
 | `modes/training.md` | Training evaluation instructions |
+| `modes/patterns.md` | Pattern analysis instructions |
+| `modes/followup.md` | Follow-up cadence instructions |
 | `modes/de/*` | German language modes |
 | `modes/tr/*` | Turkey / EMEA override modes |
 | `config/profile.tr.example.yml` | Turkey locale profile starter |

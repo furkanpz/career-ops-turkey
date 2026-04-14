@@ -47,7 +47,7 @@
 
 Career-Ops turns any AI coding CLI into a full job search command center. Instead of manually tracking applications in a spreadsheet, you get an AI-powered pipeline that:
 
-- **Evaluates offers** with a structured A-F scoring system (10 weighted dimensions)
+- **Evaluates offers** with a structured A-G scoring system (10 weighted dimensions + posting legitimacy)
 - **Generates tailored PDFs** -- ATS-optimized CVs customized per job description
 - **Scans portals** automatically (tracked company pages + LinkedIn Jobs, Kariyer.net, Indeed Turkiye, Eleman.net, Secretcv, Yenibiris, ISKUR)
 - **Processes in batch** -- evaluate 10+ offers in parallel with sub-agents
@@ -66,13 +66,13 @@ Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored
 | Feature | Description |
 |---------|-------------|
 | **Auto-Pipeline** | Paste a URL, get a full evaluation + PDF + tracker entry |
-| **6-Block Evaluation** | Role summary, CV match, level strategy, comp research, personalization, interview prep (STAR+R) |
+| **7-Block Evaluation** | Role summary, CV match, level strategy, comp research, personalization, interview prep (STAR+R), posting legitimacy |
 | **Interview Story Bank** | Accumulates STAR+Reflection stories across evaluations -- 5-10 master stories that answer any behavioral question |
 | **Negotiation Scripts** | Salary negotiation frameworks, geographic discount pushback, competing offer leverage |
 | **ATS PDF Generation** | Keyword-injected CVs with Space Grotesk + DM Sans design |
 | **Portal Scanner** | Single `scan.mjs` runtime for tracked companies, Turkish boards, and EMEA ATS discovery with Playwright liveness checks |
 | **Batch Processing** | Parallel evaluation with `claude -p` workers |
-| **Dashboard TUI** | Terminal UI with progress analytics, light/dark Catppuccin themes, vim motions, and richer markdown/table viewing |
+| **Dashboard TUI** | Terminal UI with progress analytics, light/dark Catppuccin themes, vim motions, manual refresh, and richer markdown/table viewing |
 | **Human-in-the-Loop** | AI evaluates and recommends, you decide and act. The system never submits an application -- you always have the final call |
 | **Pipeline Integrity** | Automated merge, dedup, status normalization, health checks |
 
@@ -116,9 +116,9 @@ See [docs/SETUP.md](docs/SETUP.md) for the full setup guide.
 
 Turkey-oriented usage is first-class in this fork: set `language.modes_dir: modes/tr` in `config/profile.yml` or tell Claude to use `modes/tr/` for Turkey-market workflows. This is a locale adaptation, not a fixed role pack. Canonical commands stay stable, and the documented Turkish aliases are supported: `teklif` → evaluation, `basvur` → live application help.
 
-Parity scope in this fork is the canonical product surface plus the Turkey locale layer. Upstream
-locales such as `modes/ja/` or `modes/ru/`, and upstream repository marketing assets such as docs
-images, are intentionally outside the Turkey completion scope.
+Parity scope in this fork tracks the upstream `v1.4` product surface, additional locale packs,
+and repository/community assets while preserving the Turkey locale layer, fork identity, and
+fork-safe update channel.
 
 Parser-safe report keys stay canonical and English even in Turkish workflows:
 `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`.
@@ -167,7 +167,7 @@ You paste a job URL or description
 └────────┬─────────┘
          │
 ┌────────▼─────────┐
-│  A-F Evaluation  │  Match, gaps, comp research, STAR stories
+│  A-G Evaluation  │  Match, gaps, comp research, STAR stories, legitimacy
 │  (reads cv.md)   │
 └────────┬─────────┘
          │
@@ -272,7 +272,7 @@ career-ops/
 - **Agent**: Claude Code with custom skills and modes
 - **PDF**: Playwright/Puppeteer + HTML template
 - **Scanner**: Playwright + Greenhouse API + WebSearch
-- **Dashboard**: Go + Bubble Tea + Lipgloss (Catppuccin Mocha theme)
+- **Dashboard**: Go + Bubble Tea + Lipgloss (automatic Catppuccin light/dark themes)
 - **Data**: Markdown tables + YAML config + TSV batch files
 
 ## Also Open Source

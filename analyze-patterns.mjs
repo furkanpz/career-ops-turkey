@@ -26,7 +26,9 @@ const REPORTS_DIR = join(CAREER_OPS, 'reports');
 const args = process.argv.slice(2);
 const summaryMode = args.includes('--summary');
 const minThresholdIdx = args.indexOf('--min-threshold');
-const MIN_THRESHOLD = minThresholdIdx !== -1 ? parseInt(args[minThresholdIdx + 1]) || 5 : 5;
+const MIN_THRESHOLD = minThresholdIdx !== -1 && args[minThresholdIdx + 1] !== undefined
+  ? (Number.isNaN(parseInt(args[minThresholdIdx + 1])) ? 5 : parseInt(args[minThresholdIdx + 1]))
+  : 5;
 
 function normalizeStatus(raw) {
   const normalized = normalizeTrackerStatus(raw);

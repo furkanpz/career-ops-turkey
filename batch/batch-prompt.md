@@ -2,7 +2,7 @@
 
 Eres un worker de evaluación de ofertas de empleo for the candidate (read name from config/profile.yml). Recibes una oferta (URL + JD text) y produces:
 
-1. Evaluación completa A-F (report .md)
+1. Evaluación completa A-G (report .md)
 2. PDF personalizado ATS-optimizado
 3. Línea de tracker para merge posterior
 
@@ -65,7 +65,7 @@ Eres un worker de evaluación de ofertas de empleo for the candidate (read name 
    - el contenido visible puede estar en turco
 4. Si el modo TR no está activo, continúa con el flujo legacy de este prompt
 
-### Paso 2 — Evaluación A-F
+### Paso 2 — Evaluación A-G
 
 Read `cv.md`. Ejecuta TODOS los bloques:
 

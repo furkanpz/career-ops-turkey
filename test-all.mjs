@@ -750,7 +750,7 @@ if (
 if (
   readme.includes('locale adaptation') &&
   readme.includes('user-layer `portals.yml`') &&
-  readme.includes('Parity scope in this fork is the canonical product surface plus the Turkey locale layer') &&
+  readme.includes('Parity scope in this fork tracks the upstream `v1.4` product surface') &&
   claudeDoc.includes('locale-aware only; it must still be customized') &&
   claudeDoc.includes('role targeting still belongs')
 ) {
@@ -781,8 +781,11 @@ const leakPatterns = [
 
 const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
 const allowedFiles = [
-  'README.md', 'README.es.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
+  'README.md', 'README.tr.md', 'README.es.md', 'README.ja.md', 'README.ko-KR.md',
+  'README.pt-BR.md', 'README.ru.md', 'README.zh-TW.md',
+  'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
   'package.json', '.github/FUNDING.yml', 'CLAUDE.md', 'go.mod', 'test-all.mjs',
+  'CODE_OF_CONDUCT.md', 'GOVERNANCE.md', 'SECURITY.md', 'SUPPORT.md', '.github/SECURITY.md',
   'CHANGELOG.md', '.github/ISSUE_TEMPLATE/i-got-hired.yml',
   '.github/ISSUE_TEMPLATE/bug_report.yml',
   '.github/ISSUE_TEMPLATE/feature_request.yml',

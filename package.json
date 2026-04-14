@@ -17,7 +17,7 @@
     "rollback": "node update-system.mjs rollback",
     "liveness": "node check-liveness.mjs"
   },
-  "keywords": ["job-search", "claude-code", "career", "automation", "turkey"],
+  "keywords": ["ai", "job-search", "claude-code", "career", "automation", "turkey"],
   "author": "Santiago Fernández de Valderrama <hi@santifer.io> (https://santifer.io)",
   "homepage": "https://github.com/furkanpz/career-ops-turkey",
   "repository": {
@@ -26,7 +26,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "playwright": "^1.58.1"
   }
 }
