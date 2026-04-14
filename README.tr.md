@@ -1,6 +1,6 @@
 # Career-Ops
 
-[English](README.md) | [Türkçe](README.tr.md) | [Español](README.es.md)
+[English](README.md) | [Türkçe](README.tr.md) | [Español](README.es.md) | [Português (Brasil)](README.pt-BR.md) | [한국어](README.ko-KR.md) | [日本語](README.ja.md) | [Русский](README.ru.md) | [繁體中文](README.zh-TW.md)
 
 <p align="center">
   <a href="https://x.com/santifer"><img src="docs/hero-banner.jpg" alt="Career-Ops — Çok Ajanlı İş Arama Sistemi" width="800"></a>
@@ -28,6 +28,9 @@
   <img src="https://img.shields.io/badge/FR-blue?style=flat" alt="FR">
   <img src="https://img.shields.io/badge/PT--BR-green?style=flat" alt="PT-BR">
   <img src="https://img.shields.io/badge/TR-red?style=flat" alt="TR">
+  <img src="https://img.shields.io/badge/KO-white?style=flat" alt="KO">
+  <img src="https://img.shields.io/badge/JA-red?style=flat" alt="JA">
+  <img src="https://img.shields.io/badge/ZH--TW-blue?style=flat" alt="ZH-TW">
 </p>
 
 ---
@@ -44,7 +47,7 @@
 
 Career-Ops, herhangi bir yapay zekâ kodlama CLI'ını tam teşekküllü bir iş arama komuta merkezine dönüştürür. Başvuruları bir tabloda manuel takip etmek yerine, size şunları sunan bir yapay zekâ pipeline'ı elde edersiniz:
 
-- **İlanları değerlendirir**: 10 ağırlıklı boyuttan oluşan yapılandırılmış A-F puanlama sistemi
+- **İlanları değerlendirir**: 10 ağırlıklı boyut ve posting legitimacy kontrolünden oluşan yapılandırılmış A-G puanlama sistemi
 - **Kişiselleştirilmiş PDF üretir**: Her iş tanımına göre uyarlanan ATS uyumlu CV'ler
 - **Portalları tarar**: Takip edilen şirket kariyer sayfaları + LinkedIn Jobs, Kariyer.net, Indeed Turkiye, Eleman.net, Secretcv, Yenibiris, ISKUR
 - **Toplu işler**: 10+ ilanı paralel alt ajanlarla değerlendirir
@@ -63,13 +66,13 @@ Bu sistem, 740+ iş ilanını değerlendirmek, 100+ kişiselleştirilmiş CV ür
 | Özellik | Açıklama |
 |---------|----------|
 | **Auto-Pipeline** | Bir URL yapıştırın; tam değerlendirme + PDF + tracker kaydı alın |
-| **6 Bloklu Değerlendirme** | Rol özeti, CV uyumu, seviye stratejisi, ücret araştırması, kişiselleştirme, mülakat hazırlığı (STAR+R) |
+| **7 Bloklu Değerlendirme** | Rol özeti, CV uyumu, seviye stratejisi, ücret araştırması, kişiselleştirme, mülakat hazırlığı (STAR+R), posting legitimacy |
 | **Mülakat Hikâye Bankası** | Değerlendirmeler boyunca STAR+Reflection hikâyeleri biriktirir; davranışsal soruların çoğunu karşılayacak 5-10 ana hikâye oluşturur |
 | **Müzakere Senaryoları** | Maaş pazarlığı çerçeveleri, coğrafi indirim itirazları, rakip teklif kaldıraçları |
 | **ATS PDF Üretimi** | Space Grotesk + DM Sans tasarımıyla anahtar kelime uyumlu CV'ler |
 | **Portal Tarayıcı** | Takip edilen şirketler, Türkiye odaklı panolar ve EMEA ATS keşfi için Playwright liveness kontrolüyle çalışan tek `scan.mjs` runtime'ı |
 | **Batch Processing** | `claude -p` worker'ları ile paralel değerlendirme |
-| **Dashboard TUI** | İlerleme analitiği, açık/koyu Catppuccin temaları, vim hareketleri ve gelişmiş markdown/tablo görünümü sunan terminal arayüzü |
+| **Dashboard TUI** | İlerleme analitiği, açık/koyu Catppuccin temaları, vim hareketleri, manuel refresh ve gelişmiş markdown/tablo görünümü sunan terminal arayüzü |
 | **Human-in-the-Loop** | Yapay zekâ değerlendirir ve önerir; kararı ve aksiyonu siz verirsiniz. Sistem asla sizin yerinize başvuru göndermez |
 | **Pipeline Integrity** | Otomatik merge, dedup, durum normalizasyonu ve sağlık kontrolleri |
 
@@ -113,7 +116,7 @@ Tam kurulum rehberi için [docs/SETUP.md](docs/SETUP.md) dosyasına bakın.
 
 Bu forkta Türkiye odaklı kullanım birinci sınıf vatandaş olarak ele alınır: `config/profile.yml` içinde `language.modes_dir: modes/tr` ayarlayın veya Claude'a Türkiye pazarı akışları için `modes/tr/` kullanmasını söyleyin. Bu, sabit bir rol paketi değil; locale adaptasyonudur. Canonical komutlar değişmez ve belgelenmiş Türkçe alias'lar desteklenir: `teklif` → değerlendirme, `basvur` → canlı başvuru yardımı.
 
-Bu forkun parity kapsamı canonical ürün yüzeyi ile Turkey locale katmanından oluşur. Upstream taraftaki `modes/ja/`, `modes/ru/` gibi locale'ler ve repo pazarlama görselleri gibi varlıklar bilinçli olarak bu kapsamın dışındadır.
+Bu forkun parity kapsamı upstream `v1.4` ürün yüzeyini, ek locale paketlerini ve repo/community varlıklarını takip eder; aynı zamanda Turkey locale katmanını, fork kimliğini ve fork-safe update channel davranışını korur.
 
 Türkçe workflow'larda bile parser-safe rapor anahtarları canonical ve İngilizce kalır:
 `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`.
@@ -162,7 +165,7 @@ Bir iş ilanı URL'si veya açıklaması yapıştırırsınız
 └────────┬─────────┘
          │
 ┌────────▼─────────┐
-│  A-F             │  Uyum, boşluklar, ücret araştırması, STAR hikâyeleri
+│  A-G             │  Uyum, boşluklar, ücret araştırması, STAR hikâyeleri, legitimacy
 │  Değerlendirme   │
 │  (cv.md okunur)  │
 └────────┬─────────┘
@@ -216,7 +219,7 @@ go build -o career-dashboard .
 ./career-dashboard --path ..
 ```
 
-Öne çıkanlar: 6 filtre sekmesi, 4 sıralama modu, grouped/flat görünüm, lazy-loaded preview'lar, inline durum değişiklikleri, ilerleme analitiği, vim hareketleri (`hjkl`, `g`, `G`) ve otomatik Catppuccin açık/koyu tema seçimi.
+Öne çıkanlar: 6 filtre sekmesi, 4 sıralama modu, grouped/flat görünüm, lazy-loaded preview'lar, inline durum değişiklikleri, ilerleme analitiği, vim hareketleri (`hjkl`, `g`, `G`), manuel refresh (`r`) ve otomatik Catppuccin açık/koyu tema seçimi.
 
 ## Proje Yapısı
 
@@ -268,7 +271,7 @@ career-ops/
 - **Ajan**: Özel skill ve modlarla Claude Code
 - **PDF**: Playwright/Puppeteer + HTML şablon
 - **Tarayıcı**: Playwright + Greenhouse API + WebSearch keşfi
-- **Dashboard**: Go + Bubble Tea + Lipgloss (Catppuccin Mocha teması)
+- **Dashboard**: Go + Bubble Tea + Lipgloss (otomatik Catppuccin açık/koyu temaları)
 - **Veri**: Markdown tablolar + YAML yapılandırması + TSV batch dosyaları
 
 ## Diğer Açık Kaynak Projeler
