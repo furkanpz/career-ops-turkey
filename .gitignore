@@ -14,8 +14,7 @@ batch/logs/*
 !batch/logs/.gitkeep
 batch/batch-state.tsv
 batch/batch-input.tsv
-batch/tracker-additions/*.tsv
-batch/tracker-additions/merged/*.tsv
+batch/tracker-additions/**/*.tsv
 !batch/tracker-additions/.gitkeep
 jds/*
 !jds/.gitkeep
@@ -31,6 +30,7 @@ interview-prep/story-bank.md
 # Generated
 .resolved-prompt-*
 node_modules/
+bun.lock
 
 # OS
 .DS_Store

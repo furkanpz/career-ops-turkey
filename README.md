@@ -1,6 +1,6 @@
 # Career-Ops
 
-[English](README.md) | [Türkçe](README.tr.md) | [Español](README.es.md)
+[English](README.md) | [Türkçe](README.tr.md) | [Español](README.es.md) | [Português (Brasil)](README.pt-BR.md) | [한국어](README.ko-KR.md) | [日本語](README.ja.md) | [Русский](README.ru.md) | [繁體中文](README.zh-TW.md)
 
 <p align="center">
   <a href="https://x.com/santifer"><img src="docs/hero-banner.jpg" alt="Career-Ops — Multi-Agent Job Search System" width="800"></a>
@@ -28,6 +28,9 @@
   <img src="https://img.shields.io/badge/FR-blue?style=flat" alt="FR">
   <img src="https://img.shields.io/badge/PT--BR-green?style=flat" alt="PT-BR">
   <img src="https://img.shields.io/badge/TR-red?style=flat" alt="TR">
+  <img src="https://img.shields.io/badge/KO-white?style=flat" alt="KO">
+  <img src="https://img.shields.io/badge/JA-red?style=flat" alt="JA">
+  <img src="https://img.shields.io/badge/ZH--TW-blue?style=flat" alt="ZH-TW">
 </p>
 
 ---
@@ -217,7 +220,7 @@ go build -o career-dashboard .
 ./career-dashboard --path ..
 ```
 
-Features: 6 filter tabs, 4 sort modes, grouped/flat view, lazy-loaded previews, inline status changes, progress analytics, vim motions (`hjkl`, `g`, `G`), and automatic Catppuccin light/dark theme selection.
+Features: 6 filter tabs, 4 sort modes, grouped/flat view, lazy-loaded previews, inline status changes, progress analytics, vim motions (`hjkl`, `g`, `G`), manual refresh (`r`), and automatic Catppuccin light/dark theme selection.
 
 ## Project Structure
 

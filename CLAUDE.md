@@ -194,6 +194,8 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 
 - **German (DACH market):** `modes/de/` — native German translations with DACH-specific vocabulary (13. Monatsgehalt, Probezeit, Kündigungsfrist, AGG, Tarifvertrag, etc.). Includes `_shared.md`, `angebot.md` (evaluation), `bewerben.md` (apply), `pipeline.md`.
 - **French (Francophone market):** `modes/fr/` — native French translations with France/Belgium/Switzerland/Luxembourg-specific vocabulary (CDI/CDD, convention collective SYNTEC, RTT, mutuelle, prévoyance, 13e mois, intéressement/participation, titres-restaurant, CSE, portage salarial, etc.). Includes `_shared.md`, `offre.md` (evaluation), `postuler.md` (apply), `pipeline.md`.
+- **Japanese (Japan market):** `modes/ja/` — native Japanese translations with Japan-specific hiring vocabulary. Includes `_shared.md`, `kyujin.md` (evaluation), `oubo.md` (apply), `pipeline.md`.
+- **Russian (Russia/CIS market):** `modes/ru/` — Russian-language workflow surface for local-market searches and interview prep. Includes `_shared.md`, `oferta.md`, `apply.md`, `pipeline.md`, `interview-prep.md`.
 - **Turkish (Turkey market):** `modes/tr/` — Turkish-market override layer for Turkey-based candidates, including mixed-language Turkey/EMEA hiring context. Load the canonical root mode from `modes/` first, then overlay the Turkish file when it exists. The Turkey layer changes locale behavior, board coverage, and scoring heuristics; user role targeting still belongs in `config/profile.yml`, `modes/_profile.md`, and `portals.yml`. Includes `_shared.md`, `teklif.md` (evaluation), `basvur.md` (apply), `pipeline.md`, and Turkish overrides for the other workflow entrypoints.
 
 **When to use German modes:** If the user is targeting German-language job postings, lives in DACH, or asks for German output. Either:
@@ -206,12 +208,22 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 2. User sets `language.modes_dir: modes/fr` in `config/profile.yml` → always use French modes
 3. You detect a French JD → suggest switching to French modes
 
+**When to use Japanese modes:** If the user is targeting Japanese-language job postings, lives in Japan, or asks for Japanese output. Either:
+1. User says "use Japanese modes" → read from `modes/ja/` instead of `modes/`
+2. User sets `language.modes_dir: modes/ja` in `config/profile.yml` → use Japanese modes
+3. You detect a Japanese JD → suggest switching to Japanese modes
+
+**When to use Russian modes:** If the user is targeting Russian-language job postings or asks for Russian output. Either:
+1. User says "use Russian modes" → read from `modes/ru/` instead of `modes/`
+2. User sets `language.modes_dir: modes/ru` in `config/profile.yml` → use Russian modes
+3. You detect a Russian JD → suggest switching to Russian modes
+
 **When to use Turkish modes:** If the user is Turkey-based, is targeting roles in Turkey or realistic Turkey/EMEA opportunities, or asks for Turkish output. Either:
 1. User says "use Turkish modes" → read from `modes/tr/` instead of `modes/`
 2. User sets `language.modes_dir: modes/tr` in `config/profile.yml` → prefer Turkish modes for career workflows
 3. You detect a Turkey-market hiring context → suggest switching to Turkish modes
 
-**When NOT to:** If the user applies to English-language roles, even at French or German companies, use the default English modes.
+**When NOT to:** If the user applies to English-language roles, even at French, German, Japanese, Russian, or Turkish companies, use the default English modes.
 
 **Turkish command compatibility:** Keep canonical subcommands stable. In Turkish workflows only, `teklif` is an alias for `oferta` and `basvur` is an alias for `apply`. Other commands keep their canonical names and simply load Turkish overrides when `language.modes_dir` points at `modes/tr`.
 
@@ -271,6 +283,7 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 - GitHub Actions now validate the repo on pull requests.
 - Repo automation files (`.github/*`, release metadata, dependency bots) are system-layer and may be updated with upstream syncs.
 - `test-all.mjs` is the required pre-merge regression gate for this fork as well.
+- Community governance docs from upstream (`CODE_OF_CONDUCT.md`, `GOVERNANCE.md`, `SECURITY.md`, `SUPPORT.md`) are part of the system layer and should stay in sync unless the fork deliberately overrides them.
 
 ---
 
