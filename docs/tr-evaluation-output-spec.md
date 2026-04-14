@@ -34,6 +34,13 @@ To reduce downstream breakage risk, keep these machine-stable keys in the report
 **Score:** {final score}/5
 **URL:** {original posting URL}
 **PDF:** {pdf path or pending}
+**City:** {city or unknown}
+**Work Model:** {remote|hybrid|on_site|field|unspecified}
+**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
+**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
+**Salary Transparency:** {transparent|market_range|opaque|unknown}
+**Source:** {portal or company careers}
+**Confidence:** {high|medium|low}
 ```
 
 Notes:
@@ -41,6 +48,7 @@ Notes:
 - `**URL:**` is required.
 - `**Archetype** |` stays fixed intentionally for parser-safe dashboard extraction.
 - `**Score:**` should be the final score after any red-flag cap, not the raw weighted score.
+- Turkey metadata keys stay English intentionally; dashboard reads these as fallback when `data/tr-listings.jsonl` or pipeline tags are missing.
 
 ## Required Body Structure
 

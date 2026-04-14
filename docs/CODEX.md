@@ -66,6 +66,7 @@ Scanner note: `scan` mode is now script-first. Both `/career-ops scan` and `npm 
 - Treat raw JD text or a job URL as the full auto-pipeline path unless the user explicitly asks for evaluation only.
 - Keep all personalization in `config/profile.yml`, `modes/_profile.md`, `article-digest.md`, or `portals.yml`.
 - Keep parser-safe report keys canonical and English: `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`.
+- In Turkish workflows, also keep parser-safe metadata keys canonical and English: `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence`. `data/tr-listings.jsonl` is an additive user-layer sidecar; read it when useful, but do not hand-edit it unless the user explicitly asks for data repair.
 - Never verify a job’s live status with generic web fetch when Playwright is available.
 - Keep `portals.yml` in the user layer. If it is missing the latest Turkey parser keys, warn and point to `templates/portals.tr.example.yml`; do not auto-overwrite it during scans or updates.
 - Never submit an application for the user.

@@ -20,3 +20,6 @@ Bu dosya `modes/auto-pipeline.md` ile birlikte okunur. `modes/auto-pipeline.md` 
 - `automation.application.auto_draft_form_answers` false ise Section G oluşturmadan önce kullanıcıyı uyar.
 - İlan dili İngilizce olsa bile aday Türkiye bazlıysa şehir, hibrit politika, maaş netliği ve legal setup sinyallerini TR scoring içinde koru.
 - Report machine-key'leri her zaman English kalır: `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`.
+- Report header'a dashboard için parser-safe TR metadata ekle:
+  `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence`.
+- Scanner'dan gelen `data/tr-listings.jsonl` veya pipeline note tag'leri varsa (`city:`, `work_model:`, `lang:`, `salary:`, `source:`, `confidence:`) bunları kanıt olarak kullan; yoksa JD'den çıkar ve belirsiz alanları metadata tipine göre güvenli değerle yaz: city ve salary için `unknown`, work model/language/employment type için `unspecified`.

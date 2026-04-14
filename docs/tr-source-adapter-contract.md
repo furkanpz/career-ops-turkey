@@ -22,7 +22,7 @@ Non-goals:
 1. One adapter contract, many source families.
 2. Adapters may fetch differently, but they must emit one shared normalized envelope.
 3. Raw evidence is preserved. Normalized fields never replace raw evidence.
-4. Unknown beats guessed. Adapters must prefer `unknown` or `null` over weak inference.
+4. Unspecified beats guessed. Adapters must prefer `unspecified` or `null` over weak inference.
 5. Normalization is shared, not adapter-specific. Adapters extract raw signals; shared normalization utilities map them to canonical enums.
 
 ## Where This Fits
@@ -189,10 +189,10 @@ interface NormalizedListingCandidate {
     city: string | null;
     country_code: string | null;
     region_scope: string | null; // e.g. TR, EMEA, GLOBAL when explicit
-    work_model: string;         // canonical enum or unknown
-    seniority: string;          // canonical enum or unknown
-    language: string;           // canonical enum or unknown
-    employment_type: string;    // canonical enum or unknown
+    work_model: string;         // canonical enum or unspecified
+    seniority: string;          // canonical enum or unspecified
+    language: string;           // canonical enum or unspecified
+    employment_type: string;    // canonical enum or unspecified
     compensation_text: string | null;
     posted_at: string | null;   // ISO timestamp when reliable, else null
     pipeline_status: "discovered";
@@ -259,7 +259,7 @@ These must always be present:
 - `provenance.discovered_at`
 - `provenance.fetched_via`
 
-If a value is unknown, emit `unknown` or `null` according to the field type. Do not omit keys.
+If a value is ambiguous or missing, emit `unspecified` or `null` according to the field type. Do not omit keys.
 
 ### Canonical enums
 

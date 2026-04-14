@@ -14,5 +14,7 @@ Eğer `config/profile.yml` içinde `language.modes_dir: modes/tr` varsa, her wor
 
 - Tracker status label'ları canonical English kalır.
 - Report machine-key'leri canonical English kalır.
+- Her report header'ı parser-safe TR metadata üretir: `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence`.
+- Worker, scanner sidecar veya pipeline tag'leri varsa bunları kullanır; yoksa JD'den çıkarır ve belirsiz alanları metadata tipine göre güvenli değerle bırakır: city ve salary için `unknown`, work model/language/employment type için `unspecified`.
 - PDF template seçimi ve output naming için `cv-template-utils.mjs` kullanılır.
 - `automation.application` ve `language.cv_preferences` alanları interactive akıştakiyle aynı şekilde yorumlanır.

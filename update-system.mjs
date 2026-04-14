@@ -62,6 +62,7 @@ const SYSTEM_PATHS = [
   'normalize-statuses.mjs',
   'cv-sync-check.mjs',
   'cv-template-utils.mjs',
+  'tr-listing-normalizer.mjs',
   'tracker-status-utils.mjs',
   'company-name-utils.mjs',
   'test-all.mjs',

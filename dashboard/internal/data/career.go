@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -26,6 +27,13 @@ var (
 	reArchetypeColon = regexp.MustCompile(`(?i)\*\*(?:Archetype|Arquetipo):\*\*\s*(.+)`)
 	reReportURL      = regexp.MustCompile(`(?m)^\*\*URL:\*\*\s*(https?://\S+)`)
 	reBatchID        = regexp.MustCompile(`(?m)^\*\*Batch ID:\*\*\s*(\d+)`)
+	reMetaCity       = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*City:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaWorkModel  = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Work Model:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaLanguage   = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Language:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaEmployment = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Employment Type:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaSalary     = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Salary Transparency:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaSource     = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Source:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaConfidence = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Confidence:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
 
 	statusRegistryOnce   sync.Once
 	statusAliasToGroup   map[string]string
@@ -47,6 +55,20 @@ type trackerStatusEntry struct {
 	Rank         int      `json:"rank"`
 	DisplayOrder int      `json:"display_order"`
 	Aliases      []string `json:"aliases"`
+}
+
+type trListingRecord struct {
+	CanonicalURL       string   `json:"canonical_url"`
+	URL                string   `json:"url"`
+	City               string   `json:"city"`
+	WorkModel          string   `json:"work_model"`
+	Language           string   `json:"language"`
+	EmploymentType     string   `json:"employment_type"`
+	SalaryTransparency string   `json:"salary_transparency"`
+	Source             string   `json:"source"`
+	SourceSlug         string   `json:"source_slug"`
+	ConfidenceScore    float64  `json:"confidence_score"`
+	Warnings           []string `json:"warnings"`
 }
 
 func initStatusRegistryDefaults() {
@@ -230,6 +252,192 @@ func TrackerStatusLabel(group string) string {
 	return strings.ToUpper(group)
 }
 
+func canonicalizeListingURL(raw string) string {
+	parsed, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+		return strings.TrimSpace(raw)
+	}
+	query := parsed.Query()
+	for key := range query {
+		lower := strings.ToLower(key)
+		if strings.HasPrefix(lower, "utm_") {
+			query.Del(key)
+			continue
+		}
+		switch lower {
+		case "refid", "trackingid", "trk", "originalsubdomain", "page", "pagenum", "position", "index", "start":
+			query.Del(key)
+		}
+	}
+	parsed.RawQuery = query.Encode()
+	parsed.Fragment = ""
+	return parsed.String()
+}
+
+func loadTrListingSidecar(careerOpsPath string) map[string]trListingRecord {
+	path := filepath.Join(careerOpsPath, "data", "tr-listings.jsonl")
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+
+	records := make(map[string]trListingRecord)
+	for _, line := range strings.Split(string(content), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		var record trListingRecord
+		if err := json.Unmarshal([]byte(line), &record); err != nil {
+			continue
+		}
+		key := record.CanonicalURL
+		if key == "" {
+			key = canonicalizeListingURL(record.URL)
+		}
+		if key == "" {
+			continue
+		}
+		records[key] = record
+	}
+	return records
+}
+
+func applyTrListingRecord(app *model.CareerApplication, record trListingRecord) {
+	if record.City != "" {
+		app.City = record.City
+	}
+	if record.WorkModel != "" && record.WorkModel != "unspecified" {
+		app.WorkModel = record.WorkModel
+	}
+	if record.Language != "" && record.Language != "unspecified" {
+		app.Language = record.Language
+	}
+	if record.EmploymentType != "" && record.EmploymentType != "unspecified" {
+		app.EmploymentType = record.EmploymentType
+	}
+	if record.SalaryTransparency != "" && record.SalaryTransparency != "unknown" {
+		app.SalaryTransparency = record.SalaryTransparency
+		app.SalaryTransparent = record.SalaryTransparency == "transparent"
+	}
+	if record.Source != "" {
+		app.Source = record.Source
+	} else if record.SourceSlug != "" {
+		app.Source = record.SourceSlug
+	}
+	if record.ConfidenceScore > 0 {
+		app.ConfidenceScore = record.ConfidenceScore
+	}
+	for _, warning := range record.Warnings {
+		if warning == "low_confidence" && app.Confidence == "" {
+			app.Confidence = "low"
+		}
+	}
+}
+
+func parseFloatLoose(value string) float64 {
+	value = strings.TrimSpace(strings.TrimSuffix(value, "%"))
+	parsed, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return 0
+	}
+	if parsed > 1 {
+		return parsed / 100
+	}
+	return parsed
+}
+
+func applyTagMetadata(app *model.CareerApplication, notes string) {
+	for _, token := range strings.Fields(strings.ReplaceAll(notes, ";", " ")) {
+		token = strings.Trim(token, ",|")
+		parts := strings.SplitN(token, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.ToLower(strings.TrimSpace(parts[0]))
+		value := strings.TrimSpace(parts[1])
+		switch key {
+		case "city":
+			if app.City == "" {
+				app.City = value
+			}
+		case "work_model":
+			if app.WorkModel == "" {
+				app.WorkModel = value
+			}
+		case "lang", "language":
+			if app.Language == "" {
+				app.Language = value
+			}
+		case "employment", "employment_type":
+			if app.EmploymentType == "" {
+				app.EmploymentType = value
+			}
+		case "salary":
+			if app.SalaryTransparency == "" {
+				app.SalaryTransparency = value
+				app.SalaryTransparent = value == "transparent"
+			}
+		case "source":
+			if app.Source == "" {
+				app.Source = value
+			}
+		case "confidence":
+			if app.ConfidenceScore == 0 {
+				app.ConfidenceScore = parseFloatLoose(value)
+			}
+			if app.Confidence == "" && app.ConfidenceScore > 0 && app.ConfidenceScore < 0.65 {
+				app.Confidence = "low"
+			}
+		}
+	}
+}
+
+func applyReportMetadata(app *model.CareerApplication, reportText string) {
+	if m := reMetaCity.FindStringSubmatch(reportText); m != nil && app.City == "" {
+		app.City = cleanTableCell(m[1])
+	}
+	if m := reMetaWorkModel.FindStringSubmatch(reportText); m != nil && app.WorkModel == "" {
+		app.WorkModel = cleanTableCell(m[1])
+	}
+	if m := reMetaLanguage.FindStringSubmatch(reportText); m != nil && app.Language == "" {
+		app.Language = cleanTableCell(m[1])
+	}
+	if m := reMetaEmployment.FindStringSubmatch(reportText); m != nil && app.EmploymentType == "" {
+		app.EmploymentType = cleanTableCell(m[1])
+	}
+	if m := reMetaSalary.FindStringSubmatch(reportText); m != nil && app.SalaryTransparency == "" {
+		app.SalaryTransparency = cleanTableCell(m[1])
+		app.SalaryTransparent = strings.EqualFold(app.SalaryTransparency, "transparent")
+	}
+	if m := reMetaSource.FindStringSubmatch(reportText); m != nil && app.Source == "" {
+		app.Source = cleanTableCell(m[1])
+	}
+	if m := reMetaConfidence.FindStringSubmatch(reportText); m != nil && app.Confidence == "" {
+		app.Confidence = cleanTableCell(m[1])
+		if app.ConfidenceScore == 0 {
+			app.ConfidenceScore = parseFloatLoose(app.Confidence)
+		}
+	}
+}
+
+func enrichTrListingMetadata(careerOpsPath string, apps []model.CareerApplication, reportHeaders map[int]string) {
+	sidecar := loadTrListingSidecar(careerOpsPath)
+	for i := range apps {
+		applyTagMetadata(&apps[i], apps[i].Notes)
+		if reportHeaders != nil {
+			applyReportMetadata(&apps[i], reportHeaders[i])
+		}
+		if apps[i].JobURL == "" || sidecar == nil {
+			continue
+		}
+		key := canonicalizeListingURL(apps[i].JobURL)
+		if record, ok := sidecar[key]; ok {
+			applyTrListingRecord(&apps[i], record)
+		}
+	}
+}
+
 // ParseApplications reads applications.md and returns parsed applications.
 // It tries both {path}/applications.md and {path}/data/applications.md for compatibility.
 func ParseApplications(careerOpsPath string) []model.CareerApplication {
@@ -320,6 +528,7 @@ func ParseApplications(careerOpsPath string) []model.CareerApplication {
 	// 5. company name fallback from batch-input.tsv
 	batchURLs := loadBatchInputURLs(careerOpsPath)
 	reportNumURLs := loadJobURLs(careerOpsPath)
+	reportHeaders := make(map[int]string)
 
 	for i := range apps {
 		if apps[i].ReportPath == "" {
@@ -335,26 +544,20 @@ func ParseApplications(careerOpsPath string) []model.CareerApplication {
 		if len(header) > 1000 {
 			header = header[:1000]
 		}
+		reportHeaders[i] = header
 
 		// Strategy 1: **URL:** in report
 		if m := reReportURL.FindStringSubmatch(header); m != nil {
 			apps[i].JobURL = m[1]
-			continue
-		}
-
-		// Strategy 2: **Batch ID:** -> batch-input.tsv
-		if m := reBatchID.FindStringSubmatch(header); m != nil {
+		} else if m := reBatchID.FindStringSubmatch(header); m != nil {
+			// Strategy 2: **Batch ID:** -> batch-input.tsv
 			if url, ok := batchURLs[m[1]]; ok {
 				apps[i].JobURL = url
-				continue
 			}
-		}
-
-		// Strategy 3: report_num -> batch-state completed mapping
-		if reportNumURLs != nil {
+		} else if reportNumURLs != nil {
+			// Strategy 3: report_num -> batch-state completed mapping
 			if url, ok := reportNumURLs[apps[i].ReportNumber]; ok {
 				apps[i].JobURL = url
-				continue
 			}
 		}
 	}
@@ -364,6 +567,9 @@ func ParseApplications(careerOpsPath string) []model.CareerApplication {
 
 	// Strategy 5: company name fallback from batch-input.tsv
 	enrichAppURLsByCompany(careerOpsPath, apps)
+
+	// Turkey listing metadata sidecar and note-tag fallback.
+	enrichTrListingMetadata(careerOpsPath, apps, reportHeaders)
 
 	return apps
 }

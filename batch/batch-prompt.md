@@ -191,6 +191,7 @@ Donde `{company-slug}` es el nombre de empresa en lowercase, sin espacios, con g
 
 Si `config/profile.yml -> language.modes_dir` es `modes/tr`, este bloque es solo una referencia minima. El contrato obligatorio del report lo define `modes/tr/teklif.md`:
 - machine keys del header en English (`Date`, `Archetype`, `Score`, `URL`, `PDF`, `Batch ID`)
+- metadata Turkey si `language.modes_dir` es `modes/tr`: `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence`
 - bloque `## Global Score`
 - `**Red Flag Cap:**`, `**Final Score:**`, `**Confidence:**`, `**Recommendation Category:**`, `**Borderline:**`
 - secciones `## Strengths`, `## Risks`, `## Recommendation`
@@ -204,6 +205,13 @@ Si `config/profile.yml -> language.modes_dir` es `modes/tr`, este bloque es solo
 **URL:** {URL de la oferta original}
 **PDF:** output/cv-candidate-{company-slug}-{lang}-{{DATE}}.pdf
 **Batch ID:** {{ID}}
+**City:** {city or unknown}
+**Work Model:** {remote|hybrid|on_site|field|unspecified}
+**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
+**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
+**Salary Transparency:** {transparent|market_range|opaque|unknown}
+**Source:** {portal or company careers}
+**Confidence:** {high|medium|low}
 
 ---
 

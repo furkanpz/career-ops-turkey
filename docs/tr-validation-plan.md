@@ -242,14 +242,16 @@ Fail:
 
 ## Reality Check
 
-There is no Turkey listing normalizer implementation in the repo today.
+Turkey listing normalization now has a runtime implementation in `tr-listing-normalizer.mjs` and an additive user-layer sidecar at `data/tr-listings.jsonl`.
 
-So validation is currently:
+Validation must cover:
 
 - contract consistency checks
-- fixture-based manual QA against the normalization spec
+- fixture-based QA against the normalization spec
+- sidecar merge/upsert behavior keyed by canonical URL
+- dashboard fallback order: sidecar first, then note tags, then report metadata
 
-Any Turkey release that claims automated field normalization must add executable tests later.
+Any future enum expansion must update the normalizer, scanner fixtures, dashboard parser tests, and this validation plan in the same change.
 
 ### Unit
 
@@ -292,7 +294,7 @@ Use this fixture table during review:
 Pass:
 
 - every mapping is deterministic and conservative
-- ambiguous values stay `unknown` or `null`
+- ambiguous values stay `unspecified` or `null`
 - raw text is preserved where the spec says to preserve it
 
 Fail:
@@ -303,7 +305,7 @@ Fail:
 
 ### Manual QA
 
-#### NM-M1: Unknown-beats-guessed review
+#### NM-M1: Unspecified-beats-guessed review
 
 Review ambiguous cases such as:
 
@@ -313,7 +315,7 @@ Review ambiguous cases such as:
 
 Pass:
 
-- the proposed Turkey behavior prefers `unknown` over weak inference
+- the proposed Turkey behavior prefers `unspecified` over weak inference
 
 Fail:
 

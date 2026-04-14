@@ -18,7 +18,7 @@ Non-goals:
 
 ## Design Principles
 
-1. Additive first. Existing `data/pipeline.md`, `data/applications.md`, reports, and dashboard flows remain valid.
+1. Additive first. Existing `data/pipeline.md`, `data/applications.md`, reports, and dashboard flows remain valid. Runtime scanner metadata is projected into `data/tr-listings.jsonl` as a JSONL sidecar before any heavier storage migration is considered.
 2. Normalized core, flat projection for consumers. Storage can be relational; downstream tools can still consume a flattened record.
 3. Preserve raw evidence. Keep original JD text and raw location/compensation text.
 4. Normalize only what is operationally useful for filtering, scoring, and tracking.
@@ -29,6 +29,7 @@ Non-goals:
 Current repo concepts:
 
 - `data/pipeline.md` is the inbox for discovered URLs.
+- `data/tr-listings.jsonl` is the additive Turkey listing metadata sidecar keyed by canonical URL.
 - `data/applications.md` is the canonical application tracker.
 - `tracker-status-registry.json` defines tracker-safe canonical statuses (`templates/states.yml` is only a human-readable mirror):
   - `EVALUATED`
@@ -114,7 +115,7 @@ Normalized Turkey location reference.
 |---|---|---:|---|
 | `id` | uuid | yes | Primary key |
 | `country_code` | char(2) | no | Actual listing country when known; do not derive from candidate default |
-| `city` | text | no | Canonical city name; nullable for country-wide remote, multi-country, or unknown cases |
+| `city` | text | no | Canonical city name; nullable for country-wide remote, multi-country, or unspecified cases |
 | `district` | text | no | e.g. `Kadikoy`, `Cankaya`, `Gebze` |
 | `region_scope` | text | no | Optional hiring geography such as `TR`, `EMEA`, `GLOBAL`, `MULTI_COUNTRY` |
 | `location_text` | text | yes | Original or cleaned display string from listing |
@@ -142,7 +143,7 @@ Core listing record. This is the operational table used by scanning, evaluation,
 | `id` | uuid | yes | Primary key |
 | `company_id` | uuid | yes | FK -> `tr_companies.id` |
 | `source_id` | uuid | yes | FK -> `tr_sources.id` |
-| `location_id` | uuid | no | FK -> `tr_locations.id`; nullable for fully unknown location |
+| `location_id` | uuid | no | FK -> `tr_locations.id`; nullable for fully unspecified location |
 | `external_listing_id` | text | no | Stable source-side id if available |
 | `title` | text | yes | Normalized role title as displayed |
 | `work_model` | text | yes | Canonical enum |
@@ -249,9 +250,9 @@ This satisfies the minimum required output fields while preserving normalized st
 
 - `remote`
 - `hybrid`
-- `onsite`
+- `on_site`
 - `field`
-- `unknown`
+- `unspecified`
 
 ### `seniority`
 
@@ -268,7 +269,7 @@ This satisfies the minimum required output fields while preserving normalized st
 - `head`
 - `vp`
 - `c_level`
-- `unknown`
+- `unspecified`
 
 ### `language`
 
@@ -280,7 +281,7 @@ This satisfies the minimum required output fields while preserving normalized st
 - `ar`
 - `ru`
 - `multilingual`
-- `unknown`
+- `unspecified`
 
 ### `employment_type`
 
@@ -292,7 +293,7 @@ This satisfies the minimum required output fields while preserving normalized st
 - `freelance`
 - `consulting`
 - `apprenticeship`
-- `unknown`
+- `unspecified`
 
 ### `pipeline_status`
 
@@ -325,7 +326,7 @@ Compatibility note:
 | `company` | Derived from `tr_companies.canonical_name` |
 | `source` | Derived from `tr_sources.source` |
 | `source_type` | Derived from `tr_sources.source_type` |
-| `city` | Canonical Turkish city name for filtering; nullable only if truly unknown |
+| `city` | Canonical Turkish city name for filtering; nullable only if truly unspecified |
 | `location_text` | Preserve source display text, including district or `Remote - Turkey` wording |
 | `work_model` | Canonical enum from listing wording |
 | `seniority` | Canonical enum from title and JD clues |

@@ -242,6 +242,13 @@ Header için parser-riskini azaltmak üzere şu anahtarlar korunur:
 **Score:** {final score}/5
 **URL:** {ilan URL}
 **PDF:** {yol veya pending}
+**City:** {city veya unknown}
+**Work Model:** {remote|hybrid|on_site|field|unspecified}
+**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
+**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
+**Salary Transparency:** {transparent|market_range|opaque|unknown}
+**Source:** {portal veya company careers}
+**Confidence:** {high|medium|low}
 ```
 
 Rapor iskeleti:

@@ -70,3 +70,70 @@ func TestWithReloadedDataPreservesStateAndSelection(t *testing.T) {
 		t.Fatal("expected cached report summaries to survive refresh")
 	}
 }
+
+func TestTurkeyPresetFilters(t *testing.T) {
+	apps := []model.CareerApplication{
+		{
+			Company:            "Acme",
+			Role:               "Backend Engineer",
+			Status:             "Evaluated",
+			Score:              4.1,
+			City:               "istanbul",
+			WorkModel:          "hybrid",
+			Language:           "tr_en",
+			SalaryTransparency: "transparent",
+			SalaryTransparent:  true,
+			ConfidenceScore:    0.72,
+		},
+		{
+			Company:         "Beta",
+			Role:            "Platform Engineer",
+			Status:          "Evaluated",
+			Score:           3.8,
+			City:            "ankara",
+			WorkModel:       "on_site",
+			Language:        "tr",
+			Confidence:      "low",
+			ConfidenceScore: 0.52,
+		},
+	}
+
+	pm := NewPipelineModel(
+		theme.NewTheme("catppuccin-mocha"),
+		apps,
+		model.PipelineMetrics{Total: len(apps)},
+		"..",
+		120,
+		40,
+	)
+
+	cases := []struct {
+		filter string
+		want   string
+	}{
+		{filterRemote, "Acme"},
+		{filterIstanbul, "Acme"},
+		{filterTrEn, "Acme"},
+		{filterSalary, "Acme"},
+		{filterReview, "Beta"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.filter, func(t *testing.T) {
+			pm.activeTab = tabIndex(tc.filter)
+			pm.applyFilterAndSort()
+			if len(pm.filtered) != 1 || pm.filtered[0].Company != tc.want {
+				t.Fatalf("expected %s filter to keep %s, got %+v", tc.filter, tc.want, pm.filtered)
+			}
+		})
+	}
+}
+
+func tabIndex(filter string) int {
+	for i, tab := range pipelineTabs {
+		if tab.filter == filter {
+			return i
+		}
+	}
+	return 0
+}

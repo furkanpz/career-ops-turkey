@@ -119,6 +119,7 @@ console.log('\n3. Scanner contract');
 
 let scanModule = null;
 let livenessModule = null;
+let trListingModule = null;
 const packageJson = readJson('package.json');
 const readme = readFile('README.md');
 const englishReadme = fileExists('README.en.md') ? readFile('README.en.md') : readme;
@@ -170,6 +171,13 @@ try {
   pass('check-liveness.mjs imports cleanly');
 } catch (err) {
   fail(`check-liveness.mjs import failed: ${err.message}`);
+}
+
+try {
+  trListingModule = await import(pathToFileURL(join(ROOT, 'tr-listing-normalizer.mjs')).href);
+  pass('tr-listing-normalizer.mjs imports cleanly');
+} catch (err) {
+  fail(`tr-listing-normalizer.mjs import failed: ${err.message}`);
 }
 
 if (scanModule) {
@@ -416,6 +424,54 @@ if (scanModule) {
     fail('Kariyer direct search parser failed');
   }
 
+  const genericTrBoardFixtures = [
+    {
+      name: 'Indeed TR',
+      parser: scanModule.parseIndeedTrSearchResultsHtml,
+      url: 'https://tr.indeed.com/viewjob?jk=abc123',
+    },
+    {
+      name: 'Eleman.net',
+      parser: scanModule.parseElemanNetSearchResultsHtml,
+      url: 'https://www.eleman.net/is-ilani/backend-developer-i123',
+    },
+    {
+      name: 'Secretcv',
+      parser: scanModule.parseSecretcvSearchResultsHtml,
+      url: 'https://www.secretcv.com/is-ilanlari/backend-developer-is-ilani-123',
+    },
+    {
+      name: 'Yenibiris',
+      parser: scanModule.parseYenibirisSearchResultsHtml,
+      url: 'https://www.yenibiris.com/is-ilanlari/backend-developer/123',
+    },
+    {
+      name: 'ISKUR',
+      parser: scanModule.parseIskurSearchResultsHtml,
+      url: 'https://esube.iskur.gov.tr/Istihdam/AcikIsIlanDetay.aspx?uiID=123',
+    },
+  ];
+  for (const fixture of genericTrBoardFixtures) {
+    const html = [
+      '<article class="job-card">',
+      `<a class="job-title" href="${fixture.url}">Backend Developer</a>`,
+      '<span class="company">Example Teknoloji</span>',
+      '<span class="location">Istanbul Hybrid</span>',
+      '</article>',
+    ].join('');
+    const parsed = fixture.parser(html, 10);
+    if (
+      parsed.length === 1 &&
+      parsed[0].title === 'Backend Developer' &&
+      parsed[0].company === 'Example Teknoloji' &&
+      parsed[0].location === 'Istanbul Hybrid'
+    ) {
+      pass(`${fixture.name} direct search parser works`);
+    } else {
+      fail(`${fixture.name} direct search parser failed`);
+    }
+  }
+
   const linkedInPages = scanModule.expandDirectSearchUrls({
     pagination: { type: 'linkedin_start', page_size: 25, max_pages: 3 },
     search_urls: ['https://www.linkedin.com/jobs/search/?keywords=Software%20Engineer&location=Turkey'],
@@ -550,6 +606,108 @@ if (livenessModule) {
   }
 }
 
+if (trListingModule) {
+  const normalized = trListingModule.normalizeTrListingCandidate({
+    title: 'Senior Backend Engineer - Istanbul Hybrid - English',
+    company: 'Example A.S.',
+    url: 'https://www.kariyer.net/is-ilani/example?utm_source=test',
+    source: 'Kariyer.net',
+    sourceType: 'job_board',
+    parserKey: 'kariyernet_search',
+    location: 'Istanbul',
+    compensationText: '120.000 TL gross',
+    discoveryMethod: 'direct_board_search',
+  }, { updatedAt: '2026-04-14T00:00:00.000Z' });
+  if (
+    normalized.city === 'istanbul' &&
+    normalized.work_model === 'hybrid' &&
+    normalized.language === 'en' &&
+    normalized.seniority === 'senior' &&
+    normalized.salary_transparency === 'transparent' &&
+    normalized.source_slug === 'kariyer_net' &&
+    normalized.confidence_score >= 0.8
+  ) {
+    pass('TR listing normalizer extracts core metadata');
+  } else {
+    fail(`TR listing normalizer mismatch: ${JSON.stringify(normalized)}`);
+  }
+
+  const tags = trListingModule.makeTrListingTags(normalized);
+  if (
+    tags.includes('city:istanbul') &&
+    tags.includes('work_model:hybrid') &&
+    tags.includes('lang:en') &&
+    tags.includes('salary:transparent') &&
+    tags.includes('source:kariyer_net')
+  ) {
+    pass('TR listing metadata tags are stable');
+  } else {
+    fail(`TR listing metadata tags mismatch: ${tags.join(' ')}`);
+  }
+
+  const canonicalInput = trListingModule.normalizeTrListingCandidate({
+    title: 'QA Engineer',
+    company: 'Canonical Corp',
+    url: 'https://example.com/canonical-job',
+    source: 'Company Careers',
+    sourceType: 'company_careers',
+    workModel: 'on_site',
+    language: 'tr_en',
+    employmentType: 'full_time',
+    salaryTransparency: 'transparent',
+  }, { updatedAt: '2026-04-14T00:00:00.000Z' });
+  if (
+    canonicalInput.work_model === 'on_site' &&
+    canonicalInput.language === 'tr_en' &&
+    canonicalInput.employment_type === 'full_time' &&
+    canonicalInput.salary_transparency === 'transparent'
+  ) {
+    pass('TR listing normalizer preserves canonical metadata values');
+  } else {
+    fail(`TR listing normalizer dropped canonical values: ${JSON.stringify(canonicalInput)}`);
+  }
+
+  const extendedEnums = trListingModule.normalizeTrListingCandidate({
+    title: 'Field Engineering Director',
+    company: 'Expanded Corp',
+    url: 'https://example.com/expanded-job',
+    source: 'Company Careers',
+    sourceType: 'company_careers',
+    location: 'Sahada',
+    language: 'German',
+    employmentType: 'temporary',
+  }, { updatedAt: '2026-04-14T00:00:00.000Z' });
+  if (
+    extendedEnums.work_model === 'field' &&
+    extendedEnums.seniority === 'director' &&
+    extendedEnums.language === 'de' &&
+    extendedEnums.employment_type === 'temporary'
+  ) {
+    pass('TR listing normalizer covers extended enum values');
+  } else {
+    fail(`TR listing normalizer extended enum mismatch: ${JSON.stringify(extendedEnums)}`);
+  }
+
+  const sidecar = trListingModule.buildTrListingSidecarJsonl(
+    '{"canonical_url":"https://example.com/job","url":"https://example.com/job","city":"ankara"}\n',
+    [{
+      title: 'Backend Developer',
+      company: 'Example',
+      url: 'https://example.com/job?utm_source=x',
+      source: 'Company Careers',
+      sourceType: 'company_careers',
+      location: 'Istanbul Remote',
+    }],
+    { updatedAt: '2026-04-14T00:00:00.000Z' },
+  );
+  const sidecarRows = sidecar.trim().split('\n').map((line) => JSON.parse(line));
+  if (sidecarRows.length === 1 && sidecarRows[0].city === 'istanbul' && sidecarRows[0].work_model === 'remote') {
+    pass('TR listing sidecar upsert is keyed by canonical URL');
+  } else {
+    fail(`TR listing sidecar upsert mismatch: ${sidecar}`);
+  }
+}
+
 // ── 4. DASHBOARD BUILD ──────────────────────────────────────────
 
 if (!QUICK) {
@@ -579,6 +737,7 @@ const systemFiles = [
   'templates/states.yml', 'templates/cv-template.html', 'templates/portals.tr.example.yml',
   'config/profile.tr.example.yml', 'tracker-status-registry.json',
   'tracker-status-utils.mjs', 'cv-template-utils.mjs', 'company-name-utils.mjs',
+  'tr-listing-normalizer.mjs',
   '.claude/skills/career-ops/SKILL.md', '.opencode/commands/career-ops.md',
   '.opencode/commands/career-ops-patterns.md', '.opencode/commands/career-ops-followup.md',
 ];
@@ -596,7 +755,7 @@ const userFiles = [
   'config/profile.yml', 'modes/_profile.md', 'portals.yml',
 ];
 for (const f of userFiles) {
-  const tracked = run(`git ls-files ${f}`);
+  const tracked = run(`git ls-files ${f} 2>/dev/null`);
   if (tracked === '') {
     pass(`User file gitignored: ${f}`);
   } else if (tracked === null) {

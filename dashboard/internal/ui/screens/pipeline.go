@@ -71,6 +71,11 @@ const (
 	filterInterview = "interview"
 	filterSkip      = "skip"
 	filterTop       = "top"
+	filterRemote    = "remote_hybrid"
+	filterIstanbul  = "istanbul"
+	filterTrEn      = "tr_en"
+	filterSalary    = "salary"
+	filterReview    = "review"
 )
 
 type pipelineTab struct {
@@ -84,6 +89,11 @@ var pipelineTabs = []pipelineTab{
 	{filterApplied, "APPLIED"},
 	{filterInterview, "INTERVIEW"},
 	{filterTop, "TOP ≥4"},
+	{filterRemote, "REMOTE/HYBRID"},
+	{filterIstanbul, "ISTANBUL"},
+	{filterTrEn, "TR-EN"},
+	{filterSalary, "SALARY"},
+	{filterReview, "REVIEW"},
 	{filterSkip, "SKIP"},
 }
 
@@ -433,6 +443,26 @@ func (m *PipelineModel) applyFilterAndSort() {
 			if app.Score >= 4.0 && norm != "skip" {
 				filtered = append(filtered, app)
 			}
+		case filterRemote:
+			if isRemoteOrHybrid(app) {
+				filtered = append(filtered, app)
+			}
+		case filterIstanbul:
+			if isIstanbul(app) {
+				filtered = append(filtered, app)
+			}
+		case filterTrEn:
+			if isTrEnLanguage(app) {
+				filtered = append(filtered, app)
+			}
+		case filterSalary:
+			if app.SalaryTransparent || strings.EqualFold(app.SalaryTransparency, "transparent") {
+				filtered = append(filtered, app)
+			}
+		case filterReview:
+			if needsTurkeyReview(app) {
+				filtered = append(filtered, app)
+			}
 		default:
 			if norm == currentFilter {
 				filtered = append(filtered, app)
@@ -635,6 +665,26 @@ func (m PipelineModel) countForFilter(filter string) int {
 			if app.Score >= 4.0 && norm != "skip" {
 				count++
 			}
+		case filterRemote:
+			if isRemoteOrHybrid(app) {
+				count++
+			}
+		case filterIstanbul:
+			if isIstanbul(app) {
+				count++
+			}
+		case filterTrEn:
+			if isTrEnLanguage(app) {
+				count++
+			}
+		case filterSalary:
+			if app.SalaryTransparent || strings.EqualFold(app.SalaryTransparency, "transparent") {
+				count++
+			}
+		case filterReview:
+			if needsTurkeyReview(app) {
+				count++
+			}
 		default:
 			if norm == filter {
 				count++
@@ -815,6 +865,11 @@ func (m PipelineModel) renderPreview() string {
 		lines = append(lines, padStyle.Render(dimStyle.Render("Loading preview...")))
 	}
 
+	if meta := renderTurkeyMetadata(app); meta != "" {
+		lines = append(lines, padStyle.Render(
+			labelStyle.Render("TR Metadata: ")+valueStyle.Render(meta)))
+	}
+
 	return strings.Join(lines, "\n")
 }
 
@@ -887,6 +942,74 @@ func (m PipelineModel) overlayStatusPicker(body string) string {
 }
 
 // -- Helpers --
+
+func isRemoteOrHybrid(app model.CareerApplication) bool {
+	value := foldTurkeyFilterText(app.WorkModel + " " + app.Remote)
+	return strings.Contains(value, "remote") || strings.Contains(value, "hybrid") || strings.Contains(value, "hibrit")
+}
+
+func isIstanbul(app model.CareerApplication) bool {
+	value := foldTurkeyFilterText(app.City + " " + app.Notes)
+	return strings.Contains(value, "istanbul")
+}
+
+func isTrEnLanguage(app model.CareerApplication) bool {
+	value := foldTurkeyFilterText(app.Language + " " + app.Notes)
+	padded := " " + strings.Join(strings.Fields(value), " ") + " "
+	return strings.Contains(value, "tr_en") || strings.Contains(value, "tr-en") || strings.Contains(value, "english") || strings.Contains(padded, " en ") || strings.Contains(value, "lang:en")
+}
+
+func needsTurkeyReview(app model.CareerApplication) bool {
+	value := foldTurkeyFilterText(app.Confidence + " " + app.Notes)
+	return strings.Contains(value, "low") ||
+		strings.Contains(value, "public_unverified") ||
+		strings.Contains(value, "review_only") ||
+		(app.ConfidenceScore > 0 && app.ConfidenceScore < 0.65)
+}
+
+func foldTurkeyFilterText(value string) string {
+	replacer := strings.NewReplacer(
+		"İ", "i",
+		"I", "i",
+		"ı", "i",
+		"ğ", "g",
+		"Ğ", "g",
+		"ü", "u",
+		"Ü", "u",
+		"ş", "s",
+		"Ş", "s",
+		"ö", "o",
+		"Ö", "o",
+		"ç", "c",
+		"Ç", "c",
+	)
+	return strings.ToLower(replacer.Replace(value))
+}
+
+func renderTurkeyMetadata(app model.CareerApplication) string {
+	var parts []string
+	if app.City != "" {
+		parts = append(parts, "city="+app.City)
+	}
+	if app.WorkModel != "" {
+		parts = append(parts, "work_model="+app.WorkModel)
+	}
+	if app.Language != "" {
+		parts = append(parts, "lang="+app.Language)
+	}
+	if app.SalaryTransparency != "" {
+		parts = append(parts, "salary="+app.SalaryTransparency)
+	}
+	if app.Source != "" {
+		parts = append(parts, "source="+app.Source)
+	}
+	if app.Confidence != "" {
+		parts = append(parts, "confidence="+app.Confidence)
+	} else if app.ConfidenceScore > 0 {
+		parts = append(parts, fmt.Sprintf("confidence=%.2f", app.ConfidenceScore))
+	}
+	return strings.Join(parts, "  ")
+}
 
 func (m PipelineModel) scoreStyle(score float64) lipgloss.Style {
 	switch {

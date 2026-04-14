@@ -21,6 +21,11 @@ import yaml from 'js-yaml';
 import { chromium } from 'playwright';
 import { checkUrl } from './check-liveness.mjs';
 import { normalizeCompanyKey, normalizeRoleTitle } from './company-name-utils.mjs';
+import {
+  makeTrListingTags,
+  normalizeTrListingCandidate,
+  upsertTrListingSidecar,
+} from './tr-listing-normalizer.mjs';
 
 const parseYaml = yaml.load;
 
@@ -31,6 +36,7 @@ const PORTALS_PATH = join(ROOT, 'portals.yml');
 const DATA_DIR = join(ROOT, 'data');
 const SCAN_HISTORY_PATH = join(DATA_DIR, 'scan-history.tsv');
 const SCAN_LATEST_PATH = join(DATA_DIR, 'scan-latest.tsv');
+const TR_LISTINGS_PATH = join(DATA_DIR, 'tr-listings.jsonl');
 const PIPELINE_PATH = join(DATA_DIR, 'pipeline.md');
 const REVIEW_PIPELINE_PATH = join(DATA_DIR, 'review-pipeline.md');
 const APPLICATIONS_PATH = existsSync(join(DATA_DIR, 'applications.md'))
@@ -748,10 +754,10 @@ function isLikelyJobUrl(url, parserKey = '', adapterFamily = '') {
 
     if (host.includes('linkedin.com')) return path.includes('/jobs/view/');
     if (host.includes('kariyer.net')) return path.includes('/is-ilani/');
-    if (host.includes('indeed.com')) return path.includes('/viewjob') || path.includes('/jobs');
-    if (host.includes('eleman.net')) return path.includes('/is-ilani/');
-    if (host.includes('yenibiris.com')) return path.includes('/is-ilanlari/');
-    if (host.includes('secretcv.com')) return path.includes('/is-ilanlari/');
+    if (host.includes('indeed.com')) return path.includes('/viewjob') || path.includes('/jobs') || path.includes('/rc/clk') || parsed.searchParams.has('jk');
+    if (host.includes('eleman.net')) return path.includes('/is-ilani/') || path.includes('/job/');
+    if (host.includes('yenibiris.com')) return path.includes('/is-ilanlari/') || path.includes('is-ilani');
+    if (host.includes('secretcv.com')) return path.includes('/is-ilanlari/') || path.includes('/is-ilani/') || path.includes('/ilan/');
     if (host.includes('iskur') || host.includes('esube.iskur')) return path.includes('ilan') || path.includes('job');
     if (host.includes('greenhouse') || host.includes('ashbyhq.com') || host.includes('lever.co') || host.includes('workable.com') || host.includes('teamtailor')) {
       return /\/(jobs?|job-boards?|careers?|openings?)/.test(path);
@@ -933,6 +939,18 @@ function ensureDataFiles() {
   if (!existsSync(SCAN_LATEST_PATH)) {
     writeFileSync(SCAN_LATEST_PATH, 'run_id\turl\tfirst_seen\tportal\ttitle\tcompany\tstatus\tbucket\treason\tsource_host\n', 'utf-8');
   }
+  if (!existsSync(TR_LISTINGS_PATH)) {
+    writeFileSync(TR_LISTINGS_PATH, '', 'utf-8');
+  }
+}
+
+function formatTrMetadataSuffix(offer) {
+  const tags = makeTrListingTags(normalizeTrListingCandidate(offer));
+  return tags.length > 0 ? ` | ${tags.join(' ')}` : '';
+}
+
+function formatPipelineOfferLine(offer) {
+  return `- [ ] ${offer.url} | ${offer.company} | ${offer.title}${formatTrMetadataSuffix(offer)}`;
 }
 
 function appendToPipeline(offers) {
@@ -943,7 +961,7 @@ function appendToPipeline(offers) {
   const marker = '## Pendientes';
   const markerIndex = text.indexOf(marker);
 
-  const lines = offers.map((offer) => `- [ ] ${offer.url} | ${offer.company} | ${offer.title}`);
+  const lines = offers.map((offer) => formatPipelineOfferLine(offer));
   if (markerIndex === -1) {
     text += `\n## Pendientes\n\n${lines.join('\n')}\n`;
     writeFileSync(PIPELINE_PATH, text, 'utf-8');
@@ -1402,6 +1420,77 @@ export function parseKariyerSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESUL
   return results.slice(0, resolveSearchResultLimit(limit));
 }
 
+function extractHtmlMetaField(block, tokens) {
+  const tokenPattern = tokens.map(escapeRegex).join('|');
+  const attrPattern = new RegExp(`<[^>]+(?:class|data-test|data-testid|itemprop|aria-label)=["'][^"']*(?:${tokenPattern})[^"']*["'][^>]*>([\\s\\S]*?)<\\/[^>]+>`, 'i');
+  const attrMatch = block.match(attrPattern);
+  if (attrMatch?.[1]) {
+    return normalizeWhitespace(stripTags(attrMatch[1]));
+  }
+
+  const labelPattern = new RegExp(`(?:${tokenPattern})\\s*[:：]\\s*([^<|\\n]+)`, 'i');
+  const labelMatch = normalizeWhitespace(stripTags(block)).match(labelPattern);
+  return normalizeWhitespace(labelMatch?.[1] || '');
+}
+
+function parseGenericTrBoardSearchResultsHtml(html, limit, parserKey, baseUrl) {
+  const results = [];
+  const seenUrls = new Set();
+  const anchorRegex = /<a\b([^>]*)href=["']([^"']+)["']([^>]*)>([\s\S]*?)<\/a>/gi;
+  let match;
+
+  while ((match = anchorRegex.exec(html)) !== null) {
+    const attrs = `${match[1] || ''} ${match[3] || ''}`;
+    const url = toAbsoluteUrl(decodeHtmlEntities(match[2] || ''), baseUrl);
+    if (!isLikelyJobUrl(url, parserKey) || seenUrls.has(url)) continue;
+
+    const contextStart = Math.max(0, match.index - 900);
+    const contextEnd = Math.min(html.length, anchorRegex.lastIndex + 900);
+    const context = html.slice(contextStart, contextEnd);
+    const ariaTitle = decodeHtmlEntities(attrs.match(/(?:title|aria-label)=["']([^"']+)["']/i)?.[1] || '');
+    const rawTitle = normalizeWhitespace(stripTags(ariaTitle || match[4]));
+    if (!rawTitle || rawTitle.length < 3) continue;
+
+    const extracted = extractRoleCompanyFromTitle(rawTitle, parserKey);
+    const company = cleanCompanyToken(
+      extractHtmlMetaField(context, ['company', 'firma', 'employer', 'sirket', 'kurum']) ||
+      extracted.company
+    );
+    const location = normalizeWhitespace(
+      extractHtmlMetaField(context, ['location', 'lokasyon', 'sehir', 'city', 'il']) ||
+      extracted.location
+    );
+    const title = cleanRoleToken(extracted.role || rawTitle);
+
+    if (!title || !company) continue;
+    seenUrls.add(url);
+    results.push({ url, title, company, location });
+    if (results.length >= resolveSearchResultLimit(limit)) break;
+  }
+
+  return results;
+}
+
+export function parseIndeedTrSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
+  return parseGenericTrBoardSearchResultsHtml(html, limit, 'indeed_tr_search', 'https://tr.indeed.com');
+}
+
+export function parseElemanNetSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
+  return parseGenericTrBoardSearchResultsHtml(html, limit, 'elemannet_search', 'https://www.eleman.net');
+}
+
+export function parseSecretcvSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
+  return parseGenericTrBoardSearchResultsHtml(html, limit, 'secretcv_search', 'https://www.secretcv.com');
+}
+
+export function parseYenibirisSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
+  return parseGenericTrBoardSearchResultsHtml(html, limit, 'yenibiris_search', 'https://www.yenibiris.com');
+}
+
+export function parseIskurSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
+  return parseGenericTrBoardSearchResultsHtml(html, limit, 'iskur_search', 'https://esube.iskur.gov.tr');
+}
+
 function stripSearchSourceSuffix(rawTitle, parserKey) {
   let title = normalizeWhitespace(rawTitle);
   const profile = sourceProfileFor(parserKey);
@@ -1553,7 +1642,7 @@ function guessCompanyFromUrl(url) {
 export function normalizeSearchResult(result, queryConfig, options = {}) {
   const parserKey = queryConfig.parser_key || 'kariyernet_search';
   const profile = sourceProfileFor(parserKey, queryConfig.adapter_family);
-  const forcedCompany = options.companyName || queryConfig.company_name || '';
+  const forcedCompany = result.company || options.companyName || queryConfig.company_name || '';
   const extracted = extractRoleCompanyFromTitle(result.title, parserKey, forcedCompany);
   const role = extracted.role;
   const company = cleanCompanyToken(extracted.company || forcedCompany || guessCompanyFromUrl(result.url));
@@ -1570,7 +1659,7 @@ export function normalizeSearchResult(result, queryConfig, options = {}) {
     title: role,
     url: result.url,
     company,
-    location: extracted.location || '',
+    location: result.location || extracted.location || '',
     parserKey,
     source: profile.source,
     sourceType: profile.sourceType,
@@ -1771,11 +1860,16 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
     return { offers: [], history: [], handled: false };
   }
 
-  const parseDirect = parserKey === 'linkedin_jobs_search'
-    ? parseLinkedInSearchResultsHtml
-    : parserKey === 'kariyernet_search'
-      ? parseKariyerSearchResultsHtml
-      : null;
+  const directParsers = {
+    linkedin_jobs_search: parseLinkedInSearchResultsHtml,
+    kariyernet_search: parseKariyerSearchResultsHtml,
+    indeed_tr_search: parseIndeedTrSearchResultsHtml,
+    elemannet_search: parseElemanNetSearchResultsHtml,
+    secretcv_search: parseSecretcvSearchResultsHtml,
+    yenibiris_search: parseYenibirisSearchResultsHtml,
+    iskur_search: parseIskurSearchResultsHtml,
+  };
+  const parseDirect = directParsers[parserKey] || null;
 
   if (!parseDirect) {
     return { offers: [], history: [], handled: false };
@@ -2475,6 +2569,7 @@ async function main() {
     }
     if (!dryRun) {
       appendToReviewPipeline(reviewOffers);
+      upsertTrListingSidecar(TR_LISTINGS_PATH, [...addedOffers, ...reviewOffers], { updatedAt: runId });
     }
     if (!dryRun) {
       appendHistory(historyEntries);
@@ -2543,7 +2638,7 @@ async function main() {
         console.log(`  + ${offer.company} | ${offer.title} | ${offer.queryName}`);
       }
       if (!dryRun) {
-        console.log(`\nSaved to ${PIPELINE_PATH} and ${SCAN_HISTORY_PATH}`);
+        console.log(`\nSaved to ${PIPELINE_PATH}, ${TR_LISTINGS_PATH}, and ${SCAN_HISTORY_PATH}`);
       }
     }
 
@@ -2553,7 +2648,7 @@ async function main() {
         console.log(`  ~ ${offer.company} | ${offer.title} | ${offer.reviewReason}`);
       }
       if (!dryRun) {
-        console.log(`\nSaved review items to ${REVIEW_PIPELINE_PATH}`);
+        console.log(`\nSaved review items to ${REVIEW_PIPELINE_PATH} and ${TR_LISTINGS_PATH}`);
       }
     }
 

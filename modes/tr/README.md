@@ -80,5 +80,12 @@ Türkçe raporlar oluşturulurken, dashboard ve parser için bazı header alanla
 - `**TL;DR** |`
 - `**Date:**`
 - `**Batch ID:**`
+- `**City:**`
+- `**Work Model:**`
+- `**Language:**`
+- `**Employment Type:**`
+- `**Salary Transparency:**`
+- `**Source:**`
+- `**Confidence:**`
 
 Görünen gövde Türkçe olabilir, ama bu anahtarlar sabit kalmalıdır.

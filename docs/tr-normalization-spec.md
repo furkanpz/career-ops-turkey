@@ -4,10 +4,10 @@
 
 This document defines how common raw values from Turkish job listings should map into the canonical Turkey job data model in `docs/tr-data-model.md`.
 
-This is a mapping spec only.
+This is the mapping spec for the runtime implementation in `tr-listing-normalizer.mjs`.
 
-- No parser implementation in this step.
-- No regex library contract in this step.
+- Runtime enum values are compact and parser-safe.
+- No live-source scraping guarantee is implied by this spec.
 - Normalization should be deterministic and conservative.
 
 ## General Rules
@@ -15,7 +15,7 @@ This is a mapping spec only.
 1. Preserve raw source text in `jd_raw` and `location_text`.
 2. Normalize comparisons case-insensitively and diacritic-insensitively, but store canonical output with consistent display casing.
 3. Prefer explicit evidence from the listing over inference.
-4. If a value is ambiguous, map to `unknown` instead of guessing.
+4. If a value is ambiguous, map enum fields to `unspecified` instead of guessing; nullable storage fields may still use `null`.
 5. If multiple raw values conflict, prefer the most explicit and most recently updated source text.
 6. When title and body disagree, prefer body text for `employment_type` and `work_model`; prefer title for `seniority` only when the body is silent.
 
@@ -115,17 +115,17 @@ Canonical values:
 
 - `remote`
 - `hybrid`
-- `onsite`
+- `on_site`
 - `field`
-- `unknown`
+- `unspecified`
 
 | Raw value examples | Canonical `work_model` |
 |---|---|
 | `Uzaktan`, `Remote`, `Tam uzaktan`, `Fully remote`, `Home office`, `Evden calisma`, `Work from home` | `remote` |
 | `Hibrit`, `Hybrid`, `Haftada 2 gun ofis`, `3 gun ofis 2 gun ev`, `Ofis + uzaktan`, `Esnek hibrit` | `hybrid` |
-| `Ofisten`, `On-site`, `Ofis`, `Is yerinde`, `Sirket lokasyonunda`, `Yerinde calisma` | `onsite` |
+| `Ofisten`, `On-site`, `Ofis`, `Is yerinde`, `Sirket lokasyonunda`, `Yerinde calisma` | `on_site` |
 | `Sahada`, `Field`, `Seyahatli`, `Bolgede aktif ziyaret`, `Mobil saha` | `field` |
-| `Remote/hybrid`, `Esnek`, `Duruma gore`, `Lokasyon fark etmez` with no explicit pattern | `unknown` |
+| `Remote/hybrid`, `Esnek`, `Duruma gore`, `Lokasyon fark etmez` with no explicit pattern | `unspecified` |
 
 Rules:
 
@@ -150,7 +150,7 @@ Canonical values:
 - `head`
 - `vp`
 - `c_level`
-- `unknown`
+- `unspecified`
 
 | Raw value examples | Canonical `seniority` |
 |---|---|
@@ -193,7 +193,7 @@ Canonical values:
 - `ar`
 - `ru`
 - `multilingual`
-- `unknown`
+- `unspecified`
 
 | Raw value examples | Canonical `language` |
 |---|---|
@@ -205,7 +205,7 @@ Canonical values:
 | `Arapca`, `Arabic` | `ar` |
 | `Rusca`, `Russian` | `ru` |
 | `Cok dilli`, `Multilingual`, `Birden fazla yabanci dil` | `multilingual` |
-| No reliable language signal | `unknown` |
+| No reliable language signal | `unspecified` |
 
 Rules:
 
@@ -226,7 +226,7 @@ Canonical values:
 - `freelance`
 - `consulting`
 - `apprenticeship`
-- `unknown`
+- `unspecified`
 
 | Raw value examples | Canonical `employment_type` |
 |---|---|
@@ -238,7 +238,7 @@ Canonical values:
 | `Freelance`, `Serbest`, `Bagimsiz calisma` | `freelance` |
 | `Danisman`, `Consultant`, `Consulting basis` | `consulting` |
 | `Ciraklik`, `Apprenticeship`, `Aday programi` where it is not a white-collar internship | `apprenticeship` |
-| Missing or ambiguous | `unknown` |
+| Missing or ambiguous | `unspecified` |
 
 Rules:
 
@@ -338,15 +338,15 @@ This is not a model score for fit or quality. It only measures confidence in nor
 
 When raw values are ambiguous:
 
-- prefer `unknown`
+- prefer `unspecified`
 - keep the raw phrase in source text
 - lower `confidence_score`
 
 Examples:
 
-- `Esnek calisma modeli` with no office rule -> `work_model = unknown`
+- `Esnek calisma modeli` with no office rule -> `work_model = unspecified`
 - `Associate` with no other context -> `seniority = mid`
-- `Good command of foreign language preferred` -> `language = unknown`
+- `Good command of foreign language preferred` -> `language = unspecified`
 
 ## Example Mapping
 

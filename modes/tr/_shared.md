@@ -41,7 +41,25 @@
 - Tracker status label'ları her zaman canonical English kalır.
 - Report machine-key'leri her zaman canonical English kalır:
   `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`
+- Türkiye metadata key'leri parser-safe English kalır:
+  `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence`
 - Türkçe gövde ve Türkçe operatör metni serbesttir.
+
+### Türkiye metadata kontratı
+
+Bir ilan değerlendirmesi, batch işi veya auto-pipeline report'u şu metadata bloğunu header'a yakın ekler:
+
+```markdown
+**City:** {istanbul|ankara|izmir|remote|unknown}
+**Work Model:** {remote|hybrid|on_site|field|unspecified}
+**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
+**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
+**Salary Transparency:** {transparent|market_range|opaque|unknown}
+**Source:** {portal veya company careers}
+**Confidence:** {high|medium|low}
+```
+
+Bu alanlar dashboard ve scanner sidecar ile aynı anlamdadır. Emin değilsen alan tipine göre güvenli değer kullan: `City: unknown`, `Work Model: unspecified`, `Language: unspecified`, `Employment Type: unspecified`, `Salary Transparency: unknown`; kesin veri gibi davranma.
 
 ---
 

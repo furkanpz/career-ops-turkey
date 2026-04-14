@@ -19,6 +19,17 @@ type CareerApplication struct {
 	TlDr         string
 	Remote       string
 	CompEstimate string
+	// Turkey listing metadata, loaded additively from data/tr-listings.jsonl,
+	// note tags, or report metadata when present.
+	City               string
+	WorkModel          string
+	Language           string
+	EmploymentType     string
+	SalaryTransparency string
+	SalaryTransparent  bool
+	Source             string
+	Confidence         string
+	ConfidenceScore    float64
 }
 
 // PipelineMetrics holds aggregate stats for the pipeline dashboard.
@@ -48,10 +59,10 @@ type ProgressMetrics struct {
 	OfferRate     float64 // Offer / Applied
 
 	// Averages
-	AvgScore     float64
-	TopScore     float64
-	TotalOffers  int
-	ActiveApps int // not skip/rejected/discarded
+	AvgScore    float64
+	TopScore    float64
+	TotalOffers int
+	ActiveApps  int // not skip/rejected/discarded
 }
 
 // FunnelStage represents one stage of the application funnel.

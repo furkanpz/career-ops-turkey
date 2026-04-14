@@ -16,12 +16,34 @@
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import yaml from 'js-yaml';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = __dirname;
 
 const warnings = [];
 const errors = [];
+
+function missingTrProfileFields(profileContent) {
+  let profile = null;
+  try {
+    profile = yaml.load(profileContent) || {};
+  } catch {
+    return ['config/profile.yml could not be parsed as YAML for extended Turkey profile checks'];
+  }
+
+  const modesDir = String(profile?.language?.modes_dir || '');
+  const looksTurkeyProfile = modesDir.includes('modes/tr') || profileContent.includes('profile.tr.example') || profileContent.includes('cv_preferences');
+  if (!looksTurkeyProfile) return [];
+
+  const missing = [];
+  if (!profile?.compensation?.salary_preferences) missing.push('compensation.salary_preferences');
+  if (!profile?.language?.cv_preferences) missing.push('language.cv_preferences');
+  if (!profile?.location_preferences) missing.push('location_preferences');
+  if (!profile?.constraints) missing.push('constraints');
+  if (!profile?.automation) missing.push('automation');
+  return missing;
+}
 
 // 1. Check cv.md exists
 const cvPath = join(projectRoot, 'cv.md');
@@ -47,6 +69,11 @@ if (!existsSync(profilePath)) {
       warnings.push(`config/profile.yml may still have example data. Check field: ${field}`);
       break;
     }
+  }
+
+  const trMissing = missingTrProfileFields(profileContent);
+  if (trMissing.length > 0) {
+    warnings.push(`config/profile.yml is Turkey-mode but is missing optional TR fields: ${trMissing.join(', ')}. Add them when you want salary/location/constraint-aware scoring; this is warning-only.`);
   }
 }
 

@@ -16,9 +16,11 @@ Bu dosya `modes/pipeline.md` ile birlikte okunur. `modes/pipeline.md` içindeki 
 1. `data/pipeline.md` oku
 2. `Pendientes` altındaki `- [ ]` kayıtları bul
 3. Her URL için:
+   - varsa `data/tr-listings.jsonl` ve pipeline note tag'lerinden (`city:`, `work_model:`, `lang:`, `salary:`, `source:`, `confidence:`) TR metadata oku
    - rapor numarasını sıralı hesapla
    - JD çıkar
    - `modes/tr/teklif.md` mantığı ile A-G değerlendirmesi yap
+   - `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence` metadata bloğunu report header'a yaz
    - final score, confidence ve recommendation category üret
    - root pipeline kuralına göre PDF gerekiyorsa üret
    - tracker girişi yaz
@@ -33,8 +35,8 @@ Bu dosya `modes/pipeline.md` ile birlikte okunur. `modes/pipeline.md` içindeki 
 İşlem sonunda şu tabloyu göster:
 
 ```markdown
-| # | Şirket | Rol | Final Score | Confidence | Recommendation | PDF |
-|---|---|---|---|---|---|---|
+| # | Şirket | Rol | City | Work Model | Language | Final Score | Confidence | Recommendation | PDF |
+|---|---|---|---|---|---|---|---|---|---|
 ```
 
 ## Conservative kural
