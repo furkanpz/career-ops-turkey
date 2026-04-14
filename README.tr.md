@@ -45,11 +45,11 @@
 
 ## Bu Nedir
 
-Career-Ops, herhangi bir yapay zekâ kodlama CLI'ını tam teşekküllü bir iş arama komuta merkezine dönüştürür. Başvuruları bir tabloda manuel takip etmek yerine, size şunları sunan bir yapay zekâ pipeline'ı elde edersiniz:
+Career-Ops, herhangi bir yapay zekâ kodlama CLI'ını tam teşekküllü bir iş arama komuta merkezine dönüştürür. Başvuruları bir tabloda manuel takip etmek yerine, size şunları sunan bir yapay zekâ iş akışı elde edersiniz:
 
-- **İlanları değerlendirir**: 10 ağırlıklı boyut ve posting legitimacy kontrolünden oluşan yapılandırılmış A-G puanlama sistemi
+- **İlanları değerlendirir**: 10 ağırlıklı boyut ve ilan güvenilirliği kontrolünden oluşan yapılandırılmış A-G puanlama sistemi
 - **Kişiselleştirilmiş PDF üretir**: Her iş tanımına göre uyarlanan ATS uyumlu CV'ler
-- **Portalları tarar**: Takip edilen şirket kariyer sayfaları + LinkedIn Jobs, Kariyer.net, Indeed Turkiye, Eleman.net, Secretcv, Yenibiris, ISKUR
+- **Portalları tarar**: Takip edilen şirket kariyer sayfaları + LinkedIn Jobs, Kariyer.net, Indeed Türkiye, Eleman.net, Secretcv, Yenibiris, ISKUR
 - **Toplu işler**: 10+ ilanı paralel alt ajanlarla değerlendirir
 - **Her şeyi takip eder**: Bütünlük kontrolleriyle tek bir doğruluk kaynağında toplar
 
@@ -65,16 +65,16 @@ Bu sistem, 740+ iş ilanını değerlendirmek, 100+ kişiselleştirilmiş CV ür
 
 | Özellik | Açıklama |
 |---------|----------|
-| **Auto-Pipeline** | Bir URL yapıştırın; tam değerlendirme + PDF + tracker kaydı alın |
-| **7 Bloklu Değerlendirme** | Rol özeti, CV uyumu, seviye stratejisi, ücret araştırması, kişiselleştirme, mülakat hazırlığı (STAR+R), posting legitimacy |
+| **Auto-Pipeline** | Bir URL yapıştırın; tam değerlendirme + PDF + takip kaydı alın |
+| **7 Bloklu Değerlendirme** | Rol özeti, CV uyumu, seviye stratejisi, ücret araştırması, kişiselleştirme, mülakat hazırlığı (STAR+R), ilan güvenilirliği |
 | **Mülakat Hikâye Bankası** | Değerlendirmeler boyunca STAR+Reflection hikâyeleri biriktirir; davranışsal soruların çoğunu karşılayacak 5-10 ana hikâye oluşturur |
 | **Müzakere Senaryoları** | Maaş pazarlığı çerçeveleri, coğrafi indirim itirazları, rakip teklif kaldıraçları |
 | **ATS PDF Üretimi** | Space Grotesk + DM Sans tasarımıyla anahtar kelime uyumlu CV'ler |
-| **Portal Tarayıcı** | Takip edilen şirketler, Türkiye odaklı panolar ve EMEA ATS keşfi için Playwright liveness kontrolüyle çalışan tek `scan.mjs` runtime'ı |
-| **Batch Processing** | `claude -p` worker'ları ile paralel değerlendirme |
+| **Portal Tarayıcı** | Takip edilen şirketler, Türkiye odaklı iş panoları ve EMEA ATS keşfi için Playwright canlılık kontrolüyle çalışan tek `scan.mjs` runtime'ı |
+| **Toplu İşleme** | `claude -p` worker'ları ile paralel toplu değerlendirme |
 | **Dashboard TUI** | İlerleme analitiği, açık/koyu Catppuccin temaları, vim hareketleri, manuel refresh ve gelişmiş markdown/tablo görünümü sunan terminal arayüzü |
-| **Human-in-the-Loop** | Yapay zekâ değerlendirir ve önerir; kararı ve aksiyonu siz verirsiniz. Sistem asla sizin yerinize başvuru göndermez |
-| **Pipeline Integrity** | Otomatik merge, dedup, durum normalizasyonu ve sağlık kontrolleri |
+| **İnsan Onayı** | Yapay zekâ değerlendirir ve önerir; kararı ve aksiyonu siz verirsiniz. Sistem asla sizin yerinize başvuru göndermez |
+| **İş Akışı Bütünlüğü** | Otomatik birleştirme, tekrar kayıt azaltma, durum normalizasyonu ve sağlık kontrolleri |
 
 ## Hızlı Başlangıç
 
@@ -110,13 +110,13 @@ claude   # Bu dizinde Claude Code'u açın
 # Bir iş ilanı URL'si yapıştırın veya /career-ops çalıştırın
 ```
 
-> **Sistem, doğrudan Claude tarafından özelleştirilecek şekilde tasarlanmıştır.** Türkiye fork'u locale davranışını, pazar sezgilerini ve board kapsamını değiştirir. Sizin hedef rolleriniz, anahtar kelimeleriniz, şirket listeniz ve kişisel anlatınız ise hâlâ `config/profile.yml`, `modes/_profile.md`, `article-digest.md` veya `portals.yml` içinde tutulmalıdır.
+> **Sistem, doğrudan Claude tarafından özelleştirilecek şekilde tasarlanmıştır.** Türkiye fork'u dil/pazar davranışını, pazar sezgilerini ve iş panosu kapsamını değiştirir. Sizin hedef rolleriniz, anahtar kelimeleriniz, şirket listeniz ve kişisel anlatınız ise hâlâ `config/profile.yml`, `modes/_profile.md`, `article-digest.md` veya `portals.yml` içinde tutulmalıdır.
 
 Tam kurulum rehberi için [docs/SETUP.md](docs/SETUP.md) dosyasına bakın.
 
-Bu forkta Türkiye odaklı kullanım birinci sınıf vatandaş olarak ele alınır: `config/profile.yml` içinde `language.modes_dir: modes/tr` ayarlayın veya Claude'a Türkiye pazarı akışları için `modes/tr/` kullanmasını söyleyin. Bu, sabit bir rol paketi değil; locale adaptasyonudur. Canonical komutlar değişmez ve belgelenmiş Türkçe alias'lar desteklenir: `teklif` → değerlendirme, `basvur` → canlı başvuru yardımı.
+Bu forkta Türkiye odaklı kullanım birinci sınıf vatandaş olarak ele alınır: `config/profile.yml` içinde `language.modes_dir: modes/tr` ayarlayın veya Claude'a Türkiye pazarı akışları için `modes/tr/` kullanmasını söyleyin. Bu, sabit bir rol paketi değil; Türkiye pazarı ve dil uyarlamasıdır. Canonical komutlar değişmez ve belgelenmiş Türkçe alias'lar desteklenir: `teklif` → değerlendirme, `basvur` → canlı başvuru yardımı.
 
-Bu forkun parity kapsamı upstream `v1.4` ürün yüzeyini, ek locale paketlerini ve repo/community varlıklarını takip eder; aynı zamanda Turkey locale katmanını, fork kimliğini ve fork-safe update channel davranışını korur.
+Bu forkun uyumluluk kapsamı upstream `v1.4` ürün yüzeyini, ek dil/locale paketlerini ve repo/community varlıklarını takip eder; aynı zamanda Türkiye locale katmanını, fork kimliğini ve fork-safe update channel davranışını korur.
 
 Türkçe workflow'larda bile parser-safe rapor anahtarları canonical ve İngilizce kalır:
 `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`.
@@ -165,7 +165,7 @@ Bir iş ilanı URL'si veya açıklaması yapıştırırsınız
 └────────┬─────────┘
          │
 ┌────────▼─────────┐
-│  A-G             │  Uyum, boşluklar, ücret araştırması, STAR hikâyeleri, legitimacy
+│  A-G             │  Uyum, boşluklar, ücret araştırması, STAR hikâyeleri, güvenilirlik
 │  Değerlendirme   │
 │  (cv.md okunur)  │
 └────────┬─────────┘
@@ -192,7 +192,7 @@ Tarayıcı artık hem `/career-ops scan` hem de `npm run scan` için tek runtime
 
 - LinkedIn Jobs
 - Kariyer.net
-- Indeed Turkiye
+- Indeed Türkiye
 - Eleman.net
 
 Şablondaki ikincil Türkiye board kapsamı:

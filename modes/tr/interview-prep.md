@@ -1,9 +1,9 @@
-# Mod: interview-prep -- Turkiye locale override
+# Mod: interview-prep -- Türkiye uyarlaması
 
 Bu dosya `modes/interview-prep.md` ile birlikte okunur.
 
-## Arastirma lensi
+## Araştırma lensi
 
-- Turkiye veya EMEA ekipleri icin mulakat surecinde lokasyon, calisma modeli, Ingilizce/Turkce iletisim beklentisi ve legal setup sinyallerini de ara.
-- Turkce soru bankasi veya yerel forum bulursan kullan; yoksa English kaynaklarla devam et ama cikarsama oldugunu belirt.
-- Story-bank seciminde `modes/tr/teklif.md` icindeki gaps ve recommendation logic ile uyumu koru.
+- Türkiye veya EMEA ekipleri için mülakat sürecinde lokasyon, çalışma modeli, İngilizce/Türkçe iletişim beklentisi ve legal setup sinyallerini de ara.
+- Türkçe soru bankası veya yerel forum bulursan kullan; yoksa English kaynaklarla devam et ama çıkarım yaptığını belirt.
+- Story-bank seçiminde `modes/tr/teklif.md` içindeki gaps ve recommendation logic ile uyumu koru.

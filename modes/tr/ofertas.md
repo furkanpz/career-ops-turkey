@@ -1,9 +1,9 @@
-# Mod: ofertas -- Turkiye locale override
+# Mod: ofertas -- Türkiye uyarlaması
 
 Bu dosya `modes/ofertas.md` ile birlikte okunur.
 
-## Karsilastirma kurallari
+## Karşılaştırma kuralları
 
-- `compensation.salary_preferences` varsa TRY/EUR/USD beklentilerini role gore normalize et.
-- `location_preferences` ve `constraints` varsa bunlari score yorumunda one cikar.
-- Turkiye/EMEA rollerinde lokasyon, hibrit politika, gross/net belirsizligi ve contractor/EOR farkini ayri risk olarak yaz.
+- `compensation.salary_preferences` varsa TRY/EUR/USD beklentilerini role göre normalize et.
+- `location_preferences` ve `constraints` varsa bunları score yorumunda öne çıkar.
+- Türkiye/EMEA rollerinde lokasyon, hibrit politika, gross/net belirsizliği ve contractor/EOR farkını ayrı risk olarak yaz.

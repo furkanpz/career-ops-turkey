@@ -1,22 +1,23 @@
-# Mod: teklif -- Turkiye icin tam A-F degerlendirme
+# Mod: teklif -- Türkiye için tam A-G değerlendirme
 
-Bu dosya `modes/oferta.md` ile birlikte okunur. `modes/oferta.md` icindeki A-F feature set'inin TAMAMI korunur: story bank entegrasyonu, Section G gating, ATS keyword extraction, report kaydi ve tracker writeback davranisi dusmez.
+Bu dosya `modes/oferta.md` ile birlikte okunur. `modes/oferta.md` içindeki A-G özellik yüzeyinin TAMAMI korunur: story bank entegrasyonu, Section G gating, ATS keyword extraction, report kaydı ve tracker writeback davranışı düşmez.
 
-Kullanici bir ilan metni veya URL verdiginde, HER ZAMAN A-F bloklarini uret. Ardindan Turkiye scoring framework ile final sonucu ver.
+Kullanıcı bir ilan metni veya URL verdiğinde, HER ZAMAN A-G değerlendirme yüzeyini üret. Ardından Türkiye scoring framework ile final sonucu ver.
 
-## Adim 0 -- Archetype tespiti
+## Adım 0 -- Archetype tespiti
 
-Ilani uygun archetype'a ata. Gerekirse en yakin 2 archetype'i belirt.
+İlanı uygun archetype'a ata. Gerekirse en yakın 2 archetype'i belirt.
 
-Bu secim sunlari etkiler:
+Bu seçim şunları etkiler:
 
-- Blok B'de hangi proof point'lerin one cikacagi
-- Blok E'de CV'nin nasil yeniden cercevelenecegi
-- Blok F'de hangi STAR hikayelerinin secilecegi
+- Blok B'de hangi proof point'lerin öne çıkacağı
+- Blok E'de CV'nin nasıl yeniden çerçeveleneceği
+- Blok F'de hangi STAR hikâyelerinin seçileceği
+- Blok G'de draft application answers'ın güvenli şekilde açılıp açılmayacağı
 
-## Blok A -- Rol ozeti
+## Blok A -- Rol özeti
 
-Tablo mutlaka su satirlari icerir:
+Tablo mutlaka şu satırları içerir:
 
 - `**Archetype** | ...`
 - `**Domain** | ...`
@@ -26,83 +27,83 @@ Tablo mutlaka su satirlari icerir:
 - `**Team size** | ...` veya `Bilinmiyor`
 - `**TL;DR** | ...`
 
-`TL;DR` tek cumlede rolun gercek ozunu anlatmali. Bos slogan istemiyorum.
+`TL;DR` tek cümlede rolün gerçek özünü anlatmalı. Boş slogan istemiyorum.
 
-## Blok B -- CV eslesmesi
+## Blok B -- CV eşleşmesi
 
-`cv.md` oku. Ilandaki her ana gereksinimi CV'deki somut kanitla eslestir.
+`cv.md` oku. İlandaki her ana gereksinimi CV'deki somut kanıtla eşleştir.
 
-`modes/oferta.md` icindeki story-bank ve keyword extraction davranisi korunur. `interview-prep/story-bank.md` varsa tekrar kullan, yoksa uygun hikayeleri ekle.
+`modes/oferta.md` içindeki story-bank ve keyword extraction davranışı korunur. `interview-prep/story-bank.md` varsa tekrar kullan, yoksa uygun hikâyeleri ekle.
 
-Gerekli alt bolumler:
+Gerekli alt bölümler:
 
-1. Gereksinim -> CV kaniti tablosu
+1. Gereksinim -> CV kanıtı tablosu
 2. Gaps
-3. Her gap icin kisa mitigation
+3. Her gap için kısa mitigation
 
-Her gap icin su sorulari cevapla:
+Her gap için şu soruları cevapla:
 
 1. Hard blocker mi, nice-to-have mi?
-2. Aday adjacent deneyim gosterebilir mi?
-3. Portfolyo veya case study ile acik kapanir mi?
-4. Basvuru metninde nasil daha durust ama guclu cercevelenir?
+2. Aday adjacent deneyim gösterebilir mi?
+3. Portfolyo veya case study ile açık kapanır mı?
+4. Başvuru metninde nasıl daha dürüst ama güçlü çerçevelenir?
 
 ## Blok C -- Seniority ve strateji
 
-Sunlari acikca yaz:
+Şunları açıkça yaz:
 
-1. Ilan seviyesi
-2. Adayin bu archetype'teki dogal seviyesi
-3. Eger hafif mismatch varsa nasil pozisyonlanmali
-4. Eger downlevel riski varsa bunun pratik sonucu ne olur
+1. İlan seviyesi
+2. Adayın bu archetype'teki doğal seviyesi
+3. Eğer hafif mismatch varsa nasıl pozisyonlanmalı
+4. Eğer downlevel riski varsa bunun pratik sonucu ne olur
 
-## Blok D -- Maas ve piyasa
+## Blok D -- Maaş ve piyasa
 
-WebSearch ile arastir:
+WebSearch ile araştır:
 
-- guncel maas verisi
-- sirketin comp itibari
+- güncel maaş verisi
+- şirketin comp itibari
 - role talebi / doygunluk sinyali
 
-Turkiye icin ozellikle bak:
+Türkiye için özellikle bak:
 
-- gross vs net acik mi?
-- aylik vs yillik acik mi?
-- TRY / EUR / USD acik mi?
+- gross vs net açık mı?
+- aylık vs yıllık açık mı?
+- TRY / EUR / USD açık mı?
 - payroll mu contractor / EOR mu?
-- maas bilgisi yoksa, buna ragmen adil bir piyasa tahmini kurulabiliyor mu?
+- maaş bilgisi yoksa, buna rağmen adil bir piyasa tahmini kurulabiliyor mu?
 
-`config/profile.yml -> compensation.salary_preferences` varsa TRY/EUR/USD beklentilerini bu blokta referans al. `constraints` ve `location_preferences` ile celisen comp/lokasyon setup'larini risk hanesine tasimayi unutma.
+`config/profile.yml -> compensation.salary_preferences` varsa TRY/EUR/USD beklentilerini bu blokta referans al. `constraints` ve `location_preferences` ile çelişen ücret/lokasyon düzenlerini risk hanesine taşımayı unutma.
 
-Emin degilsen bunu soyle. Uydurma yapma.
+Emin değilsen bunu söyle. Uydurma yapma.
 
-## Blok E -- CV kisisellestirme plani
+## Blok E -- CV kişiselleştirme planı
 
 Tablo:
 
-| # | Bolum | Mevcut durum | Onerilen degisiklik | Neden |
+| # | Bölüm | Mevcut durum | Önerilen değişiklik | Neden |
 |---|---|---|---|---|
 
-Top 5 CV degisikligi ve gerekiyorsa Top 5 LinkedIn degisikligi ver.
+Top 5 CV değişikliği ve gerekiyorsa Top 5 LinkedIn değişikliği ver.
 
-## Blok F -- Mulakat plani
+## Blok F -- Mülakat planı
 
-6-10 STAR+R hikayesi ver:
+6-10 STAR+R hikâyesi ver:
 
-| # | JD gereksinimi | STAR+R hikayesi | S | T | A | R | Reflection |
+| # | JD gereksinimi | STAR+R hikâyesi | S | T | A | R | Reflection |
 |---|---|---|---|---|---|---|---|
 
 Ek olarak:
 
-- onerilen 1 case study
-- 3-5 olasi red-flag sorusu
-- bu sorulara recruiter-respectful, abartisiz cevap yonu
+- önerilen 1 case study
+- 3-5 olası red-flag sorusu
+- bu sorulara recruiter-respectful, abartısız cevap yönü
 
 ---
 
-## Final degerlendirme mantigi
+## Final değerlendirme mantığı
 
-A-F bittikten sonra, `docs/tr-scoring-framework.md` ve `modes/tr/_shared.md` ile uyumlu sekilde su ciktiyi EKLE:
+A-G değerlendirme bittikten sonra, `docs/tr-scoring-framework.md` ve `modes/tr/_shared.md` ile uyumlu şekilde şu çıktıyı EKLE:
 
 ### 1. Global Score tablosu
 
@@ -124,9 +125,9 @@ A-F bittikten sonra, `docs/tr-scoring-framework.md` ve `modes/tr/_shared.md` ile
 | **Weighted Score** | **100** | **X.XX/5** |
 ```
 
-### 2. Zorunlu sonuc alanlari
+### 2. Zorunlu sonuç alanları
 
-Global Score bolumunden hemen sonra bunlari ver:
+Global Score bölümünden hemen sonra bunları ver:
 
 ```markdown
 **Red Flag Cap:** none | major | critical
@@ -138,7 +139,7 @@ Global Score bolumunden hemen sonra bunlari ver:
 
 ### 3. Strengths
 
-Baslik:
+Başlık:
 
 ```markdown
 ## Strengths
@@ -147,12 +148,12 @@ Baslik:
 Kurallar:
 
 - 3-5 madde
-- her madde kanit temelli
-- en guclu fit sinyallerini one cikar
+- her madde kanıt temelli
+- en güçlü fit sinyallerini öne çıkar
 
 ### 4. Risks
 
-Baslik:
+Başlık:
 
 ```markdown
 ## Risks
@@ -166,32 +167,32 @@ Kurallar:
 
 ### 5. Recommendation
 
-Baslik:
+Başlık:
 
 ```markdown
 ## Recommendation
 ```
 
-Bu bolumde:
+Bu bölümde:
 
-- 1 cumlelik karar
-- 1 kisa gerekce
-- gerekiyorsa "once su 1-3 seyi dogrula" listesi
+- 1 cümlelik karar
+- 1 kısa gerekçe
+- gerekiyorsa "önce şu 1-3 şeyi doğrula" listesi
 
-Recommendation dili pratik ve recruiter-respectful olmali:
+Recommendation dili pratik ve recruiter-respectful olmalı:
 
-- zayif role "denemekten zarar gelmez" deme
-- dusuk confidence varsa "iyi firsat" deme
-- adayin zamanini ve recruiter'in zamanini koru
+- zayıf role "denemekten zarar gelmez" deme
+- düşük confidence varsa "iyi fırsat" deme
+- adayın zamanını ve recruiter'ın zamanını koru
 
-### 6. Kok mode parity kurali
+### 6. Kök mode parity kuralı
 
-`modes/oferta.md` icindeki asagidaki davranislar korunur:
+`modes/oferta.md` içindeki aşağıdaki davranışlar korunur:
 
 - `interview-prep/story-bank.md` ile story reuse
-- `## Keywords extracted` bolumu
-- `## G) Draft Application Answers` gating kurali
-- tracker'a final capped score yazimi
+- `## Keywords extracted` bölümü
+- `## G) Draft Application Answers` gating kuralı
+- tracker'a final capped score yazımı
 
 ---
 
@@ -199,9 +200,9 @@ Recommendation dili pratik ve recruiter-respectful olmali:
 
 ### Borderline durumlar
 
-Su durumlardan biri varsa net sekilde isaretle:
+Şu durumlardan biri varsa net şekilde işaretle:
 
-- final score 3.7-4.1 araliginda
+- final score 3.7-4.1 aralığında
 - confidence low
 - major red flag mevcut
 - iki veya daha fazla boyut 3/5
@@ -212,29 +213,29 @@ Bu durumda recommendation category en fazla `sinirda_once_dogrula` olabilir.
 
 Confidence `low` ise:
 
-- bunu acikca yaz
-- hangi veriler eksik oldugunu yaz
+- bunu açıkça yaz
+- hangi veriler eksik olduğunu yaz
 - recommendation category `hemen_basvur` olamaz
-- draft application answers'i otomatik one cikarma
+- draft application answers'ı otomatik öne çıkarma
 
-### Overclaiming yasagi
+### Overclaiming yasağı
 
-- Adayin bilmedigi stack'i biliyor gibi yazma
-- Maas adil gorunuyor demek icin yeterli veri yoksa "belirsiz" de
-- Sirket net degilse "guvenilir" deme
+- Adayın bilmediği stack'i biliyor gibi yazma
+- Maaş adil görünüyor demek için yeterli veri yoksa "belirsiz" de
+- Şirket net değilse "güvenilir" deme
 
 ---
 
 ## Report kaydetme
 
-Rapor dosyasi:
+Rapor dosyası:
 
 `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`
 
-Header icin parser-riskini azaltmak uzere su anahtarlar korunur:
+Header için parser-riskini azaltmak üzere şu anahtarlar korunur:
 
 ```markdown
-# Degerlendirme: {Sirket} -- {Rol}
+# Değerlendirme: {Şirket} -- {Rol}
 
 **Date:** {YYYY-MM-DD}
 **Archetype** | {tespit edilen archetype}
@@ -246,27 +247,27 @@ Header icin parser-riskini azaltmak uzere su anahtarlar korunur:
 Rapor iskeleti:
 
 ```markdown
-## A) Rol Ozeti
-## B) CV Eslesmesi
+## A) Rol Özeti
+## B) CV Eşleşmesi
 ## C) Seniority ve Strateji
-## D) Maas ve Piyasa
-## E) Kisisellestirme Plani
-## F) Mulakat Plani
+## D) Maaş ve Piyasa
+## E) Kişiselleştirme Planı
+## F) Mülakat Planı
 ## Global Score
 ## Strengths
 ## Risks
 ## Recommendation
 ```
 
-`Section G` benzeri application draft bolumu sadece su durumda eklenebilir:
+`Section G` benzeri application draft bölümü sadece şu durumda eklenebilir:
 
 - final score `>= 4.5`
-- confidence `low` degil
+- confidence `low` değil
 - major / critical red flag yok
 
 ---
 
-## Tracker yazimi
+## Tracker yazımı
 
 Tracker'a yazarken `Final Score` kullan.
 
@@ -275,4 +276,4 @@ Yani:
 - capped score varsa onu kullan
 - sadece weighted score'u yazma
 
-Format mevcut sistemle ayni kalir.
+Format mevcut sistemle aynı kalır.

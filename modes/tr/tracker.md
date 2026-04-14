@@ -1,15 +1,15 @@
-# Mod: tracker -- Turkiye locale override
+# Mod: tracker -- Türkiye uyarlaması
 
 Bu dosya `modes/tracker.md` ile birlikte okunur.
 
-## Canonical status kontrati
+## Canonical status kontratı
 
-- Tracker icinde yalnizca canonical English status label'lari yazilir:
+- Tracker içinde yalnızca canonical English status label'ları yazılır:
   `EVALUATED`, `APPLIED`, `RESPONSE_RECEIVED`, `INTERVIEW`, `OFFER`, `REJECTED`, `DISCARDED`, `SKIP`
-- Kullanici Turkce veya legacy alias ile status isterse bunu canonical label'a cevirerek uygula.
+- Kullanıcı Türkçe veya legacy alias ile status isterse bunu canonical label'a çevirerek uygula.
 
-## Operator deneyimi
+## Operatör deneyimi
 
-- Aciklama metinlerini Turkce ver.
-- Status guncellerken kullaniciya eski -> yeni gecisi Turkce acikla.
-- `response_received` ile `interview` ayrimini ozellikle netlestir.
+- Açıklama metinlerini Türkçe ver.
+- Status güncellerken kullanıcıya eski -> yeni geçişi Türkçe açıkla.
+- `response_received` ile `interview` ayrımını özellikle netleştir.

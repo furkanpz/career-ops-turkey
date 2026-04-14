@@ -1,22 +1,23 @@
-# Career-Ops Turkey Profile Configuration
-# Copy this file to config/profile.yml for a Turkey-oriented locale starter.
-# The Turkey starter is locale-aware, not role-specific. Replace the sample
-# values below with your own identity, targets, and preferences.
+# Career-Ops Türkiye profil yapılandırması
+# Türkiye odaklı başlangıç için bu dosyayı config/profile.yml olarak kopyalayın.
+# Bu şablon role özel değildir; Türkiye lokali için hazırlanmış genel bir
+# başlangıçtır. Aşağıdaki örnek değerleri kendi kimliğiniz, hedefleriniz ve
+# tercihlerinizle değiştirin.
 
 candidate:
   full_name: "Deniz Kaya"
   email: "deniz@example.com"
   phone: "+90 555 000 00 00"
-  location: "Istanbul, Turkiye"
+  location: "İstanbul, Türkiye"
   linkedin: "linkedin.com/in/denizkaya"
   portfolio_url: "https://example.dev"
   github: "github.com/denizkaya"
   twitter: "https://x.com/denizkaya"
-  # (Optional) Canva resume design ID for visual CV generation via /career-ops pdf.
+  # Opsiyonel: /career-ops pdf ile görsel CV üretimi için Canva tasarım ID'si.
   # canva_resume_design_id: "DAxxxxxxxxx"
 
 target_roles:
-  # Replace these with your real target roles.
+  # Bunları gerçek hedef rollerinizle değiştirin.
   primary:
     - "Software Engineer"
     - "Product Manager"
@@ -32,30 +33,30 @@ target_roles:
       fit: "adjacent"
 
 narrative:
-  headline: "Technical professional building practical products and systems"
-  exit_story: "Built hands-on experience across real-world technical work and now targeting roles with clear scope, ownership, and room to grow."
+  headline: "Pratik ürünler ve sistemler geliştiren teknik profesyonel"
+  exit_story: "Gerçek dünya teknik çalışmalarında uygulamalı deneyim kazandım; şimdi net kapsam, sahiplik ve gelişim alanı olan rolleri hedefliyorum."
   superpowers:
-    - "Structured problem solving"
-    - "Turning ambiguity into working systems"
-    - "Cross-functional communication"
+    - "Yapılandırılmış problem çözme"
+    - "Belirsizliği çalışan sistemlere dönüştürme"
+    - "Fonksiyonlar arası iletişim"
   proof_points:
-    - name: "Project or case study #1"
+    - name: "Proje veya vaka çalışması #1"
       url: "https://example.dev/project-1"
-      hero_metric: "Replace with a real quantified result"
-    - name: "Project or case study #2"
+      hero_metric: "Gerçek ve ölçülebilir bir sonuçla değiştirin"
+    - name: "Proje veya vaka çalışması #2"
       url: "https://example.dev/project-2"
-      hero_metric: "Replace with a second proof point"
+      hero_metric: "İkinci kanıt noktasıyla değiştirin"
   # dashboard:
   #   url: "https://example.dev/demo"
   #   password: "demo-2026"
 
 compensation:
-  target_range: "<set-your-target-range>"
+  target_range: "<hedef-aralığınızı-yazın>"
   currency: "TRY"
-  minimum: "<set-your-minimum>"
-  location_flexibility: "Update this with your city, remote, and relocation preferences"
+  minimum: "<minimum-beklentiniz>"
+  location_flexibility: "Şehir, uzaktan çalışma ve taşınma tercihlerinizi yazın"
 
-  # Optional structured salary preferences. Keep or remove as needed.
+  # Opsiyonel yapılandırılmış maaş tercihleri. Gerekiyorsa tutun, değilse silin.
   salary_preferences:
     TRY:
       target_min: 900000
@@ -74,10 +75,10 @@ compensation:
       period: "gross_annual"
 
 location:
-  country: "Turkiye"
-  city: "Istanbul"
+  country: "Türkiye"
+  city: "İstanbul"
   timezone: "Europe/Istanbul"
-  visa_status: "Update with your work authorization status"
+  visa_status: "Çalışma izni / çalışma uygunluğu durumunuzu yazın"
 
 language:
   modes_dir: "modes/tr"
@@ -93,13 +94,13 @@ language:
 
 location_preferences:
   preferred_cities:
-    - "Istanbul"
+    - "İstanbul"
     - "Ankara"
-    - "Izmir"
+    - "İzmir"
   relocation_flexibility:
     willing: true
     scope: "within_turkey"
-    notes: "Replace with your actual relocation policy."
+    notes: "Gerçek taşınma politikanızı yazın."
   work_model_preference:
     priority_order:
       - "remote"
@@ -112,12 +113,12 @@ location_preferences:
 
 constraints:
   must_haves:
-    - "Clear scope"
-    - "Fair compensation"
+    - "Net rol kapsamı"
+    - "Adil ücret"
   deal_breakers:
-    - "Unpaid trial project"
-    - "Misleading compensation process"
-    - "Mandatory on-site requirement that conflicts with my real availability"
+    - "Ücretsiz deneme projesi"
+    - "Yanıltıcı ücret süreci"
+    - "Gerçek uygunluğumla çelişen zorunlu ofis şartı"
 
 automation:
   application:

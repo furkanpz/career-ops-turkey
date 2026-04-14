@@ -1,19 +1,19 @@
-# Mod: basvur -- Canli basvuru asistani (Turkiye)
+# Mod: basvur -- Canlı başvuru asistanı (Türkiye)
 
-Bu dosya `modes/apply.md` ile birlikte okunur. `modes/apply.md` icindeki workflow'un TAMAMI korunur:
+Bu dosya `modes/apply.md` ile birlikte okunur. `modes/apply.md` içindeki workflow'un TAMAMI korunur:
 
-- ekran/url/screenshot algilama
+- ekran/url/screenshot algılama
 - report lookup
-- rol mismatch uyarisi
-- soru siniflandirma
+- rol mismatch uyarısı
+- soru sınıflandırma
 - iteratif scroll/screenshot toplama
 - post-apply tracker/report update
 
-Bu mod, `modes/tr/teklif.md` ile uretilmis evaluation report'unu temel alir.
+Bu mod, `modes/tr/teklif.md` ile üretilmiş evaluation report'unu temel alır.
 
 ## Ana kural
 
-Basvuru cevabi uretmeden once rapordan sunlari oku:
+Başvuru cevabı üretmeden önce rapordan şunları oku:
 
 - `Final Score`
 - `Confidence`
@@ -21,44 +21,44 @@ Basvuru cevabi uretmeden once rapordan sunlari oku:
 - `Strengths`
 - `Risks`
 
-## Conservative davranis
+## Conservative davranış
 
 ### `Recommendation Category: basvurma`
 
-- Kullaniciya bunu acikca soyle
-- Varsayilan davranis basvuru metni yazmamak
-- Yalnizca kullanici ozellikle isterse, son derece durust ve minimal draft ver
+- Kullanıcıya bunu açıkça söyle
+- Varsayılan davranış başvuru metni yazmamak
+- Yalnızca kullanıcı özellikle isterse, son derece dürüst ve minimal draft ver
 
 ### `Recommendation Category: sinirda_once_dogrula`
 
-- Cevap uretmeden once hangi noktalari dogrulamak gerektigini yaz
-- Eksik veri maas, lokasyon, dil veya isveren netligi ise bunu saklama
-- Basvuru metni olustursan bile kesinlik tonu kullanma
+- Cevap üretmeden önce hangi noktaları doğrulamak gerektiğini yaz
+- Eksik veri maaş, lokasyon, dil veya işveren netliği ise bunu saklama
+- Başvuru metni oluştursan bile kesinlik tonu kullanma
 
 ### `Confidence: low`
 
-- Form cevaplarinda asiri iddiali ton kullanma
-- "Bu role cok uygun" gibi sert ifadelerden kacin
-- Gerekirse once hizli yeniden degerlendirme oner
+- Form cevaplarında aşırı iddialı ton kullanma
+- "Bu role çok uygun" gibi sert ifadelerden kaçın
+- Gerekirse önce hızlı yeniden değerlendirme öner
 
-## Form cevaplama kurali
+## Form cevaplama kuralı
 
 Cevaplar:
 
-- kisa
-- durust
-- role ozel
-- recruiter'e saygili
+- kısa
+- dürüst
+- role özel
+- recruiter'e saygılı
 
 Asla:
 
-- adayin deneyimini sisirme
-- dogrulanmamis bilgiyi kesin gibi yazma
+- adayın deneyimini şişirme
+- doğrulanmamış bilgiyi kesin gibi yazma
 - riskli case'lerde agresif "I'm choosing you" tonu kullanma
 
-## Parity kurali
+## Parity kuralı
 
-`modes/apply.md` icindeki tum soru tipleri burada da desteklenir:
+`modes/apply.md` içindeki tüm soru tipleri burada da desteklenir:
 
 - text area
 - dropdown
@@ -66,24 +66,24 @@ Asla:
 - salary expectation
 - work authorization
 - relocation
-- upload alanlari
+- upload alanları
 
-Form uzun ise scroll alip iteratif devam et. Bu davranis dusmez.
+Form uzun ise scroll alıp iteratif devam et. Bu davranış düşmez.
 
-## Onerilen output
+## Önerilen output
 
 ```markdown
-## Basvuru Cevaplari -- {Sirket} / {Rol}
+## Başvuru Cevapları -- {Şirket} / {Rol}
 
 Temel: Final Score X.X/5 | Confidence: medium | Recommendation: secici_basvur | Archetype: [type]
 
 ### 1. [Form sorusu]
-> [copy-paste hazir cevap]
+> [copy-paste hazır cevap]
 
 ### 2. [Form sorusu]
 > [cevap]
 
 ## Notlar
-- Eksik dogrulama noktasi varsa yaz
-- Kullaniciya son gozden gecirme notu ver
+- Eksik doğrulama noktası varsa yaz
+- Kullanıcıya son gözden geçirme notu ver
 ```

@@ -1,9 +1,9 @@
-# Mod: patterns -- Turkiye locale override
+# Mod: patterns -- Türkiye uyarlaması
 
 Bu dosya `modes/patterns.md` ile birlikte okunur.
 
-## Analiz kurallari
+## Analiz kuralları
 
-- Tracker status yorumunda canonical group'lari baz al.
+- Tracker status yorumunda canonical group'ları baz al.
 - Turkish ve legacy alias'lar normalize edildikten sonra funnel'a dahil edilir.
-- Onerileri yazarken `constraints`, `location_preferences` ve Turkey-market lokasyon sinyallerini one cikar.
+- Önerileri yazarken `constraints`, `location_preferences` ve Turkey-market lokasyon sinyallerini öne çıkar.

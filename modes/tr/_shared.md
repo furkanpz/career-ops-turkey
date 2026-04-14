@@ -1,9 +1,9 @@
-# Paylasilan Baglam -- career-ops (Turkiye)
+# Paylaşılan Bağlam -- career-ops (Türkiye)
 
 <!-- ============================================================
-     Bu dosya Turkiye pazari icin scoring, confidence ve
-     recommendation mantigini tanimlar.
-     Kullaniciya ait veriler buraya degil:
+     Bu dosya Türkiye pazarı için scoring, confidence ve
+     recommendation mantığını tanımlar.
+     Kullanıcıya ait veriler buraya değil:
      - config/profile.yml
      - modes/_profile.md
      ============================================================ -->
@@ -17,41 +17,41 @@
 | profile.yml | `config/profile.yml` | HER ZAMAN |
 | _profile.md | `modes/_profile.md` | HER ZAMAN, bunu bu dosyadan sonra oku |
 
-**KURAL:** Metrik uydurma. CV ve proof point metrigi sadece `cv.md` ve `article-digest.md` uzerinden okunur.
-**KURAL:** `article-digest.md`, proje / etki metrigi konusunda `cv.md`'den daha guvenilir sayilir.
-**KURAL:** Profil tercihleri yoksa varsayim yap, ama varsayim yaptigini acikca soyle.
+**KURAL:** Metrik uydurma. CV ve proof point metriği yalnızca `cv.md` ve `article-digest.md` üzerinden okunur.
+**KURAL:** `article-digest.md`, proje / etki metriği konusunda `cv.md`'den daha güvenilir sayılır.
+**KURAL:** Profil tercihleri yoksa varsayım yap, ama varsayım yaptığını açıkça söyle.
 
-## Profil-driven alanlar
+## Profil odaklı alanlar
 
-`config/profile.yml` icinde su alanlar varsa aktif olarak kullan:
+`config/profile.yml` içinde şu alanlar varsa aktif olarak kullan:
 
 - `compensation.salary_preferences`
-  Maas analizi ve fairness yorumunda legacy `target_range` yerine once bunu referans al.
+  Maaş analizi ve piyasa adaleti yorumunda legacy `target_range` yerine önce bunu referans al.
 - `language.cv_preferences`
-  PDF/CV dili seciminde once bu alan kullanilir.
+  PDF/CV dili seçiminde önce bu alan kullanılır.
 - `location_preferences`
   City / work model fit skorunda ve recommendation'da bunu referans al.
 - `constraints`
-  `must_haves` ve `deal_breakers` recommendation logic'e dogrudan girer.
+  `must_haves` ve `deal_breakers` recommendation logic'e doğrudan girer.
 - `automation.application`
-  PDF, draft answers ve apply helper davranisinda gating sinyali olarak kullanilir.
+  PDF, draft answers ve apply helper davranışında gating sinyali olarak kullanılır.
 
-## Makine kontrati
+## Makine kontratı
 
-- Tracker status label'lari her zaman canonical English kalir.
-- Report machine-key'leri her zaman canonical English kalir:
+- Tracker status label'ları her zaman canonical English kalır.
+- Report machine-key'leri her zaman canonical English kalır:
   `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`
-- Turkce govde ve Turkce operator metni serbesttir.
+- Türkçe gövde ve Türkçe operatör metni serbesttir.
 
 ---
 
-## Turkiye Scoring Sistemi
+## Türkiye Scoring Sistemi
 
-Bu katman `docs/tr-scoring-framework.md` ile hizalidir.
+Bu katman `docs/tr-scoring-framework.md` ile hizalıdır.
 
-Skor 10 agirlikli boyuttan olusur ve 1-5 araligindadir:
+Skor 10 ağırlıklı boyuttan oluşur ve 1-5 aralığındadır:
 
-| Boyut | Agirlik |
+| Boyut | Ağırlık |
 |---|---:|
 | Role Fit | 18 |
 | Alignment With Candidate Goals | 12 |
@@ -66,15 +66,15 @@ Skor 10 agirlikli boyuttan olusur ve 1-5 araligindadir:
 
 ### Skor ilkeleri
 
-- `5` = guclu pozitif sinyal, anlamli bir sorun yok
-- `4` = iyi, ama kucuk cekince var
-- `3` = karisik ama uygulanabilir
-- `2` = zayif fit veya belirgin risk
-- `1` = zayif / gercekci degil / ciddi sorun
+- `5` = güçlü pozitif sinyal, anlamlı bir sorun yok
+- `4` = iyi, ama küçük çekince var
+- `3` = karışık ama uygulanabilir
+- `2` = zayıf fit veya belirgin risk
+- `1` = zayıf / gerçekçi değil / ciddi sorun
 
 ### Zorunlu output
 
-Her degerlendirme sonunda sunlar MUTLAKA yer alir:
+Her değerlendirme sonunda şunlar MUTLAKA yer alır:
 
 - final score
 - strengths
@@ -82,25 +82,25 @@ Her degerlendirme sonunda sunlar MUTLAKA yer alir:
 - recommendation category
 - confidence
 
-### Strengths kurali
+### Strengths kuralı
 
 - En fazla 5 madde
-- Her madde bir kanita dayansin
-- "iyi sirket gibi gorunuyor" gibi bos ifadeler kullanma
-- En guclu 2-3 match sinyalini one cikar
+- Her madde bir kanıta dayansın
+- "iyi şirket gibi görünüyor" gibi boş ifadeler kullanma
+- En güçlü 2-3 match sinyalini öne çıkar
 
-### Risks kurali
+### Risks kuralı
 
 - En fazla 5 madde
-- Belirsizligi risk gibi gostermeden yaz: "bilinmiyor", "dogrulanmadi", "acik degil"
-- Riskleri blocker / major / minor olarak zihinsel olarak ayir
-- Uygulanabilir mitigasyon varsa kisa not dus
+- Belirsizliği risk gibi göstermeden yaz: "bilinmiyor", "doğrulanmadı", "açık değil"
+- Riskleri blocker / major / minor olarak zihinsel olarak ayır
+- Uygulanabilir mitigasyon varsa kısa not düş
 
 ---
 
 ## Confidence Kurallari
 
-Confidence degerleri:
+Confidence değerleri:
 
 - `high`
 - `medium`
@@ -108,58 +108,58 @@ Confidence degerleri:
 
 ### `high` confidence
 
-Su kosullarin cogu saglaniyorsa:
+Şu koşulların çoğu sağlanıyorsa:
 
-- JD ayrintili
-- sirket kimligi net
-- sehir / calisma modeli net
-- maas veya piyasa karsilastirmasi anlamli
+- JD ayrıntılı
+- şirket kimliği net
+- şehir / çalışma modeli net
+- maaş veya piyasa karşılaştırması anlamlı
 - dil beklentisi net
-- 10 boyutun buyuk kismi dogrudan kanitla puanlandi
+- 10 boyutun büyük kısmı doğrudan kanıtla puanlandı
 
 ### `medium` confidence
 
-Su durumda kullan:
+Şu durumda kullan:
 
-- 1-2 onemli boyutta eksik veri var
-- maas veya ekip yapisi belirsiz
-- ilanin kalitesi orta ama yine de karar verilebilir
+- 1-2 önemli boyutta eksik veri var
+- maaş veya ekip yapısı belirsiz
+- ilanın kalitesi orta ama yine de karar verilebilir
 
 ### `low` confidence
 
-Asagidakilerden biri varsa kullan:
+Aşağıdakilerden biri varsa kullan:
 
-- JD eksik, kopya veya dolayli kaynaktan okunmus
-- sirket / isveren kimligi net degil
-- sehir / hibrit / remote kosullari net degil
-- maas verisi yok ve piyasa verisi de zayif
+- JD eksik, kopya veya dolaylı kaynaktan okunmuş
+- şirket / işveren kimliği net değil
+- şehir / hibrit / remote koşulları net değil
+- maaş verisi yok ve piyasa verisi de zayıf
 - birden fazla kaynak birbirini tutmuyor
-- 3 veya daha fazla skor boyutu zayif kanitla puanlandi
+- 3 veya daha fazla skor boyutu zayıf kanıtla puanlandı
 
-**KURAL:** `low` confidence varsa bunu acikca yaz. Sanki eminmis gibi recommendation verme.
+**KURAL:** `low` confidence varsa bunu açıkça yaz. Sanki eminmiş gibi recommendation verme.
 
 ---
 
 ## Borderline Kurallari
 
-Asagidaki durumlardan biri varsa case'i `borderline` olarak isaretle:
+Aşağıdaki durumlardan biri varsa case'i `borderline` olarak işaretle:
 
-- final score `3.7-4.1` araliginda ise
+- final score `3.7-4.1` aralığında ise
 - iki veya daha fazla boyut `3/5` ise
 - bir major red flag varsa
 - confidence `low` ise
 
-`borderline` oldugunda:
+`borderline` olduğunda:
 
-- bunu acikca yaz
-- "hemen basvur" deme
-- once hangi 1-3 seyin dogrulanmasi gerektigini yaz
+- bunu açıkça yaz
+- "hemen başvur" deme
+- önce hangi 1-3 şeyin doğrulanması gerektiğini yaz
 
 ---
 
 ## Recommendation Category Kurallari
 
-Makine-dostu kategori anahtarlari:
+Makine-dostu kategori anahtarları:
 
 - `hemen_basvur`
 - `secici_basvur`
@@ -168,7 +168,7 @@ Makine-dostu kategori anahtarlari:
 
 ### `hemen_basvur`
 
-Yalnizca su durumda:
+Yalnızca şu durumda:
 
 - final score `>= 4.5`
 - critical veya major red flag yok
@@ -176,15 +176,15 @@ Yalnizca su durumda:
 
 ### `secici_basvur`
 
-Yalnizca su durumda:
+Yalnızca şu durumda:
 
 - final score `4.0-4.49`
 - critical red flag yok
-- case borderline degil veya borderline ise nedeni kucuk
+- case borderline değil veya borderline ise nedeni küçük
 
 ### `sinirda_once_dogrula`
 
-Su durumlardan herhangi birinde:
+Şu durumlardan herhangi birinde:
 
 - final score `3.5-3.99`
 - final score `>= 4.0` olsa bile confidence `low`
@@ -193,29 +193,29 @@ Su durumlardan herhangi birinde:
 
 ### `basvurma`
 
-Su durumlardan herhangi birinde:
+Şu durumlardan herhangi birinde:
 
 - final score `< 3.5`
 - critical red flag varsa
 - role fit veya candidate goals `1/5` ise
-- is acikca adayin gercek kisitlariyla celisiyorsa
+- iş açıkça adayın gerçek kısıtlarıyla çelişiyorsa
 
-**KURAL:** recommendation her zaman recruiter-respectful olmali. Zayif vakalari "brand iyi, yine de dene" diye itme.
+**KURAL:** recommendation her zaman recruiter-respectful olmalı. Zayıf vakaları "brand iyi, yine de dene" diye itme.
 
 ---
 
 ## Red Flag Caps
 
-Red flag'ler weighted score icine gizlenmez. Ayrica belirtilir.
+Red flag'ler weighted score içine gizlenmez. Ayrıca belirtilir.
 
 ### Critical red flag
 
-Ornek:
+Örnek:
 
-- supheli veya dogrulanamayan isveren
-- aldatici veya istismara acik maas modeli
-- role Turkiye bazli adaylari kabul etmiyor ama ilan bunu belirsiz birakiyor
-- acikca adayin deal-breaker'ina carpiyor
+- şüpheli veya doğrulanamayan işveren
+- aldatıcı veya istismara açık maaş modeli
+- rol Türkiye bazlı adayları kabul etmiyor ama ilan bunu belirsiz bırakıyor
+- açıkça adayın deal-breaker'ına çarpıyor
 
 Kural:
 
@@ -224,12 +224,12 @@ Kural:
 
 ### Major red flag
 
-Ornek:
+Örnek:
 
-- maas tamamen opak ve ek sinyaller below-market
-- title / seniority / location birbiriyle celisiyor
+- maaş tamamen opak ve ek sinyaller below-market
+- title / seniority / location birbiriyle çelişiyor
 - employer veya legal setup belirsiz
-- asiri yuksek basvuru eforu ama getiri dusuk
+- aşırı yüksek başvuru eforu ama getiri düşük
 
 Kural:
 
@@ -242,19 +242,19 @@ Kural:
 
 ### ASLA
 
-1. Eksik veriyi kesin yargi gibi yazma
+1. Eksik veriyi kesin yargı gibi yazma
 2. Aday deneyimini abartma
-3. Recruiter'i zaman israfina itecek sekilde zayif role "strong apply" deme
-4. Maas / sehir / dil belirsizken eminmis gibi recommendation verme
-5. Sadece brand nedeniyle zayif role'i ovme
+3. Recruiter'ı zaman israfına itecek şekilde zayıf role "strong apply" deme
+4. Maaş / şehir / dil belirsizken eminmiş gibi recommendation verme
+5. Sadece brand nedeniyle zayıf role'i övme
 
 ### HER ZAMAN
 
 1. `cv.md`, `config/profile.yml`, `modes/_profile.md` oku
 2. Gerekiyorsa `article-digest.md` oku
-3. Ilk degerlendirmede `node cv-sync-check.mjs` calistir
+3. İlk değerlendirmede `node cv-sync-check.mjs` çalıştır
 4. Role archetype belirle
-5. Puan verirken kanit eksigini not et
+5. Puan verirken kanıt eksiğini not et
 6. Final score, strengths, risks, recommendation category ve confidence ver
-7. Borderline ve low-confidence vakalari acikca isaretle
-8. Dili Turkce tut, ama makine icin kritik report key'lerini English ve sabit birak
+7. Borderline ve low-confidence vakaları açıkça işaretle
+8. Dili Türkçe tut, ama makine için kritik report key'lerini English ve sabit bırak

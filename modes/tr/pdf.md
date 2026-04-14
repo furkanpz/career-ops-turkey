@@ -1,28 +1,28 @@
-# Mod: pdf -- Turkiye locale override
+# Mod: pdf -- Türkiye uyarlaması
 
-Bu dosya `modes/pdf.md` ile birlikte okunur. `modes/pdf.md` icindeki butun ATS ve template kurallari korunur; bu dosya sadece locale secimi ve Turkiye profili icin override getirir.
+Bu dosya `modes/pdf.md` ile birlikte okunur. `modes/pdf.md` içindeki bütün ATS ve template kuralları korunur; bu dosya sadece dil/locale seçimi ve Türkiye profili için ek davranış getirir.
 
-## CV dili secimi
+## CV dili seçimi
 
-`config/profile.yml` icinde `language.cv_preferences` varsa su sirayi uygula:
+`config/profile.yml` içinde `language.cv_preferences` varsa şu sırayı uygula:
 
-1. `by_listing_language` eslesmesi
+1. `by_listing_language` eşleşmesi
 2. `default`
 3. fallback `en`
 
 Pratik kural:
-- Turkce JD -> varsayilan olarak `tr`
-- Ingilizce JD -> varsayilan olarak `en`
+- Türkçe JD -> varsayılan olarak `tr`
+- İngilizce JD -> varsayılan olarak `en`
 - Dil belirsizse `language.cv_preferences.default`
 
-## Profil alanlari
+## Profil alanları
 
-- `location_preferences` ve `constraints` rolun lokasyon gercekligini ozetlerken kullan.
-- `compensation.salary_preferences` yalnizca CV framing'i ve comp beklentisi uyumu icin referans olsun; CV'ye maas yazma.
-- `automation.application.auto_generate_pdf` false ise kullaniciya PDF generation'in defaultta kapali oldugunu belirt.
+- `location_preferences` ve `constraints` rolün lokasyon gerçekliğini özetlerken kullan.
+- `compensation.salary_preferences` yalnızca CV framing'i ve comp beklentisi uyumu için referans olsun; CV'ye maaş yazma.
+- `automation.application.auto_generate_pdf` false ise kullanıcıya PDF generation'ın defaultta kapalı olduğunu belirt.
 
-## Template ve naming
+## Şablon ve adlandırma
 
-- Template secimi ve output naming icin `cv-template-utils.mjs` ana cozumleyicidir.
-- Batch ve interactive akislarda ayni cozumleyiciyi kullan.
-- Turkce CV olusturulsa bile machine kontrati bozulmaz; report header key'leri English kalir.
+- Template seçimi ve output naming için `cv-template-utils.mjs` ana çözümleyicidir.
+- Batch ve interactive akışlarda aynı çözümleyiciyi kullan.
+- Türkçe CV oluşturulsa bile machine kontratı bozulmaz; report header key'leri English kalır.

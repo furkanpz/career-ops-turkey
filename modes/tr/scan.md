@@ -1,27 +1,27 @@
-# Mod: scan — Turkiye runtime override
+# Mod: scan — Türkiye runtime uyarlaması
 
-Bu override `modes/scan.md` ile birlikte okunur. Temel kural degismez:
+Bu uyarlama `modes/scan.md` ile birlikte okunur. Temel kural değişmez:
 
 - `/career-ops scan` = `node scan.mjs`
 - `npm run scan` = `node scan.mjs`
 
-## Turkiye-specific summary rules
+## Türkiye-specific summary rules
 
-- Ciktida birincil kaynaklari ayri belirt:
+- Çıktıda birincil kaynakları ayrı belirt:
   - LinkedIn Jobs
   - Kariyer.net
-  - Indeed Turkiye
+  - Indeed Türkiye
   - Eleman.net
-- Ikincil kaynaklari ayri belirt:
+- İkincil kaynakları ayrı belirt:
   - Secretcv
   - Yenibiris
   - ISKUR
-- `skipped_blocked_source` gorulurse bunu "kaynak erisim duvari / login / 403" diye acikla. "ilan kapali" diye yorumlama.
-- `portals.yml` eski TR template kullaniyorsa bunu net yaz:
+- `skipped_blocked_source` görülürse bunu "kaynak erişim duvarı / login / 403" diye açıkla. "ilan kapalı" diye yorumlama.
+- `portals.yml` eski TR template kullanıyorsa bunu net yaz:
   - eksik parser key'leri listele
-  - mevcut `portals.yml` dosyasini ezmeden, `templates/portals.tr.example.yml` icindeki ilgili starter girislerini kendi hedef rollerine gore merge etmesi gerektigini soyle
+  - mevcut `portals.yml` dosyasını ezmeden, `templates/portals.tr.example.yml` içindeki ilgili starter girişlerini kendi hedef rollerine göre merge etmesi gerektiğini söyle
 
 ## Safety
 
-- LinkedIn discovery-only kaynaktir. Login gerektiren scrape veya bypass deneme.
-- Sirket kariyer sayfasi ve job board sonucu cakisirsa scanner'in sectigi canonical URL'yi koru; agent olarak ikinci kez override etme.
+- LinkedIn discovery-only kaynaktır. Login gerektiren scrape veya bypass deneme.
+- Şirket kariyer sayfası ve job board sonucu çakışırsa scanner'ın seçtiği canonical URL'yi koru; agent olarak ikinci kez override etme.

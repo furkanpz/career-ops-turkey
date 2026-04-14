@@ -1,62 +1,62 @@
-# Mod: pipeline -- TR URL inbox isleme
+# Mod: pipeline -- TR URL inbox işleme
 
-Bu dosya `modes/pipeline.md` ile birlikte okunur. `modes/pipeline.md` icindeki TAM behavior korunur:
+Bu dosya `modes/pipeline.md` ile birlikte okunur. `modes/pipeline.md` içindeki TAM behavior korunur:
 
 - sequential report numbering
 - Playwright -> WebFetch -> WebSearch fallback zinciri
-- `local:jds/*` destegi
-- erisilemeyen URL'leri `- [!]` olarak isaretleme
-- 3+ URL icin paralel agent kullanimi
-- pending -> processed tasima
+- `local:jds/*` desteği
+- erişilemeyen URL'leri `- [!]` olarak işaretleme
+- 3+ URL için paralel agent kullanımı
+- pending -> processed taşıma
 
-`data/pipeline.md` icindeki birikmis ilan URL'lerini isler.
+`data/pipeline.md` içindeki birikmiş ilan URL'lerini işler.
 
 ## Workflow
 
 1. `data/pipeline.md` oku
-2. `Pendientes` altindaki `- [ ]` kayitlari bul
-3. Her URL icin:
-   - rapor numarasini sirali hesapla
-   - JD cikar
-   - `modes/tr/teklif.md` mantigi ile A-F degerlendirmesi yap
-   - final score, confidence ve recommendation category uret
-   - root pipeline kuralina gore PDF gerekiyorsa uret
-   - tracker girisi yaz
-   - erisim hatasi varsa `- [!]` olarak not dus
-4. Var olan basliklari bozma:
+2. `Pendientes` altındaki `- [ ]` kayıtları bul
+3. Her URL için:
+   - rapor numarasını sıralı hesapla
+   - JD çıkar
+   - `modes/tr/teklif.md` mantığı ile A-G değerlendirmesi yap
+   - final score, confidence ve recommendation category üret
+   - root pipeline kuralına göre PDF gerekiyorsa üret
+   - tracker girişi yaz
+   - erişim hatası varsa `- [!]` olarak not düş
+4. Var olan başlıkları bozma:
    - legacy `Pendientes` / `Procesadas`
    - veya English `Pending` / `Processed`
    Hangi stil dosyada varsa onu koru
 
-## Ozet tablo
+## Özet tablo
 
-Islem sonunda su tabloyu goster:
+İşlem sonunda şu tabloyu göster:
 
 ```markdown
-| # | Sirket | Rol | Final Score | Confidence | Recommendation | PDF |
+| # | Şirket | Rol | Final Score | Confidence | Recommendation | PDF |
 |---|---|---|---|---|---|---|
 ```
 
 ## Conservative kural
 
-Su durumda otomatik pozitif ton kullanma:
+Şu durumda otomatik pozitif ton kullanma:
 
 - recommendation `sinirda_once_dogrula`
 - recommendation `basvurma`
 - confidence `low`
 
-Bu vakalarda ozet satirinda bunu acikca belirt:
+Bu vakalarda özet satırında bunu açıkça belirt:
 
-- `dogrula`
-- `sinirda`
-- `dusuk guven`
+- `doğrula`
+- `sınırda`
+- `düşük güven`
 
 ## Sync
 
-Pipeline baslamadan once:
+Pipeline başlamadan önce:
 
 ```bash
 node cv-sync-check.mjs
 ```
 
-Uyari varsa kullaniciya bildir.
+Uyarı varsa kullanıcıya bildir.

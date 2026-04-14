@@ -1,8 +1,8 @@
-# Mod: training -- Turkiye locale override
+# Mod: training -- Türkiye uyarlaması
 
 Bu dosya `modes/training.md` ile birlikte okunur.
 
-## Degerlendirme lensi
+## Değerlendirme lensi
 
-- Egitim/cert'in Turkiye pazarinda gercek signal olup olmadigini belirt.
-- Sadece sertifika var diye pozitif yazma; mevcut CV proof point'leriyle nasil baglandigini acikla.
+- Eğitim/cert'in Türkiye pazarında gerçek signal olup olmadığını belirt.
+- Sadece sertifika var diye pozitif yazma; mevcut CV proof point'leriyle nasıl bağlandığını açıkla.

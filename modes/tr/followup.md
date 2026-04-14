@@ -1,15 +1,15 @@
-# Mod: followup -- Turkiye locale override
+# Mod: followup -- Türkiye uyarlaması
 
 Bu dosya `modes/followup.md` ile birlikte okunur.
 
-## Operator deneyimi
+## Operatör deneyimi
 
-- Dashboard aciklamalarini Turkce ver.
-- Draft follow-up metni, sirketin dili ve onceki iletisimin dili neyse ona gore yazilabilir; ama operator ozeti Turkce olmali.
-- Canonical tracker status label'lari her zaman English kalir; yorum ve aciklama metni Turkce olabilir.
+- Dashboard açıklamalarını Türkçe ver.
+- Draft follow-up metni, şirketin dili ve önceki iletişimin dili neyse ona göre yazılabilir; ama operatör özeti Türkçe olmalı.
+- Canonical tracker status label'ları her zaman English kalır; yorum ve açıklama metni Türkçe olabilir.
 
-## Turkiye-market notlari
+## Türkiye-market notları
 
-- `response_received` durumunda recruiter veya hiring manager geri donduyse hizli ama sakin cevap oner.
-- Turkiye pazarinda maas veya is modeli henuz net degilse follow-up metninde bu konuda baskici olma; once rol ve surec ilgisini koru.
-- LinkedIn follow-up gerekiyorsa discovery-only sinirlarini koru; login bypass veya scrape onerme.
+- `response_received` durumunda recruiter veya hiring manager geri döndüyse hızlı ama sakin cevap öner.
+- Türkiye pazarında maaş veya iş modeli henüz net değilse follow-up metninde bu konuda baskıcı olma; önce rol ve süreç ilgisini koru.
+- LinkedIn follow-up gerekiyorsa discovery-only sınırlarını koru; login bypass veya scrape önerme.

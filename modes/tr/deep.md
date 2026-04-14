@@ -1,9 +1,9 @@
-# Mod: deep -- Turkiye locale override
+# Mod: deep -- Türkiye uyarlaması
 
 Bu dosya `modes/deep.md` ile birlikte okunur.
 
-## Arastirma oncelikleri
+## Araştırma öncelikleri
 
-- Turkiye merkezli veya Turkiye'de ekip kuran sirketlerde Turkce kaynaklari, yerel basin ve yerel isveren sinyallerini oncele.
-- Global sirketlerde Turkiye/EMEA legal setup, payroll modeli, hibrit politika ve lokal ekip yapisi sinyallerini ayri ara.
-- Dogrulanmamis bilgiyi acikca "dogrulanmadi" diye etiketle.
+- Türkiye merkezli veya Türkiye'de ekip kuran şirketlerde Türkçe kaynakları, yerel basın ve yerel işveren sinyallerini öncele.
+- Global şirketlerde Türkiye/EMEA legal setup, payroll modeli, hibrit politika ve lokal ekip yapısı sinyallerini ayrı ara.
+- Doğrulanmamış bilgiyi açıkça "doğrulanmadı" diye etiketle.

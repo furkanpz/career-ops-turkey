@@ -1,8 +1,8 @@
-# Mod: project -- Turkiye locale override
+# Mod: project -- Türkiye uyarlaması
 
 Bu dosya `modes/project.md` ile birlikte okunur.
 
-## Degerlendirme lensi
+## Değerlendirme lensi
 
-- Projenin Turkiye veya EMEA pazarinda signal degeri olup olmadigini belirt.
-- Yerel isverenlerin gordugu proof point turlerine bak: production ownership, cost/latency, reliability, stakeholder alignment.
+- Projenin Türkiye veya EMEA pazarında signal değeri olup olmadığını belirt.
+- Yerel işverenlerin gördüğü proof point türlerine bak: production ownership, cost/latency, reliability, stakeholder alignment.

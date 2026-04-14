@@ -1,14 +1,14 @@
-# Mod: contacto -- Turkiye locale override
+# Mod: contacto -- Türkiye uyarlaması
 
 Bu dosya `modes/contacto.md` ile birlikte okunur.
 
-## Dil secimi
+## Dil seçimi
 
-- Recruiter veya hiring manager Turkiye merkezli ve iletisim dili Turkce ise mesajlari Turkce yaz.
-- Ilan global/EMEA ve iletisim Ingilizce ise English kullan.
-- Dil belirsizse once JD, recruiter profili ve sirket sayfasindaki baskin dili kontrol et.
+- Recruiter veya hiring manager Türkiye merkezli ve iletişim dili Türkçe ise mesajları Türkçe yaz.
+- İlan global/EMEA ve iletişim İngilizce ise English kullan.
+- Dil belirsizse önce JD, recruiter profili ve şirket sayfasındaki baskın dili kontrol et.
 
 ## Ton
 
-- Turkiye pazari icin daha net ama recruiter-respectful ton kullan.
-- Maas, lokasyon ve calisma modeli belirsizse mesajda kesinlik tonu kullanma.
+- Türkiye pazarı için daha net ama recruiter-respectful ton kullan.
+- Maaş, lokasyon ve çalışma modeli belirsizse mesajda kesinlik tonu kullanma.
