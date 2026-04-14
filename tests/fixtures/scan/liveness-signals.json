@@ -4,9 +4,25 @@
     "input": {
       "status": 200,
       "finalUrl": "https://www.linkedin.com/checkpoint/challenge/",
-      "bodyText": "Sign in to view more jobs on LinkedIn"
+      "bodyText": "Sign in to view more jobs on LinkedIn",
+      "parserKey": "linkedin_jobs_search",
+      "sourceType": "job_board"
     },
-    "expected": "blocked"
+    "expected": "blocked_authwall"
+  },
+  {
+    "name": "blocked-linkedin-public-with-job-content",
+    "input": {
+      "status": 200,
+      "finalUrl": "https://tr.linkedin.com/jobs/view/software-engineer-at-example-123",
+      "bodyText": "Sign in to view more jobs on LinkedIn About the job Software Engineer Example Corp Employment type Full-time Skills Node.js APIs",
+      "pageTitle": "Software Engineer - Example Corp",
+      "expectedTitle": "Software Engineer",
+      "expectedCompany": "Example Corp",
+      "parserKey": "linkedin_jobs_search",
+      "sourceType": "job_board"
+    },
+    "expected": "blocked_public"
   },
   {
     "name": "expired-turkish-posting",
@@ -22,8 +38,24 @@
     "input": {
       "status": 200,
       "finalUrl": "https://jobs.example.com/data-engineer",
-      "bodyText": "Data Engineer Basvur Sorumluluklar Veri platformlari ETL surecleri Dagitim gozlemlenebilirlik Takim calismasi Test otomasyonu Bulut mimarisi Uretim sistemleri Sorun giderme Is birligi Paydas yonetimi Teknik liderlik Kariyer gelisimi"
+      "bodyText": "Data Engineer Basvur Sorumluluklar Veri platformlari ETL surecleri Dagitim gozlemlenebilirlik Takim calismasi Test otomasyonu Bulut mimarisi Uretim sistemleri Sorun giderme Is birligi Paydas yonetimi Teknik liderlik Kariyer gelisimi",
+      "expectedTitle": "Data Engineer",
+      "expectedCompany": "Example Corp",
+      "sourceType": "company_careers"
     },
-    "expected": "active"
+    "expected": "active_live"
+  },
+  {
+    "name": "short-public-board-is-not-expired",
+    "input": {
+      "status": 200,
+      "finalUrl": "https://www.kariyer.net/is-ilani/example-company-yazilim-muhendisi-123",
+      "bodyText": "Yazılım Mühendisi Example Company Sorumluluklar Teknik nitelikler",
+      "expectedTitle": "Yazılım Mühendisi",
+      "expectedCompany": "Example Company",
+      "parserKey": "kariyernet_search",
+      "sourceType": "job_board"
+    },
+    "expected": "active_live"
   }
 ]

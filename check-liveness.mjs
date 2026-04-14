@@ -91,6 +91,94 @@ export const APPLY_PATTERNS = [
 
 // Below this length the page is probably just nav/footer (closed ATS page)
 export const MIN_CONTENT_CHARS = 300;
+const LINKEDIN_PUBLIC_LAYOUT_PATTERNS = [
+  /\babout the job\b/i,
+  /\bemployment type\b/i,
+  /\bjob function\b/i,
+  /\bskills\b/i,
+  /\bapplicants\b/i,
+  /\bmeet the hiring team\b/i,
+  /\bsee who .* hired for this role\b/i,
+  /\bseniority level\b/i,
+  /\bindustry\b/i,
+  /\bcompany size\b/i,
+];
+const GENERAL_JOB_DETAIL_PATTERNS = [
+  /\bresponsibilit(?:y|ies)\b/i,
+  /\bqualification(?:s)?\b/i,
+  /\brequirement(?:s)?\b/i,
+  /\bjob description\b/i,
+  /\bsorumluluk(?:lar)?\b/i,
+  /\bnitelik(?:ler)?\b/i,
+  /\bgereksinim(?:ler)?\b/i,
+  /\bgorev tanimi\b/i,
+  /\bgörev tanımı\b/i,
+];
+
+function getSourceHost(value) {
+  try {
+    return new URL(value).hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function normalizeNeedle(value) {
+  return normalizeBodyText(value)
+    .replace(/[İIı]/g, 'i')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function includesNormalized(text, needle) {
+  const normalizedNeedle = normalizeNeedle(needle);
+  if (!normalizedNeedle || normalizedNeedle.length < 3) return false;
+  return normalizeNeedle(text).includes(normalizedNeedle);
+}
+
+function isPublicBoardUrl(finalUrl = '', parserKey = '', sourceType = '') {
+  const host = getSourceHost(finalUrl);
+  if (parserKey === 'linkedin_jobs_search' || host.includes('linkedin.com')) return true;
+  if (parserKey === 'kariyernet_search' || host.includes('kariyer.net')) return true;
+  if (parserKey === 'indeed_tr_search' || host.includes('indeed.com')) return true;
+  if (parserKey === 'elemannet_search' || host.includes('eleman.net')) return true;
+  if (parserKey === 'secretcv_search' || host.includes('secretcv.com')) return true;
+  if (parserKey === 'yenibiris_search' || host.includes('yenibiris.com')) return true;
+  if (parserKey === 'iskur_search' || host.includes('iskur') || host.includes('esube.iskur')) return true;
+  return sourceType === 'job_board' || sourceType === 'aggregator';
+}
+
+function isLinkedInDiscovery(finalUrl = '', parserKey = '') {
+  return parserKey === 'linkedin_jobs_search' || getSourceHost(finalUrl).includes('linkedin.com');
+}
+
+function hasStrongPublicJobSignals({
+  normalizedText,
+  finalUrl = '',
+  pageTitle = '',
+  expectedTitle = '',
+  expectedCompany = '',
+  parserKey = '',
+  sourceType = '',
+} = {}) {
+  const publicBoard = isPublicBoardUrl(finalUrl, parserKey, sourceType);
+  if (!publicBoard) return false;
+
+  const combinedText = normalizeBodyText(`${pageTitle} ${normalizedText}`);
+  const titleMatch = expectedTitle ? includesNormalized(combinedText, expectedTitle) : false;
+  const companyMatch = expectedCompany ? includesNormalized(combinedText, expectedCompany) : false;
+  const applySignal = APPLY_PATTERNS.some((pattern) => pattern.test(normalizedText));
+  const detailSignal = GENERAL_JOB_DETAIL_PATTERNS.some((pattern) => pattern.test(normalizedText));
+  const linkedInSignal = isLinkedInDiscovery(finalUrl, parserKey)
+    ? LINKEDIN_PUBLIC_LAYOUT_PATTERNS.some((pattern) => pattern.test(normalizedText))
+    : false;
+
+  return (
+    (titleMatch && companyMatch) ||
+    ((titleMatch || companyMatch) && (applySignal || detailSignal || linkedInSignal))
+  );
+}
 
 function normalizeBodyText(bodyText) {
   return String(bodyText ?? '').replace(/\s+/g, ' ').trim();
@@ -105,11 +193,38 @@ function isBlockedNavigationError(err) {
   );
 }
 
-export function classifyLivenessSignals({ status = 0, finalUrl = '', bodyText = '' } = {}) {
+export function classifyLivenessSignals({ status = 0, finalUrl = '', bodyText = '', ...rest } = {}) {
+  return classifyLivenessSignalsWithContext({ status, finalUrl, bodyText, ...rest });
+}
+
+export function classifyLivenessSignalsWithContext({
+  status = 0,
+  finalUrl = '',
+  bodyText = '',
+  pageTitle = '',
+  expectedTitle = '',
+  expectedCompany = '',
+  parserKey = '',
+  sourceType = '',
+} = {}) {
   const normalizedText = normalizeBodyText(bodyText);
+  const publicBoard = isPublicBoardUrl(finalUrl, parserKey, sourceType);
+  const linkedInDiscovery = isLinkedInDiscovery(finalUrl, parserKey);
+  const strongPublicSignals = hasStrongPublicJobSignals({
+    normalizedText,
+    finalUrl,
+    pageTitle,
+    expectedTitle,
+    expectedCompany,
+    parserKey,
+    sourceType,
+  });
 
   if (status === 401 || status === 403 || status === 429) {
-    return { result: 'blocked', reason: `HTTP ${status}` };
+    return {
+      result: strongPublicSignals && publicBoard ? 'blocked_public' : 'blocked_authwall',
+      reason: `HTTP ${status}`,
+    };
   }
 
   if (status === 404 || status === 410) {
@@ -118,7 +233,10 @@ export function classifyLivenessSignals({ status = 0, finalUrl = '', bodyText = 
 
   for (const pattern of BLOCKED_URL_PATTERNS) {
     if (pattern.test(finalUrl)) {
-      return { result: 'blocked', reason: `redirect to ${finalUrl}` };
+      return {
+        result: strongPublicSignals && publicBoard ? 'blocked_public' : 'blocked_authwall',
+        reason: `redirect to ${finalUrl}`,
+      };
     }
   }
 
@@ -130,12 +248,11 @@ export function classifyLivenessSignals({ status = 0, finalUrl = '', bodyText = 
 
   for (const pattern of BLOCKED_PATTERNS) {
     if (pattern.test(normalizedText)) {
-      return { result: 'blocked', reason: `pattern matched: ${pattern.source}` };
+      return {
+        result: strongPublicSignals && publicBoard ? 'blocked_public' : 'blocked_authwall',
+        reason: `pattern matched: ${pattern.source}`,
+      };
     }
-  }
-
-  if (APPLY_PATTERNS.some((pattern) => pattern.test(normalizedText))) {
-    return { result: 'active', reason: 'apply button detected' };
   }
 
   for (const pattern of EXPIRED_PATTERNS) {
@@ -144,30 +261,61 @@ export function classifyLivenessSignals({ status = 0, finalUrl = '', bodyText = 
     }
   }
 
+  if (APPLY_PATTERNS.some((pattern) => pattern.test(normalizedText))) {
+    return { result: linkedInDiscovery ? 'blocked_public' : 'active_live', reason: 'apply button detected' };
+  }
+
   if (normalizedText.length < MIN_CONTENT_CHARS) {
+    if (strongPublicSignals && publicBoard) {
+      return {
+        result: linkedInDiscovery ? 'blocked_public' : 'active_live',
+        reason: 'public job signals detected despite short content',
+      };
+    }
     return { result: 'expired', reason: 'insufficient content — likely nav/footer only' };
   }
 
-  return { result: 'uncertain', reason: 'content present but no apply button found' };
+  if (strongPublicSignals && publicBoard) {
+    return {
+      result: linkedInDiscovery ? 'blocked_public' : 'active_live',
+      reason: 'public job detail signals detected',
+    };
+  }
+
+  return {
+    result: linkedInDiscovery && publicBoard ? 'blocked_public' : 'blocked_authwall',
+    reason: 'content present but no trusted apply signal found',
+  };
 }
 
-export async function checkUrl(page, url) {
+export async function checkUrl(page, url, options = {}) {
+  const timeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : 15_000;
+  const waitMs = Number.isFinite(options.waitMs) ? options.waitMs : 2_000;
   try {
-    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
 
     // Give SPAs (Ashby, Lever, Workday) time to hydrate
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(waitMs);
     const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    return classifyLivenessSignals({
+    const pageTitle = await page.title();
+    return classifyLivenessSignalsWithContext({
       status: response?.status() ?? 0,
       finalUrl: page.url(),
       bodyText,
+      pageTitle,
+      expectedTitle: options.expectedTitle,
+      expectedCompany: options.expectedCompany,
+      parserKey: options.parserKey,
+      sourceType: options.sourceType,
     });
 
   } catch (err) {
     const message = String(err?.message ?? '').split('\n')[0];
     if (isBlockedNavigationError(err)) {
-      return { result: 'blocked', reason: `navigation error: ${message}` };
+      return {
+        result: isPublicBoardUrl(url, options.parserKey, options.sourceType) ? 'blocked_public' : 'blocked_authwall',
+        reason: `navigation error: ${message}`,
+      };
     }
     return { result: 'expired', reason: `navigation error: ${message}` };
   }
@@ -195,25 +343,30 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  let active = 0, expired = 0, uncertain = 0;
-  let blocked = 0;
+  let active = 0, expired = 0, publicBlocked = 0;
+  let authwallBlocked = 0;
 
   // Sequential — project rule: never Playwright in parallel
   for (const url of urls) {
     const { result, reason } = await checkUrl(page, url);
-    const icon = { active: '✅', expired: '❌', uncertain: '⚠️', blocked: '⛔' }[result];
+    const icon = {
+      active_live: '✅',
+      expired: '❌',
+      blocked_public: '⚠️',
+      blocked_authwall: '⛔',
+    }[result];
     console.log(`${icon} ${result.padEnd(10)} ${url}`);
-    if (result !== 'active') console.log(`           ${reason}`);
-    if (result === 'active') active++;
+    if (result !== 'active_live') console.log(`           ${reason}`);
+    if (result === 'active_live') active++;
     else if (result === 'expired') expired++;
-    else if (result === 'blocked') blocked++;
-    else uncertain++;
+    else if (result === 'blocked_public') publicBlocked++;
+    else authwallBlocked++;
   }
 
   await browser.close();
 
-  console.log(`\nResults: ${active} active  ${expired} expired  ${blocked} blocked  ${uncertain} uncertain`);
-  if (expired > 0 || blocked > 0 || uncertain > 0) process.exit(1);
+  console.log(`\nResults: ${active} active  ${expired} expired  ${publicBlocked} public-blocked  ${authwallBlocked} authwall-blocked`);
+  if (expired > 0 || publicBlocked > 0 || authwallBlocked > 0) process.exit(1);
 }
 
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);

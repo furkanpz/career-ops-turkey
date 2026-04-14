@@ -106,5 +106,60 @@
       "source": "Greenhouse",
       "sourceType": "company_careers"
     }
+  },
+  {
+    "name": "remote-sensing-role-kept",
+    "query": {
+      "name": "LinkedIn Jobs — Turkey AI & Data",
+      "parser_key": "linkedin_jobs_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Remote Sensing Engineer at Acme | LinkedIn",
+      "url": "https://www.linkedin.com/jobs/view/234567890"
+    },
+    "expected": {
+      "title": "Remote Sensing Engineer",
+      "company": "Acme",
+      "source": "LinkedIn",
+      "sourceType": "job_board"
+    }
+  },
+  {
+    "name": "role-location-company-last-segment",
+    "query": {
+      "name": "LinkedIn Jobs — Turkey Product",
+      "parser_key": "linkedin_jobs_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Senior Product Manager - Remote - Turkey - Acme | LinkedIn",
+      "url": "https://www.linkedin.com/jobs/view/345678901"
+    },
+    "expected": {
+      "title": "Senior Product Manager",
+      "company": "Acme",
+      "location": "Remote - Turkey",
+      "source": "LinkedIn",
+      "sourceType": "job_board"
+    }
+  },
+  {
+    "name": "remote-brand-company-kept",
+    "query": {
+      "name": "LinkedIn Jobs — Turkey Platform",
+      "parser_key": "linkedin_jobs_search",
+      "adapter_family": "turkish_job_board"
+    },
+    "result": {
+      "title": "Platform Engineer at RemoteTech | LinkedIn",
+      "url": "https://www.linkedin.com/jobs/view/456789012"
+    },
+    "expected": {
+      "title": "Platform Engineer",
+      "company": "RemoteTech",
+      "source": "LinkedIn",
+      "sourceType": "job_board"
+    }
   }
 ]

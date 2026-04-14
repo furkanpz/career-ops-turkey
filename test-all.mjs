@@ -172,6 +172,7 @@ if (scanModule) {
       normalized &&
       normalized.title === testCase.expected.title &&
       normalized.company === testCase.expected.company &&
+      (testCase.expected.location === undefined || normalized.location === testCase.expected.location) &&
       normalized.source === testCase.expected.source &&
       normalized.sourceType === testCase.expected.sourceType
     ) {
@@ -215,6 +216,255 @@ if (scanModule) {
       pass(`Company title cleanup fixture OK: ${testCase.name}`);
     } else {
       fail(`Company title cleanup mismatch: ${testCase.name}`);
+    }
+  }
+
+  const tolerantTitleFilter = scanModule.buildTitleFilter({
+    include: {
+      exact_only: ['AI', '.NET', 'QA'],
+      family_contains: ['DevOps', 'AI Tutor', 'Data Management', 'ERP Sistemleri', 'Uygulama Geliştirme'],
+    },
+    review_only: {
+      family_contains: ['Veri Bilimi Danışmanı', 'Application Support Engineer', 'Technical Consultant'],
+    },
+    exclude: {
+      family_contains: ['Intern', 'Product Manager', 'Business Analyst', 'Scrum Master', 'Project Manager'],
+    },
+  });
+  if (
+    tolerantTitleFilter('Senior Dev Ops Engineer') &&
+    tolerantTitleFilter('AI Tutor') &&
+    tolerantTitleFilter('Data Management Specialist') &&
+    tolerantTitleFilter('ERP Sistemleri Uygulama Geliştirme Sorumlusu') &&
+    tolerantTitleFilter('QA Engineer') &&
+    tolerantTitleFilter('Yazılım Geliştirme Mühendisi (.Net/Angular)') &&
+    !tolerantTitleFilter('AI Tutor Intern')
+  ) {
+    pass('Title filter handles spacing variants and negatives');
+  } else {
+    fail('Title filter does not handle spacing variants correctly');
+  }
+
+  const titleMatcher = scanModule.buildTitleMatcher({
+    include: {
+      exact_only: ['AI', '.NET', 'QA', 'ABAP'],
+      family_contains: [
+        'ERP Sistemleri',
+        'Uygulama Geliştirme',
+        'Cloud Engineer',
+        'Cloud Database Engineer',
+        'Systems Engineer',
+        'Test Otomasyon Mühendisi',
+        'Yazılım Test',
+        'Veritabanı Yönetimi',
+        'Yapay Zeka Eğitmeni',
+        'SAP Cloud Platform',
+        'SAP HANA',
+      ],
+    },
+    review_only: {
+      exact_only: ['Danışman'],
+      family_contains: ['Veri Bilimi Danışmanı', 'Technical Consultant', 'Application Support Engineer', 'ERP Applications Specialist', 'System Engineer - Application'],
+    },
+    exclude: {
+      exact_only: ['Product Manager', 'Project Manager', 'Scrum Master'],
+      family_contains: ['Business Analyst', 'Accountant'],
+    },
+  });
+
+  const mainMatches = [
+    'ERP Sistemleri Uygulama Geliştirme Sorumlusu',
+    'Yazılım Geliştirme Mühendisi (.Net/Angular)',
+    'SAP ABAP Developer',
+    'SAP Cloud Platform Developer',
+    'Lead SAP HANA Developer – Platform & Cloud Expertise',
+    'QA Engineer',
+    'Test Otomasyon Mühendisi',
+    'Yazılım Test ve Devreye Alma Mühendisi',
+    'Cloud Engineer',
+    'Senior Cloud Database Engineer',
+    'Yapay Zekâ Eğitmeni',
+    'Veritabanı Yönetimi Uzmanı',
+    'Systems Engineer',
+  ].every((title) => titleMatcher(title).bucket === 'main');
+
+  const reviewMatches = [
+    'Veri Bilimi Danışmanı',
+    'Technical Consultant',
+    'Application Support Engineer',
+    'ERP Applications Specialist',
+    'System Engineer - Application',
+  ].every((title) => titleMatcher(title).bucket === 'review');
+
+  const rejectedMatches = [
+    'Product Manager',
+    'Business Analyst',
+    'Scrum Master',
+    'Project Manager',
+  ].every((title) => titleMatcher(title).bucket === 'reject');
+
+  const falsePositiveSafe =
+    titleMatcher('ERP').bucket === 'reject' &&
+    titleMatcher('Uygulama').bucket === 'reject' &&
+    titleMatcher('Danışman').bucket === 'review' &&
+    titleMatcher('Senior C# Accountant').bucket === 'reject';
+
+  if (mainMatches && reviewMatches && rejectedMatches && falsePositiveSafe) {
+    pass('Structured title matcher classifies main/review/reject buckets correctly');
+  } else {
+    fail('Structured title matcher classification failed');
+  }
+
+  const canonicalDedup = scanModule.dedupeOffers([
+    {
+      title: 'Yapay Zeka (AI) Geliştiricisi',
+      url: 'https://www.linkedin.com/jobs/view/example-role/?trackingId=abc123',
+      canonicalUrl: 'https://www.linkedin.com/jobs/view/example-role/',
+      company: 'Example Corp',
+      roleFamilyKey: 'yapay zeka geliştiricisi',
+      source: 'LinkedIn',
+      sourceType: 'job_board',
+      sourcePriority: 80,
+    },
+    {
+      title: 'Yapay Zeka (AI) Geliştiricisi',
+      url: 'https://www.linkedin.com/jobs/view/example-role/?trackingId=xyz789',
+      canonicalUrl: 'https://www.linkedin.com/jobs/view/example-role/',
+      company: 'Example Corp',
+      roleFamilyKey: 'yapay zeka geliştiricisi',
+      source: 'LinkedIn',
+      sourceType: 'job_board',
+      sourcePriority: 80,
+    },
+  ]);
+  if (canonicalDedup.offers.length === 1 && canonicalDedup.duplicates.length === 1) {
+    pass('Dedup uses canonical URLs for tracking-parameter variants');
+  } else {
+    fail('Dedup did not collapse canonical URL variants');
+  }
+
+  const sampleSearchHtml = Array.from({ length: 12 }, (_, index) => (
+    `<a class="result__a" href="https://example.com/${index}">Role ${index}</a>`
+  )).join('');
+  const limitedSearchResults = scanModule.parseSearchResultsHtml(sampleSearchHtml, 10);
+  if (limitedSearchResults.length === 10) {
+    pass('Search result limit override works');
+  } else {
+    fail('Search result limit override failed');
+  }
+
+  const sampleBingRss = [
+    '<?xml version="1.0"?>',
+    '<rss><channel>',
+    '<item><title>Software Engineer - Example Corp</title><link>https://example.com/jobs/1</link></item>',
+    '<item><title>Backend Engineer - Sample Inc</title><link>https://example.com/jobs/2</link></item>',
+    '</channel></rss>',
+  ].join('');
+  const bingResults = scanModule.parseBingRssResultsXml(sampleBingRss, 10);
+  if (bingResults.length === 2 && bingResults[0].url === 'https://example.com/jobs/1') {
+    pass('Bing RSS parser works');
+  } else {
+    fail('Bing RSS parser failed');
+  }
+
+  const sampleLinkedInHtml = [
+    '<ul class="jobs-search__results-list"><li>',
+    '<div class="base-card">',
+    '<a class="base-card__full-link" href="https://tr.linkedin.com/jobs/view/example-1"></a>',
+    '<div class="base-search-card__info">',
+    '<h3 class="base-search-card__title">Junior Software Engineer</h3>',
+    '<h4 class="base-search-card__subtitle"><a>Example Corp</a></h4>',
+    '<div class="base-search-card__metadata"><span class="job-search-card__location">Türkiye</span></div>',
+    '</div></div></li></ul>',
+  ].join('');
+  const linkedInResults = scanModule.parseLinkedInSearchResultsHtml(sampleLinkedInHtml, 10);
+  if (
+    linkedInResults.length === 1 &&
+    linkedInResults[0].title === 'Junior Software Engineer' &&
+    linkedInResults[0].company === 'Example Corp'
+  ) {
+    pass('LinkedIn direct search parser works');
+  } else {
+    fail('LinkedIn direct search parser failed');
+  }
+
+  const sampleKariyerHtml = [
+    '<div data-test="ad-card">',
+    '<a href="/is-ilani/example-company-yazilim-muhendisi-123" class="k-ad-card">',
+    '<span data-test="ad-card-title">Yazılım Mühendisi</span>',
+    '<span data-test="subtitle">Example Company</span>',
+    '<span data-test="location">İstanbul</span>',
+    '</a>',
+    '</div>',
+  ].join('');
+  const kariyerResults = scanModule.parseKariyerSearchResultsHtml(sampleKariyerHtml, 10);
+  if (
+    kariyerResults.length === 1 &&
+    kariyerResults[0].title === 'Yazılım Mühendisi' &&
+    kariyerResults[0].company === 'Example Company'
+  ) {
+    pass('Kariyer direct search parser works');
+  } else {
+    fail('Kariyer direct search parser failed');
+  }
+
+  const linkedInPages = scanModule.expandDirectSearchUrls({
+    pagination: { type: 'linkedin_start', page_size: 25, max_pages: 3 },
+    search_urls: ['https://www.linkedin.com/jobs/search/?keywords=Software%20Engineer&location=Turkey'],
+  }, 3);
+  if (
+    linkedInPages.length === 3 &&
+    linkedInPages[1].includes('start=25') &&
+    linkedInPages[2].includes('start=50')
+  ) {
+    pass('LinkedIn direct pagination expansion works');
+  } else {
+    fail('LinkedIn direct pagination expansion failed');
+  }
+
+  const kariyerPages = scanModule.expandDirectSearchUrls({
+    pagination: { type: 'kariyer_path', max_pages: 3 },
+    search_urls: ['https://www.kariyer.net/is-ilanlari/yazilim%2Bmuhendisi'],
+  }, 3);
+  if (
+    kariyerPages.length === 3 &&
+    kariyerPages[1].endsWith('/is-ilanlari/yazilim%2Bmuhendisi-2') &&
+    kariyerPages[2].endsWith('/is-ilanlari/yazilim%2Bmuhendisi-3')
+  ) {
+    pass('Kariyer direct pagination expansion works');
+  } else {
+    fail('Kariyer direct pagination expansion failed');
+  }
+
+  const reviewMergeCases = readJson('tests/fixtures/scan/review-merge.json');
+  for (const testCase of reviewMergeCases) {
+    const merged = scanModule.mergeReviewQueueEntries(testCase.existing, testCase.incoming);
+    const simplify = (items) => items.map((item) => ({
+      url: item.url,
+      company: item.company,
+      title: item.title,
+      reviewReason: item.reviewReason,
+    }));
+    if (
+      JSON.stringify(simplify(merged.unverified_public || [])) === JSON.stringify(testCase.expected.unverified_public) &&
+      JSON.stringify(simplify(merged.review_only || [])) === JSON.stringify(testCase.expected.review_only)
+    ) {
+      pass(`Review queue merge fixture OK: ${testCase.name}`);
+    } else {
+      fail(`Review queue merge mismatch: ${testCase.name}`);
+    }
+  }
+
+  const latestHistoryCases = readJson('tests/fixtures/scan/latest-history.json');
+  for (const testCase of latestHistoryCases) {
+    const lines = scanModule.buildLatestHistoryTsv(testCase.entries, testCase.runId).trim().split('\n');
+    if (
+      lines[0] === testCase.expectedHeader &&
+      JSON.stringify(lines.slice(1)) === JSON.stringify(testCase.expectedRows)
+    ) {
+      pass(`Latest history fixture OK: ${testCase.name}`);
+    } else {
+      fail(`Latest history fixture mismatch: ${testCase.name}`);
     }
   }
 }

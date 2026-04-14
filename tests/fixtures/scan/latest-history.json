@@ -1,0 +1,30 @@
+[
+  {
+    "name": "writes-latest-history-with-additive-columns",
+    "runId": "2026-04-12T10:30:00.000Z",
+    "entries": [
+      {
+        "url": "https://tr.linkedin.com/jobs/view/example-1",
+        "firstSeen": "2026-04-12",
+        "portal": "LinkedIn Jobs — Turkey Software, Backend, Junior & AI",
+        "title": "Junior Software Engineer",
+        "company": "Example Corp",
+        "status": "review_public_unverified",
+        "reason": "public_unverified"
+      },
+      {
+        "url": "https://careers.example.com/jobs/platform-engineer",
+        "firstSeen": "2026-04-12",
+        "portal": "Example Corp",
+        "title": "Platform Engineer",
+        "company": "Example Corp",
+        "status": "added"
+      }
+    ],
+    "expectedHeader": "run_id\turl\tfirst_seen\tportal\ttitle\tcompany\tstatus\tbucket\treason\tsource_host",
+    "expectedRows": [
+      "2026-04-12T10:30:00.000Z\thttps://tr.linkedin.com/jobs/view/example-1\t2026-04-12\tLinkedIn Jobs — Turkey Software, Backend, Junior & AI\tJunior Software Engineer\tExample Corp\treview_public_unverified\treview\tpublic_unverified\ttr.linkedin.com",
+      "2026-04-12T10:30:00.000Z\thttps://careers.example.com/jobs/platform-engineer\t2026-04-12\tExample Corp\tPlatform Engineer\tExample Corp\tadded\tmain\t\tcareers.example.com"
+    ]
+  }
+]

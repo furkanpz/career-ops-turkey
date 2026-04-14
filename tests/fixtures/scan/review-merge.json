@@ -1,0 +1,59 @@
+[
+  {
+    "name": "replaces-existing-review-reason-and-section",
+    "existing": [
+      {
+        "checked": false,
+        "url": "https://old.example.com/job",
+        "company": "Example Corp",
+        "title": "Veri Bilimi Danışmanı",
+        "reviewReason": "review_only:Veri Bilimi Danışmanı",
+        "section": "review_only"
+      }
+    ],
+    "incoming": [
+      {
+        "url": "https://new.example.com/job",
+        "company": "Example Corp",
+        "title": "Veri Bilimi Danışmanı",
+        "reviewReason": "public_unverified; review_only:Veri Bilimi Danışmanı"
+      }
+    ],
+    "expected": {
+      "unverified_public": [
+        {
+          "url": "https://new.example.com/job",
+          "company": "Example Corp",
+          "title": "Veri Bilimi Danışmanı",
+          "reviewReason": "public_unverified; review_only:Veri Bilimi Danışmanı"
+        }
+      ],
+      "review_only": []
+    }
+  },
+  {
+    "name": "keeps-existing-checked-items-without-duplicates",
+    "existing": [
+      {
+        "checked": true,
+        "url": "https://kept.example.com/job",
+        "company": "Kept Corp",
+        "title": "Application Support Engineer",
+        "reviewReason": "review_only:Application Support Engineer",
+        "section": "review_only"
+      }
+    ],
+    "incoming": [],
+    "expected": {
+      "unverified_public": [],
+      "review_only": [
+        {
+          "url": "https://kept.example.com/job",
+          "company": "Kept Corp",
+          "title": "Application Support Engineer",
+          "reviewReason": "review_only:Application Support Engineer"
+        }
+      ]
+    }
+  }
+]

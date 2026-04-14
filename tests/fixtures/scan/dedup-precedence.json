@@ -31,7 +31,7 @@
     }
   },
   {
-    "name": "linkedin-beats-kariyernet",
+    "name": "kariyernet-beats-linkedin",
     "offers": [
       {
         "title": "Senior Backend Engineer",
@@ -57,8 +57,8 @@
       }
     ],
     "expected": {
-      "url": "https://www.linkedin.com/jobs/view/99887766",
-      "source": "LinkedIn"
+      "url": "https://www.kariyer.net/is-ilani/hepsiburada-senior-backend-engineer-1",
+      "source": "Kariyer.net"
     }
   },
   {

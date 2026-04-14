@@ -8,5 +8,25 @@
     "name": "backend-with-location",
     "input": "Senior Backend Engineer Istanbul Engineering",
     "expected": "Senior Backend Engineer"
+  },
+  {
+    "name": "director-of-engineering-kept",
+    "input": "Director of Engineering",
+    "expected": "Director of Engineering"
+  },
+  {
+    "name": "vp-engineering-kept",
+    "input": "VP Engineering",
+    "expected": "VP Engineering"
+  },
+  {
+    "name": "head-of-data-science-kept",
+    "input": "Head of Data Science",
+    "expected": "Head of Data Science"
+  },
+  {
+    "name": "software-engineering-lead-kept",
+    "input": "Software Engineering Lead",
+    "expected": "Software Engineering Lead"
   }
 ]
