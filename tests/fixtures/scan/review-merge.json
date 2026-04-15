@@ -57,7 +57,7 @@
     }
   },
   {
-    "name": "drops-legacy-authwall-only-entries-on-rewrite",
+    "name": "keeps-authwall-board-entries-visible-on-rewrite",
     "existing": [
       {
         "checked": false,
@@ -71,7 +71,14 @@
     "incoming": [],
     "expected": {
       "unverified_public": [],
-      "review_only": []
+      "review_only": [
+        {
+          "url": "https://old.example.com/job",
+          "company": "Old Corp",
+          "title": "Backend Developer",
+          "reviewReason": "authwall_blocked"
+        }
+      ]
     }
   }
 ]

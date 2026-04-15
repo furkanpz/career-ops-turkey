@@ -472,6 +472,61 @@ if (scanModule) {
     }
   }
 
+  const elemanCardHtml = [
+    '<div class="c-box__body ilan_listeleme_bol">',
+    '<a href="https://www.eleman.net/is-ilani/net-backend-developer-i4612914" title="Net Backend Developer iş ilanı" target="_blank">',
+    '<h3 class="c-showcase-box__title u-gap-bottom-xsmall">Net Backend Developer</h3>',
+    '<span class="c-showcase-box__subtitle">Foxsoft Bilişim - <i class="icon icon-map-marker"></i> İstanbul Anadolu - Kartal</span>',
+    '</a>',
+    '</div>',
+  ].join('');
+  const elemanCardResults = scanModule.parseElemanNetSearchResultsHtml(elemanCardHtml, 10);
+  if (
+    elemanCardResults.length === 1 &&
+    elemanCardResults[0].title === 'Net Backend Developer' &&
+    elemanCardResults[0].company === 'Foxsoft Bilişim' &&
+    elemanCardResults[0].location === 'İstanbul Anadolu - Kartal'
+  ) {
+    pass('Eleman card parser works');
+  } else {
+    fail('Eleman card parser failed');
+  }
+
+  const kariyerFallbackHtml = [
+    '<article class="job-card">',
+    '<a href="https://www.kariyer.net/is-ilani/example-company-backend-developer-123">Backend Developer</a>',
+    '<span class="company">Example Company</span>',
+    '<span class="location">İstanbul</span>',
+    '</article>',
+  ].join('');
+  const kariyerFallbackResults = scanModule.parseKariyerSearchResultsHtml(kariyerFallbackHtml, 10);
+  if (
+    kariyerFallbackResults.length === 1 &&
+    kariyerFallbackResults[0].title === 'Backend Developer' &&
+    kariyerFallbackResults[0].company === 'Example Company'
+  ) {
+    pass('Kariyer fallback parser works');
+  } else {
+    fail('Kariyer fallback parser failed');
+  }
+
+  const kariyerBlockedHtml = [
+    '<html>',
+    '<head><meta name="description" content="px-captcha"><title>Access to this page has been denied</title></head>',
+    '<body>Press & Hold to confirm you are a human</body>',
+    '</html>',
+  ].join('');
+  if (
+    scanModule.isBlockedSearchHtml(kariyerBlockedHtml) &&
+    scanModule.blockedFetchReason(new Error('HTTP 403')) === 'captcha_blocked' &&
+    scanModule.blockedFetchReason(new Error('HTTP 429')) === 'rate_limited' &&
+    scanModule.parseKariyerSearchResultsHtml(kariyerBlockedHtml, 10).length === 0
+  ) {
+    pass('Blocked search HTML detector works');
+  } else {
+    fail('Blocked search HTML detector failed');
+  }
+
   const linkedInPages = scanModule.expandDirectSearchUrls({
     pagination: { type: 'linkedin_start', page_size: 25, max_pages: 3 },
     search_urls: ['https://www.linkedin.com/jobs/search/?keywords=Software%20Engineer&location=Turkey'],
@@ -498,6 +553,74 @@ if (scanModule) {
     pass('Kariyer direct pagination expansion works');
   } else {
     fail('Kariyer direct pagination expansion failed');
+  }
+
+  const kariyerQuerySeedPages = scanModule.expandDirectSearchUrls({
+    search_urls: ['https://www.kariyer.net/is-ilanlari?kw=yaz%C4%B1l%C4%B1m'],
+  }, 3);
+  if (
+    kariyerQuerySeedPages.length === 3 &&
+    kariyerQuerySeedPages[0] === 'https://www.kariyer.net/is-ilanlari?kw=yaz%C4%B1l%C4%B1m' &&
+    kariyerQuerySeedPages[1] === 'https://www.kariyer.net/is-ilanlari?kw=yaz%C4%B1l%C4%B1m&cp=2' &&
+    kariyerQuerySeedPages[2] === 'https://www.kariyer.net/is-ilanlari?kw=yaz%C4%B1l%C4%B1m&cp=3'
+  ) {
+    pass('Kariyer query pagination expansion works');
+  } else {
+    fail('Kariyer query pagination expansion failed');
+  }
+
+  const elemanPages = scanModule.expandDirectSearchUrls({
+    parser_key: 'elemannet_search',
+    search_urls: ['https://www.eleman.net/is-ilanlari?aranan=yaz%C4%B1l%C4%B1m&arandi=e&sehir=&ilce='],
+  }, 3);
+  if (
+    elemanPages.length === 3 &&
+    elemanPages[0] === 'https://www.eleman.net/is-ilanlari?aranan=yaz%C4%B1l%C4%B1m&arandi=e&sehir=&ilce=' &&
+    elemanPages[1] === 'https://www.eleman.net/is-ilanlari?aranan=yaz%C4%B1l%C4%B1m&arandi=e&sehir=&ilce=&sy=2' &&
+    elemanPages[2] === 'https://www.eleman.net/is-ilanlari?aranan=yaz%C4%B1l%C4%B1m&arandi=e&sehir=&ilce=&sy=3'
+  ) {
+    pass('Eleman direct search pagination expansion works');
+  } else {
+    fail('Eleman direct search pagination expansion failed');
+  }
+
+  const linkedInQuotaHistory = [];
+  const linkedInQuotaOffers = Array.from({ length: 35 }, (_, index) => ({
+    url: `https://www.linkedin.com/jobs/view/${index + 1}`,
+    queryName: 'LinkedIn Jobs — Turkey Software, Backend, Junior & AI',
+    title: `Backend Engineer ${index + 1}`,
+    company: `Example ${index + 1}`,
+    parserKey: 'linkedin_jobs_search',
+    roleFamilyKey: `role-family-${index + 1}`,
+  }));
+  const linkedInQuotaKept = scanModule.applySourceQuotas(linkedInQuotaOffers, linkedInQuotaHistory, '2026-04-15');
+  const linkedInTotalQuotaDrops = linkedInQuotaHistory.filter((entry) => entry.reason === 'linkedin_total_quota').length;
+  if (
+    linkedInQuotaKept.length === 30 &&
+    linkedInTotalQuotaDrops === 5
+  ) {
+    pass('LinkedIn total quota works');
+  } else {
+    fail('LinkedIn total quota failed');
+  }
+
+  const elemanRealisticCard = scanModule.normalizeSearchResult({
+    title: 'Net Backend Developer Foxsoft Bilişim - İstanbul Anadolu - Kartal Foxsof Bilişim olarak büyüyen ekibimize katılacak',
+    url: 'https://www.eleman.net/is-ilani/net-backend-developer-i4612914',
+  }, {
+    name: 'Eleman.net — Software, Developer, Data & AI',
+    parser_key: 'elemannet_search',
+    adapter_family: 'turkish_job_board',
+  });
+  if (
+    elemanRealisticCard &&
+    elemanRealisticCard.title === 'Net Backend Developer' &&
+    elemanRealisticCard.company === 'Foxsoft Bilişim' &&
+    elemanRealisticCard.location === 'İstanbul Anadolu'
+  ) {
+    pass('Eleman realistic card title normalization works');
+  } else {
+    fail('Eleman realistic card title normalization failed');
   }
 
   const reviewMergeCases = readJson('tests/fixtures/scan/review-merge.json');
@@ -540,13 +663,52 @@ if (scanModule) {
   }
 
   if (
-    !scanModule.shouldKeepVisibleReviewReason('authwall_blocked') &&
+    scanModule.shouldKeepVisibleReviewReason('authwall_blocked') &&
     scanModule.shouldKeepVisibleReviewReason('public_unverified') &&
     scanModule.shouldKeepVisibleReviewReason('review_only:Application Support Engineer')
   ) {
     pass('Visible review reason filter works');
   } else {
     fail('Visible review reason filter failed');
+  }
+
+  const authwallReviewLatestHistory = scanModule.buildLatestHistoryTsv([
+    {
+      url: 'https://www.kariyer.net/is-ilani/example-backend',
+      firstSeen: '2026-04-12',
+      portal: 'Kariyer.net — Software, Developer & Junior',
+      title: 'Backend Developer',
+      company: 'Example Corp',
+      status: 'review_blocked_source',
+      reason: 'authwall_blocked',
+    },
+  ], '2026-04-12T10:30:00.000Z').trim().split('\n')[1];
+  if (
+    authwallReviewLatestHistory === '2026-04-12T10:30:00.000Z\thttps://www.kariyer.net/is-ilani/example-backend\t2026-04-12\tKariyer.net — Software, Developer & Junior\tBackend Developer\tExample Corp\treview_blocked_source\treview\tauthwall_blocked\tkariyer.net'
+  ) {
+    pass('Authwall review latest-history reason works');
+  } else {
+    fail('Authwall review latest-history reason failed');
+  }
+
+  const sourceBlockedLatestHistory = scanModule.buildLatestHistoryTsv([
+    {
+      url: 'https://www.kariyer.net/is-ilanlari?kw=yaz%C4%B1l%C4%B1m',
+      firstSeen: '2026-04-15',
+      portal: 'Kariyer.net — Software, Developer & Junior',
+      title: 'Kariyer.net search blocked',
+      company: 'Kariyer.net',
+      status: 'skipped_blocked_source',
+      bucket: 'dropped',
+      reason: 'captcha_blocked',
+    },
+  ], '2026-04-15T10:30:00.000Z').trim().split('\n')[1];
+  if (
+    sourceBlockedLatestHistory === '2026-04-15T10:30:00.000Z\thttps://www.kariyer.net/is-ilanlari?kw=yaz%C4%B1l%C4%B1m\t2026-04-15\tKariyer.net — Software, Developer & Junior\tKariyer.net search blocked\tKariyer.net\tskipped_blocked_source\tdropped\tcaptcha_blocked\tkariyer.net'
+  ) {
+    pass('Source blocked latest-history diagnostic works');
+  } else {
+    fail('Source blocked latest-history diagnostic failed');
   }
 
   if (

@@ -56,7 +56,8 @@ const DUCKDUCKGO_HTML_ENDPOINT = 'https://html.duckduckgo.com/html/';
 const BING_SEARCH_ENDPOINT = 'https://www.bing.com/search';
 const BLOCKED_PUBLIC_CACHE_DAYS = 3;
 const BLOCKED_AUTHWALL_CACHE_DAYS = 7;
-const LINKEDIN_ROLE_FAMILY_QUOTA = 8;
+const LINKEDIN_ROLE_FAMILY_QUOTA = 3;
+const LINKEDIN_TOTAL_QUOTA = 30;
 const VERIFICATION_BUDGET_MS = 120_000;
 const VERIFICATION_TIMEOUTS = {
   discoveryOnly: { timeoutMs: 7_000, waitMs: 1_000 },
@@ -258,6 +259,8 @@ const SEARCH_TITLE_PATTERNS = [
   /^(?<role>.+?)\s+[|]\s+(?<company>.+)$/i,
 ];
 
+const ELEMAN_ROLE_COMPANY_PATTERN = /^(?<role>.+?\b(?:engineer|developer|specialist|analyst|consultant|architect|manager|webmaster|programmer|designer|administrator|uzmani|uzmanı|muhendisi|mühendisi|gelistirici|geliştirici|yazilimci|yazılımcı))(?:\s*\([^)]*\))?\s+(?<company>.+)$/i;
+
 function foldText(value) {
   return String(value ?? '')
     .replace(/[İIı]/g, 'i')
@@ -343,6 +346,41 @@ function getSourceHost(url) {
   }
 }
 
+export function isBlockedSearchHtml(html = '') {
+  const value = String(html || '');
+  return /px-captcha|captcha\.px-cloud\.net|window\._pxAppId|Access to this page has been denied|Press\s*&\s*Hold to confirm/i.test(value);
+}
+
+function makeSourceBlockedHistoryEntry(queryConfig, url, firstSeen, reason = 'blocked_source') {
+  const parserKey = queryConfig.parser_key || 'kariyernet_search';
+  const profile = sourceProfileFor(parserKey, queryConfig.adapter_family);
+  return {
+    url,
+    firstSeen,
+    portal: queryConfig.name || profile.source,
+    title: `${profile.source} search blocked`,
+    company: profile.source,
+    status: 'skipped_blocked_source',
+    bucket: 'dropped',
+    reason,
+    sourceHost: getSourceHost(url),
+  };
+}
+
+function isOnlySourceBlockedDiagnostics(result = {}) {
+  return Boolean(result.handled)
+    && (result.offers || []).length === 0
+    && (result.history || []).length > 0
+    && (result.history || []).every((entry) => entry.status === 'skipped_blocked_source');
+}
+
+export function blockedFetchReason(error) {
+  const message = String(error?.message || '');
+  if (/HTTP 429/i.test(message)) return 'rate_limited';
+  if (/HTTP (401|403)/i.test(message)) return 'captcha_blocked';
+  return '';
+}
+
 function isLinkedInOffer(offer) {
   const host = getSourceHost(offer?.url);
   return offer?.parserKey === 'linkedin_jobs_search' || host.includes('linkedin.com');
@@ -368,6 +406,12 @@ function isLowPriorityPublicOffer(offer) {
 
 function isDiscoveryOnlyOffer(offer) {
   return isLinkedInOffer(offer);
+}
+
+function shouldReviewAuthwallOffer(offer) {
+  if (isLinkedInOffer(offer)) return false;
+  if (isCompanyOwnedOffer(offer)) return false;
+  return offer?.sourceType === 'job_board' || offer?.sourceType === 'aggregator';
 }
 
 function offerPrecedenceTier(offer) {
@@ -452,7 +496,9 @@ export function normalizeLegacyReviewEntryReason(reason = '') {
 
 export function shouldKeepVisibleReviewReason(reason = '') {
   const tags = normalizeReviewReasonTags(reason);
-  return tags.includes('public_unverified') || tags.some((tag) => tag.startsWith('review_only:'));
+  return tags.includes('public_unverified')
+    || tags.includes('authwall_blocked')
+    || tags.some((tag) => tag.startsWith('review_only:'));
 }
 
 function roleFamilyTokens(value = '') {
@@ -697,6 +743,60 @@ function normalizeKariyerPath(pathname) {
   return pathname.replace(/-\d+$/, '');
 }
 
+function directSearchPageParamFor(parserKey) {
+  if (parserKey === 'kariyernet_search') return 'cp';
+  if (parserKey === 'elemannet_search') return 'sy';
+  return '';
+}
+
+export function buildDirectSearchPageUrl(seed, queryConfig = {}, pageIndex = 1) {
+  const parserKey = queryConfig.parser_key || 'kariyernet_search';
+  const paginationType = String(queryConfig?.pagination?.type || '');
+  const pageSize = Number.parseInt(String(queryConfig?.pagination?.page_size ?? 25), 10) || 25;
+  const parsed = new URL(seed);
+
+  if (paginationType === 'linkedin_start') {
+    const baseStart = Number.parseInt(parsed.searchParams.get('start') || '0', 10) || 0;
+    if (pageIndex > 1) {
+      parsed.searchParams.set('start', String(baseStart + (pageIndex - 1) * pageSize));
+    }
+    return parsed.toString();
+  }
+
+  if (paginationType === 'kariyer_path') {
+    parsed.pathname = normalizeKariyerPath(parsed.pathname);
+    if (pageIndex > 1) {
+      parsed.pathname = `${parsed.pathname}-${pageIndex}`;
+    }
+    return parsed.toString();
+  }
+
+  const pageParam = String(queryConfig?.pagination?.param || '') || directSearchPageParamFor(parserKey);
+  if (pageParam) {
+    parsed.searchParams.delete(pageParam);
+    if (pageIndex > 1) {
+      parsed.searchParams.set(pageParam, String(pageIndex));
+    }
+  }
+  return parsed.toString();
+}
+
+function expandDirectSearchUrlPages(seed, queryConfig, pageLimit = DEFAULT_DIRECT_SEARCH_PAGE_LIMIT) {
+  const limit = resolveDirectSearchPageLimit(pageLimit);
+  const urls = [];
+  const seen = new Set();
+
+  for (let pageIndex = 1; pageIndex <= limit; pageIndex++) {
+    try {
+      appendUniqueUrl(urls, seen, buildDirectSearchPageUrl(seed, queryConfig, pageIndex));
+    } catch {
+      continue;
+    }
+  }
+
+  return urls;
+}
+
 function appendUniqueUrl(target, seen, url) {
   if (!looksLikeHttpUrl(url) || seen.has(url)) return;
   seen.add(url);
@@ -708,37 +808,10 @@ export function expandDirectSearchUrls(queryConfig, pageLimit = DEFAULT_DIRECT_S
   const limit = resolveDirectSearchPageLimit(pageLimit);
   const urls = [];
   const seen = new Set();
-  const paginationType = String(queryConfig?.pagination?.type || '');
-  const pageSize = Number.parseInt(String(queryConfig?.pagination?.page_size ?? 25), 10) || 25;
 
   for (const seed of seeds) {
-    appendUniqueUrl(urls, seen, seed);
-
-    if (limit <= 1) continue;
-
-    try {
-      const parsed = new URL(seed);
-
-      if (paginationType === 'linkedin_start') {
-        const baseStart = Number.parseInt(parsed.searchParams.get('start') || '0', 10) || 0;
-        for (let pageIndex = 1; pageIndex < limit; pageIndex++) {
-          const nextUrl = new URL(parsed.toString());
-          nextUrl.searchParams.set('start', String(baseStart + pageIndex * pageSize));
-          appendUniqueUrl(urls, seen, nextUrl.toString());
-        }
-        continue;
-      }
-
-      if (paginationType === 'kariyer_path') {
-        const basePath = normalizeKariyerPath(parsed.pathname);
-        for (let pageIndex = 2; pageIndex <= limit; pageIndex++) {
-          const nextUrl = new URL(parsed.toString());
-          nextUrl.pathname = `${basePath}-${pageIndex}`;
-          appendUniqueUrl(urls, seen, nextUrl.toString());
-        }
-      }
-    } catch {
-      continue;
+    for (const url of expandDirectSearchUrlPages(seed, queryConfig, limit)) {
+      appendUniqueUrl(urls, seen, url);
     }
   }
 
@@ -1110,9 +1183,10 @@ function deriveLatestHistoryReason(entry = {}) {
   switch (entry.status) {
     case 'review_public_unverified':
     case 'review_public_unverified_cached':
+      return 'public_unverified';
     case 'review_blocked_source':
     case 'review_blocked_source_cached':
-      return 'public_unverified';
+      return 'authwall_blocked';
     case 'review_review_only':
       return 'review_only';
     case 'skipped_authwall_blocked':
@@ -1417,6 +1491,10 @@ export function parseKariyerSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESUL
     results.push({ url, title, company, location });
   }
 
+  if (results.length === 0) {
+    return parseGenericTrBoardSearchResultsHtml(html, limit, 'kariyernet_search', 'https://www.kariyer.net');
+  }
+
   return results.slice(0, resolveSearchResultLimit(limit));
 }
 
@@ -1475,8 +1553,43 @@ export function parseIndeedTrSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESU
   return parseGenericTrBoardSearchResultsHtml(html, limit, 'indeed_tr_search', 'https://tr.indeed.com');
 }
 
+function parseElemanSubtitle(subtitle = '') {
+  const text = normalizeWhitespace(stripTags(subtitle).replace(/\s*-\s*/g, ' - '));
+  const parts = text.split(/\s+-\s+/).map((part) => normalizeWhitespace(part)).filter(Boolean);
+  return {
+    company: cleanCompanyToken(parts[0] || ''),
+    location: joinLocationParts(parts.slice(1)),
+  };
+}
+
 export function parseElemanNetSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
-  return parseGenericTrBoardSearchResultsHtml(html, limit, 'elemannet_search', 'https://www.eleman.net');
+  const results = [];
+  const seenUrls = new Set();
+  const cardRegex = /<div[^>]*class="[^"]*c-box__body ilan_listeleme_bol[^"]*"[^>]*>[\s\S]*?<\/a>/gi;
+  let match;
+
+  while ((match = cardRegex.exec(html)) !== null) {
+    const block = match[0];
+    const url = toAbsoluteUrl(decodeHtmlEntities(block.match(/<a[^>]*href="([^"]*\/is-ilani\/[^"]+)"/i)?.[1] || ''), 'https://www.eleman.net');
+    const title = cleanRoleToken(normalizeWhitespace(stripTags(block.match(/<h3[^>]*class="[^"]*c-showcase-box__title[^"]*"[^>]*>([\s\S]*?)<\/h3>/i)?.[1] || '')));
+    const subtitle = block.match(/<span[^>]*class="[^"]*c-showcase-box__subtitle[^"]*"[^>]*>([\s\S]*?)<\/span>/i)?.[1] || '';
+    const parsedSubtitle = parseElemanSubtitle(subtitle);
+    if (!url || !title || !parsedSubtitle.company || seenUrls.has(url)) continue;
+    seenUrls.add(url);
+    results.push({
+      url,
+      title,
+      company: parsedSubtitle.company,
+      location: parsedSubtitle.location,
+    });
+    if (results.length >= resolveSearchResultLimit(limit)) break;
+  }
+
+  if (results.length === 0) {
+    return parseGenericTrBoardSearchResultsHtml(html, limit, 'elemannet_search', 'https://www.eleman.net');
+  }
+
+  return results;
 }
 
 export function parseSecretcvSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
@@ -1505,6 +1618,7 @@ function cleanCompanyToken(value) {
     String(value ?? '')
       .replace(/\b(is hiring|hiring now|careers?|jobs?)\b/gi, '')
       .replace(/\b(kariyer\.net|indeed|linkedin|eleman\.net|iskur|i̇şkur|işkur|secretcv|yenibiris)\b/gi, '')
+      .replace(/^[^a-zA-Z0-9ÇĞİÖŞÜçğıöşü]+/, '')
   );
 }
 
@@ -1524,7 +1638,12 @@ function joinLocationParts(parts) {
 }
 
 export function normalizeCompanyListingTitle(value) {
-  let title = normalizeWhitespace(insertCamelSpacing(value).replace(/\bNEW\b/gi, ' ').replace(/\s+/g, ' '));
+  let title = normalizeWhitespace(
+    insertCamelSpacing(value)
+      .replace(/\)(?=[A-ZÇĞİÖŞÜ])/g, ') ')
+      .replace(/\bNEW\b/g, ' ')
+      .replace(/\s+/g, ' ')
+  );
   const parts = splitStructuredTitle(title);
 
   if (parts.length > 1) {
@@ -1557,6 +1676,29 @@ function splitStructuredTitle(title) {
     .filter(Boolean);
 }
 
+function extractElemanRoleCompanyFromTitle(title) {
+  const parts = splitStructuredTitle(title);
+  const locationIndex = parts.findIndex((part) => looksLikeLocationSegment(part));
+  if (locationIndex === -1) return null;
+
+  const prefix = normalizeWhitespace(parts.slice(0, locationIndex).join(' - '));
+  const fallbackPrefix = normalizeWhitespace(parts[locationIndex - 1] || '');
+  const location = joinLocationParts(parts.slice(locationIndex).filter((part) => looksLikeLocationSegment(part)));
+
+  for (const candidate of [prefix, fallbackPrefix]) {
+    if (!candidate) continue;
+    const match = candidate.match(ELEMAN_ROLE_COMPANY_PATTERN);
+    if (!match?.groups?.role || !match?.groups?.company) continue;
+    return {
+      role: cleanRoleToken(match.groups.role),
+      company: cleanCompanyToken(match.groups.company),
+      location,
+    };
+  }
+
+  return null;
+}
+
 function extractRoleCompanyFromTitle(rawTitle, parserKey, forcedCompany = '') {
   const title = stripSearchSourceSuffix(rawTitle, parserKey);
 
@@ -1577,6 +1719,13 @@ function extractRoleCompanyFromTitle(rawTitle, parserKey, forcedCompany = '') {
         company: cleanCompanyToken(match.groups.company),
         location: '',
       };
+    }
+  }
+
+  if (parserKey === 'elemannet_search') {
+    const elemanStructured = extractElemanRoleCompanyFromTitle(title);
+    if (elemanStructured) {
+      return elemanStructured;
     }
   }
 
@@ -1821,12 +1970,27 @@ function classifyOffer(offer, titleMatcher) {
   };
 }
 
-function applySourceQuotas(offers, history, firstSeen) {
+export function applySourceQuotas(offers, history, firstSeen) {
   const kept = [];
   const roleFamilyCounts = new Map();
+  let linkedInTotalCount = 0;
 
   for (const offer of offers) {
     if (offer.parserKey === 'linkedin_jobs_search') {
+      if (linkedInTotalCount >= LINKEDIN_TOTAL_QUOTA) {
+        history.push({
+          url: offer.url,
+          firstSeen,
+          portal: offer.queryName,
+          title: offer.title,
+          company: offer.company,
+          status: 'skipped_source_quota',
+          reason: 'linkedin_total_quota',
+          bucket: 'dropped',
+          sourceHost: getSourceHost(offer.url),
+        });
+        continue;
+      }
       const roleFamilyKey = offer.roleFamilyKey || normalizeRoleFamilyKey(offer.title);
       const count = roleFamilyCounts.get(roleFamilyKey) || 0;
       if (count >= LINKEDIN_ROLE_FAMILY_QUOTA) {
@@ -1844,6 +2008,7 @@ function applySourceQuotas(offers, history, firstSeen) {
         continue;
       }
       roleFamilyCounts.set(roleFamilyKey, count + 1);
+      linkedInTotalCount += 1;
     }
 
     kept.push(offer);
@@ -1855,8 +2020,8 @@ function applySourceQuotas(offers, history, firstSeen) {
 async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT) {
   const parserKey = queryConfig.parser_key || 'kariyernet_search';
   const directPageLimit = resolveDirectSearchPageLimit(queryConfig?.pagination?.max_pages ?? queryConfig?.direct_search_page_limit);
-  const urls = expandDirectSearchUrls(queryConfig, directPageLimit);
-  if (urls.length === 0) {
+  const seeds = searchUrlCandidatesFor(queryConfig);
+  if (seeds.length === 0) {
     return { offers: [], history: [], handled: false };
   }
 
@@ -1882,31 +2047,62 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
   let succeeded = false;
   let lastError = null;
 
-  for (const url of urls) {
-    try {
-      const html = await fetchText(url, searchFetchOptions('direct_board'));
-      const results = parseDirect(html, searchResultLimit);
-      succeeded = true;
+  for (const seed of seeds) {
+    const seedResultUrls = new Set();
+    const urls = expandDirectSearchUrlPages(seed, queryConfig, directPageLimit);
 
-      for (const result of results) {
-        const offer = classifyOffer(makeOffer(result), titleFilter);
-        if (!offer.title || !offer.company || !offer.url) continue;
-        if (offer.matchBucket === 'reject') {
-          history.push({
-            url: offer.url,
-            firstSeen,
-            portal: queryConfig.name,
-            title: offer.title,
-            company: offer.company,
-            status: 'skipped_title',
-          });
-          continue;
+    for (const url of urls) {
+      try {
+        const html = await fetchText(url, searchFetchOptions('direct_board'));
+        if (isBlockedSearchHtml(html)) {
+          succeeded = true;
+          history.push(makeSourceBlockedHistoryEntry(queryConfig, url, firstSeen, 'captcha_blocked'));
+          break;
         }
 
-        offers.push(offer);
+        const results = parseDirect(html, searchResultLimit);
+        succeeded = true;
+        if (results.length === 0) {
+          break;
+        }
+
+        let newResultCount = 0;
+        for (const result of results) {
+          const canonicalResultUrl = canonicalizeOfferUrl(result.url || '');
+          if (canonicalResultUrl && seedResultUrls.has(canonicalResultUrl)) continue;
+          if (canonicalResultUrl) seedResultUrls.add(canonicalResultUrl);
+          newResultCount += 1;
+
+          const offer = classifyOffer(makeOffer(result), titleFilter);
+          if (!offer.title || !offer.company || !offer.url) continue;
+          if (offer.matchBucket === 'reject') {
+            history.push({
+              url: offer.url,
+              firstSeen,
+              portal: queryConfig.name,
+              title: offer.title,
+              company: offer.company,
+              status: 'skipped_title',
+            });
+            continue;
+          }
+
+          offers.push(offer);
+        }
+
+        if (newResultCount === 0) {
+          break;
+        }
+      } catch (error) {
+        const blockedReason = blockedFetchReason(error);
+        if (blockedReason) {
+          succeeded = true;
+          history.push(makeSourceBlockedHistoryEntry(queryConfig, url, firstSeen, blockedReason));
+          break;
+        }
+        lastError = error;
+        break;
       }
-    } catch (error) {
-      lastError = error;
     }
   }
 
@@ -1944,17 +2140,27 @@ async function runSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFA
     directError = error;
   }
 
-  if (directResult.handled) {
+  if (directResult.handled && (directResult.offers.length > 0 || directResult.history.length > 0)) {
+    if (isOnlySourceBlockedDiagnostics(directResult)) {
+      // Keep the source-level diagnostic, but still try indexed search fallback.
+    } else {
+      return { offers: directResult.offers, history: directResult.history };
+    }
+  }
+
+  const directHistory = directResult.history || [];
+
+  if (directResult.handled && directResult.offers.length > 0) {
     return { offers: directResult.offers, history: directResult.history };
   }
 
   if (!queryConfig.query || looksLikeHttpUrl(queryConfig.query)) {
     if (directError) throw directError;
-    return { offers: [], history: [] };
+    return { offers: [], history: directHistory };
   }
 
   const offers = [];
-  const history = [];
+  const history = [...directHistory];
   const firstSeen = new Date().toISOString().slice(0, 10);
   let lastError = directError;
 
@@ -1991,6 +2197,10 @@ async function runSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFA
     } catch (error) {
       lastError = error;
     }
+  }
+
+  if (history.length > 0) {
+    return { offers: applySourceQuotas(offers, history, firstSeen), history };
   }
 
   throw lastError || new Error(`Search query failed for ${queryConfig.name}`);
@@ -2268,13 +2478,29 @@ async function verifySearchOffers(browser, dedupedResult, existingUrlSet, existi
           stats.unverifiedPublic += 1;
           stats.reviewByQuery.set(cachedOffer.queryName, (stats.reviewByQuery.get(cachedOffer.queryName) || 0) + 1);
         } else {
-          history.push(makeOfferHistoryEntry(cachedOffer, 'skipped_authwall_blocked', firstSeen, {
-            bucket: 'dropped',
-            reason: 'authwall_blocked',
-          }));
-          pushGroupDuplicateHistory(history, groupOffers, cachedOffer, firstSeen);
-          stats.cachedAuthwallDropped += 1;
-          stats.authwallDropped += 1;
+          const reviewReason = formatReviewReason(cachedOffer, ['authwall_blocked']);
+          if (shouldReviewAuthwallOffer(cachedOffer)) {
+            existingUrlSet.add(cachedOffer.canonicalUrl || canonicalizeOfferUrl(cachedOffer.url));
+            existingCompanyRoleSet.add(identityKey);
+            reviewOffers.push({
+              ...cachedOffer,
+              reviewReason,
+            });
+            history.push(makeOfferHistoryEntry(cachedOffer, 'review_blocked_source_cached', firstSeen, {
+              bucket: 'review',
+              reason: reviewReason,
+            }));
+            pushGroupDuplicateHistory(history, groupOffers, cachedOffer, firstSeen);
+            stats.reviewByQuery.set(cachedOffer.queryName, (stats.reviewByQuery.get(cachedOffer.queryName) || 0) + 1);
+          } else {
+            history.push(makeOfferHistoryEntry(cachedOffer, 'skipped_authwall_blocked', firstSeen, {
+              bucket: 'dropped',
+              reason: 'authwall_blocked',
+            }));
+            pushGroupDuplicateHistory(history, groupOffers, cachedOffer, firstSeen);
+            stats.cachedAuthwallDropped += 1;
+            stats.authwallDropped += 1;
+          }
         }
         continue;
       }
@@ -2394,12 +2620,28 @@ async function verifySearchOffers(browser, dedupedResult, existingUrlSet, existi
       }
 
       if (authwallRepresentative) {
-        history.push(makeOfferHistoryEntry(authwallRepresentative, 'skipped_authwall_blocked', firstSeen, {
-          bucket: 'dropped',
-          reason: 'authwall_blocked',
-        }));
-        pushGroupDuplicateHistory(history, groupOffers, authwallRepresentative, firstSeen);
-        stats.authwallDropped += 1;
+        const reviewReason = formatReviewReason(authwallRepresentative, ['authwall_blocked']);
+        if (shouldReviewAuthwallOffer(authwallRepresentative)) {
+          existingUrlSet.add(authwallRepresentative.canonicalUrl || canonicalizeOfferUrl(authwallRepresentative.url));
+          existingCompanyRoleSet.add(identityKey);
+          reviewOffers.push({
+            ...authwallRepresentative,
+            reviewReason,
+          });
+          history.push(makeOfferHistoryEntry(authwallRepresentative, 'review_blocked_source', firstSeen, {
+            bucket: 'review',
+            reason: reviewReason,
+          }));
+          pushGroupDuplicateHistory(history, groupOffers, authwallRepresentative, firstSeen);
+          stats.reviewByQuery.set(authwallRepresentative.queryName, (stats.reviewByQuery.get(authwallRepresentative.queryName) || 0) + 1);
+        } else {
+          history.push(makeOfferHistoryEntry(authwallRepresentative, 'skipped_authwall_blocked', firstSeen, {
+            bucket: 'dropped',
+            reason: 'authwall_blocked',
+          }));
+          pushGroupDuplicateHistory(history, groupOffers, authwallRepresentative, firstSeen);
+          stats.authwallDropped += 1;
+        }
       }
     }
 

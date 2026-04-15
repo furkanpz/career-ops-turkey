@@ -5,6 +5,11 @@
     "expected": "Data Scientist"
   },
   {
+    "name": "new-grad-title-kept",
+    "input": "Software Engineer (New Grad)IstanbulEngineering",
+    "expected": "Software Engineer (New Grad)"
+  },
+  {
     "name": "backend-with-location",
     "input": "Senior Backend Engineer Istanbul Engineering",
     "expected": "Senior Backend Engineer"

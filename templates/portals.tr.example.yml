@@ -32,6 +32,16 @@ title_filter:
     - "Mobile"
     - "Android"
     - "iOS"
+    - "Web Master"
+    - "Webmaster"
+    - "Web Tasarım"
+    - "Web Tasarımcı"
+    - "UI UX"
+    - "UI/UX"
+    - "Bilgisayar Mühendisi"
+    - "Bilgisayar Programcısı"
+    - "ERP Destek"
+    - "Mikro ERP"
     # -- Data / analytics --
     - "Data Engineer"
     - "Data Analyst"
@@ -103,6 +113,15 @@ search_queries:
     parser_key: kariyernet_search
     locale: tr-TR
     language: [tr, en]
+    pagination:
+      param: cp
+      max_pages: 5
+    search_urls:
+      - "https://www.kariyer.net/is-ilanlari?kw=yaz%C4%B1l%C4%B1m"
+      - "https://www.kariyer.net/is-ilanlari?kw=backend"
+      - "https://www.kariyer.net/is-ilanlari?kw=product"
+      - "https://www.kariyer.net/is-ilanlari/yazilim%2Bmuhendisi"
+      - "https://www.kariyer.net/is-ilanlari/software%2Bdeveloper"
     anti_duplication:
       canonical_source: "kariyer.net"
       normalize_company_from_result: true
@@ -115,6 +134,17 @@ search_queries:
     parser_key: kariyernet_search
     locale: tr-TR
     language: [tr, en]
+    pagination:
+      param: cp
+      max_pages: 5
+    search_urls:
+      - "https://www.kariyer.net/is-ilanlari?kw=platform"
+      - "https://www.kariyer.net/is-ilanlari?kw=veri"
+      - "https://www.kariyer.net/is-ilanlari?kw=analytics"
+      - "https://www.kariyer.net/is-ilanlari?kw=ux"
+      - "https://www.kariyer.net/is-ilanlari?kw=qa"
+      - "https://www.kariyer.net/is-ilanlari/veri%2Bmuhendisi"
+      - "https://www.kariyer.net/is-ilanlari/platform%2Bmuhendisi"
     anti_duplication:
       canonical_source: "kariyer.net"
       normalize_company_from_result: true
@@ -139,6 +169,15 @@ search_queries:
     parser_key: elemannet_search
     locale: tr-TR
     language: [tr, en]
+    pagination:
+      param: sy
+      max_pages: 5
+    search_urls:
+      - "https://www.eleman.net/is-ilanlari?aranan=yaz%C4%B1l%C4%B1m&arandi=e&sehir=&ilce="
+      - "https://www.eleman.net/is-ilanlari?aranan=backend&arandi=e&sehir=&ilce="
+      - "https://www.eleman.net/is-ilanlari?aranan=veri&arandi=e&sehir=&ilce="
+      - "https://www.eleman.net/is-ilanlari?aranan=qa&arandi=e&sehir=&ilce="
+      - "https://www.eleman.net/is-ilanlari?aranan=product&arandi=e&sehir=&ilce="
     anti_duplication:
       canonical_source: "eleman.net"
       normalize_company_from_result: true
