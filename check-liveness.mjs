@@ -146,6 +146,8 @@ function isPublicBoardUrl(finalUrl = '', parserKey = '', sourceType = '') {
   if (parserKey === 'secretcv_search' || host.includes('secretcv.com')) return true;
   if (parserKey === 'yenibiris_search' || host.includes('yenibiris.com')) return true;
   if (parserKey === 'iskur_search' || host.includes('iskur') || host.includes('esube.iskur')) return true;
+  if (parserKey === 'techcareer_search' || host.includes('techcareer.net')) return true;
+  if (parserKey === 'youthall_search' || host.includes('youthall.com')) return true;
   return sourceType === 'job_board' || sourceType === 'aggregator';
 }
 

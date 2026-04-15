@@ -104,6 +104,7 @@ const SECONDARY_TR_PARSER_KEYS = [
   'secretcv_search',
   'yenibiris_search',
   'iskur_search',
+  'techcareer_search',
 ];
 
 const KNOWN_TR_PARSER_KEYS = new Set([
@@ -160,6 +161,12 @@ const SEARCH_SOURCE_PROFILES = {
     sourceType: 'job_board',
     priority: 10,
     siteTokens: ['youthall'],
+  },
+  techcareer_search: {
+    source: 'Techcareer',
+    sourceType: 'job_board',
+    priority: 45,
+    siteTokens: ['techcareer', 'techcareer.net'],
   },
   greenhouse_board: {
     source: 'Greenhouse',
@@ -275,6 +282,8 @@ function normalizeWhitespace(value) {
 
 function decodeHtmlEntities(value) {
   return String(value ?? '')
+    .replace(/&#x([0-9a-f]+);/gi, (_, codepoint) => String.fromCodePoint(Number.parseInt(codepoint, 16)))
+    .replace(/&#(\d+);/g, (_, codepoint) => String.fromCodePoint(Number.parseInt(codepoint, 10)))
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
@@ -746,6 +755,7 @@ function normalizeKariyerPath(pathname) {
 function directSearchPageParamFor(parserKey) {
   if (parserKey === 'kariyernet_search') return 'cp';
   if (parserKey === 'elemannet_search') return 'sy';
+  if (parserKey === 'techcareer_search') return 'jobs[page]';
   return '';
 }
 
@@ -832,6 +842,8 @@ function isLikelyJobUrl(url, parserKey = '', adapterFamily = '') {
     if (host.includes('yenibiris.com')) return path.includes('/is-ilanlari/') || path.includes('is-ilani');
     if (host.includes('secretcv.com')) return path.includes('/is-ilanlari/') || path.includes('/is-ilani/') || path.includes('/ilan/');
     if (host.includes('iskur') || host.includes('esube.iskur')) return path.includes('ilan') || path.includes('job');
+    if (host.includes('techcareer.net')) return path.includes('/jobs/detail/');
+    if (host.includes('youthall.com')) return path.includes('/jobs/') || path.includes('/ilan/') || path.includes('/job/');
     if (host.includes('greenhouse') || host.includes('ashbyhq.com') || host.includes('lever.co') || host.includes('workable.com') || host.includes('teamtailor')) {
       return /\/(jobs?|job-boards?|careers?|openings?)/.test(path);
     }
@@ -1240,7 +1252,9 @@ function canonicalizeOfferUrl(url) {
       host.includes('ashbyhq.com') ||
       host.includes('lever.co') ||
       host.includes('workable.com') ||
-      host.includes('teamtailor')
+      host.includes('teamtailor') ||
+      host.includes('techcareer.net') ||
+      host.includes('youthall.com')
     ) {
       parsed.search = '';
       parsed.hash = '';
@@ -1604,6 +1618,37 @@ export function parseIskurSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_
   return parseGenericTrBoardSearchResultsHtml(html, limit, 'iskur_search', 'https://esube.iskur.gov.tr');
 }
 
+export function parseTechcareerSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
+  const results = [];
+  const seenUrls = new Set();
+  const cardRegex = /<a\b(?=[^>]*data-test=["']single-job-item["'])([^>]*)>([\s\S]*?)<\/a>/gi;
+  let match;
+
+  while ((match = cardRegex.exec(html)) !== null) {
+    const attrs = match[1] || '';
+    const block = match[2] || '';
+    const url = toAbsoluteUrl(decodeHtmlEntities(attrs.match(/href=["']([^"']+)["']/i)?.[1] || ''), 'https://www.techcareer.net');
+    const title = cleanRoleToken(normalizeWhitespace(stripTags(block.match(/data-test=["']single-job-title["'][^>]*>([\s\S]*?)<\/[^>]+>/i)?.[1] || '')));
+    const company = cleanCompanyToken(normalizeWhitespace(stripTags(block.match(/data-test=["']single-job-company-name["'][^>]*>([\s\S]*?)<\/[^>]+>/i)?.[1] || '')));
+    const location = normalizeWhitespace(stripTags(block.match(/data-test=["']single-job-location-and-work-place["'][^>]*>([\s\S]*?)<\/[^>]+>/i)?.[1] || ''));
+
+    if (!url || !title || !company || seenUrls.has(url)) continue;
+    seenUrls.add(url);
+    results.push({ url, title, company, location });
+    if (results.length >= resolveSearchResultLimit(limit)) break;
+  }
+
+  if (results.length === 0) {
+    return parseGenericTrBoardSearchResultsHtml(html, limit, 'techcareer_search', 'https://www.techcareer.net');
+  }
+
+  return results;
+}
+
+export function parseYouthallSearchResultsHtml(html, limit = DEFAULT_SEARCH_RESULT_LIMIT) {
+  return parseGenericTrBoardSearchResultsHtml(html, limit, 'youthall_search', 'https://www.youthall.com');
+}
+
 function stripSearchSourceSuffix(rawTitle, parserKey) {
   let title = normalizeWhitespace(rawTitle);
   const profile = sourceProfileFor(parserKey);
@@ -1617,7 +1662,7 @@ function cleanCompanyToken(value) {
   return normalizeWhitespace(
     String(value ?? '')
       .replace(/\b(is hiring|hiring now|careers?|jobs?)\b/gi, '')
-      .replace(/\b(kariyer\.net|indeed|linkedin|eleman\.net|iskur|i̇şkur|işkur|secretcv|yenibiris)\b/gi, '')
+      .replace(/\b(kariyer\.net|indeed|linkedin|eleman\.net|iskur|i̇şkur|işkur|secretcv|yenibiris|techcareer(?:\.net)?|youthall)\b/gi, '')
       .replace(/^[^a-zA-Z0-9ÇĞİÖŞÜçğıöşü]+/, '')
   );
 }
@@ -2033,6 +2078,8 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
     secretcv_search: parseSecretcvSearchResultsHtml,
     yenibiris_search: parseYenibirisSearchResultsHtml,
     iskur_search: parseIskurSearchResultsHtml,
+    techcareer_search: parseTechcareerSearchResultsHtml,
+    youthall_search: parseYouthallSearchResultsHtml,
   };
   const parseDirect = directParsers[parserKey] || null;
 
@@ -2046,6 +2093,7 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
   const makeOffer = directSearchOfferFactory(queryConfig);
   let succeeded = false;
   let lastError = null;
+  let sourceBlocked = false;
 
   for (const seed of seeds) {
     const seedResultUrls = new Set();
@@ -2057,6 +2105,7 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
         if (isBlockedSearchHtml(html)) {
           succeeded = true;
           history.push(makeSourceBlockedHistoryEntry(queryConfig, url, firstSeen, 'captcha_blocked'));
+          sourceBlocked = true;
           break;
         }
 
@@ -2098,11 +2147,16 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
         if (blockedReason) {
           succeeded = true;
           history.push(makeSourceBlockedHistoryEntry(queryConfig, url, firstSeen, blockedReason));
+          sourceBlocked = true;
           break;
         }
         lastError = error;
         break;
       }
+    }
+
+    if (sourceBlocked) {
+      break;
     }
   }
 

@@ -16,6 +16,8 @@ Bu uyarlama `modes/scan.md` ile birlikte okunur. Temel kural değişmez:
   - Secretcv
   - Yenibiris
   - ISKUR
+  - Techcareer.net
+  - Youthall
 - `skipped_blocked_source` görülürse bunu "kaynak erişim duvarı / login / 403" diye açıkla. "ilan kapalı" diye yorumlama.
 - `portals.yml` eski TR template kullanıyorsa bunu net yaz:
   - eksik parser key'leri listele

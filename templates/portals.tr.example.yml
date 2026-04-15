@@ -32,14 +32,6 @@ title_filter:
     - "Mobile"
     - "Android"
     - "iOS"
-    - "Web Master"
-    - "Webmaster"
-    - "Web Tasarım"
-    - "Web Tasarımcı"
-    - "UI UX"
-    - "UI/UX"
-    - "Bilgisayar Mühendisi"
-    - "Bilgisayar Programcısı"
     - "ERP Destek"
     - "Mikro ERP"
     # -- Data / analytics --
@@ -78,6 +70,14 @@ title_filter:
     - "Müşteri Temsilcisi"
     - "Satış Temsilcisi"
     - "Saha Satış"
+    - "Web Master"
+    - "Webmaster"
+    - "Web Tasarım"
+    - "Web Tasarımcı"
+    - "UI UX"
+    - "UI/UX"
+    - "Bilgisayar Mühendisi"
+    - "Bilgisayar Programcısı"
     - "Muhasebe"
     - "Ön Muhasebe"
     - "Kasiyer"
@@ -157,6 +157,13 @@ search_queries:
     parser_key: indeed_tr_search
     locale: tr-TR
     language: [tr, en]
+    pagination:
+      max_pages: 3
+    search_urls:
+      - "https://tr.indeed.com/jobs?q=software+developer&l=T%C3%BCrkiye"
+      - "https://tr.indeed.com/jobs?q=backend+developer&l=T%C3%BCrkiye"
+      - "https://tr.indeed.com/jobs?q=data+engineer&l=T%C3%BCrkiye"
+      - "https://tr.indeed.com/jobs?q=qa+engineer&l=T%C3%BCrkiye"
     anti_duplication:
       canonical_source: "indeed"
       normalize_company_from_result: true
@@ -191,6 +198,13 @@ search_queries:
     parser_key: secretcv_search
     locale: tr-TR
     language: [tr, en]
+    pagination:
+      max_pages: 3
+    search_urls:
+      - "https://www.secretcv.com/is-ilanlari/yazilim-gelistirici-is-ilanlari"
+      - "https://www.secretcv.com/is-ilanlari/software-developer-is-ilanlari"
+      - "https://www.secretcv.com/is-ilanlari/veri-muhendisi-is-ilanlari"
+      - "https://www.secretcv.com/is-ilanlari/qa-engineer-is-ilanlari"
     anti_duplication:
       canonical_source: "secretcv"
       normalize_company_from_result: true
@@ -202,6 +216,13 @@ search_queries:
     parser_key: yenibiris_search
     locale: tr-TR
     language: [tr, en]
+    pagination:
+      max_pages: 3
+    search_urls:
+      - "https://www.yenibiris.com/is-ilanlari/yazilim-gelistirici"
+      - "https://www.yenibiris.com/is-ilanlari/software-developer"
+      - "https://www.yenibiris.com/is-ilanlari/veri-muhendisi"
+      - "https://www.yenibiris.com/is-ilanlari/qa-engineer"
     anti_duplication:
       canonical_source: "yenibiris"
       normalize_company_from_result: true
@@ -230,6 +251,27 @@ search_queries:
       normalize_company_from_result: true
       strip_title_suffixes: ["Kocaeli", "İstanbul", "Izmir", "Türkiye", "Turkey"]
     query: 'site:kariyer.bilisimvadisi.com.tr/job-ad "Software Engineer" OR "Software Developer" OR "Backend Engineer" OR "Platform Engineer" OR "Data Engineer" OR "Yazılım Mühendisi" OR "Yazılım Uzmanı" OR "Ürün Yöneticisi"'
+    enabled: true
+
+  - name: Techcareer.net — Tech Roles
+    adapter_family: turkish_job_board
+    parser_key: techcareer_search
+    locale: tr-TR
+    language: [tr, en]
+    pagination:
+      param: "jobs[page]"
+      max_pages: 5
+    search_urls:
+      - "https://www.techcareer.net/en/jobs?keyword=software"
+      - "https://www.techcareer.net/en/jobs?keyword=backend"
+      - "https://www.techcareer.net/en/jobs?keyword=java"
+      - "https://www.techcareer.net/en/jobs?keyword=data"
+      - "https://www.techcareer.net/en/jobs?keyword=qa"
+    anti_duplication:
+      canonical_source: "techcareer"
+      normalize_company_from_result: true
+      strip_title_suffixes: ["İstanbul", "Istanbul", "Ankara", "Türkiye", "Turkey", "Hybrid", "Hibrit", "Remote", "Uzaktan"]
+    query: 'site:techcareer.net/jobs/detail "Software Engineer" OR "Backend Developer" OR "Data Engineer" OR "Yazılım Geliştirici" OR "Yazılım Mühendisi"'
     enabled: true
 
   - name: Youthall — New Grad Product & Tech
