@@ -12,7 +12,8 @@
  */
 
 import { execSync, execFileSync } from 'child_process';
-import { readFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
 import { join, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -96,9 +97,9 @@ console.log('\n2. Script execution (graceful on empty data)');
 const scripts = [
   { name: 'cv-sync-check.mjs', expectExit: 1, allowFail: true }, // fails without cv.md (normal in repo)
   { name: 'verify-pipeline.mjs', expectExit: 0 },
-  { name: 'normalize-statuses.mjs', expectExit: 0 },
-  { name: 'dedup-tracker.mjs', expectExit: 0 },
-  { name: 'merge-tracker.mjs', expectExit: 0 },
+  { name: 'normalize-statuses.mjs --dry-run', expectExit: 0 },
+  { name: 'dedup-tracker.mjs --dry-run', expectExit: 0 },
+  { name: 'merge-tracker.mjs --dry-run', expectExit: 0 },
   { name: 'followup-cadence.mjs', expectExit: 0 },
   { name: 'update-system.mjs check', expectExit: 0 },
 ];
@@ -712,6 +713,34 @@ if (scanModule) {
   }
 
   if (
+    scanModule.isExpectedSearchResultHost('https://www.kariyer.net/is-ilani/example-backend-123', { parser_key: 'kariyernet_search' }) &&
+    !scanModule.isExpectedSearchResultHost('https://example.com/blog/backend-jobs', { parser_key: 'kariyernet_search' }) &&
+    scanModule.isExpectedSearchResultHost('https://www.techcareer.net/jobs/detail/software-developer-2', { parser_key: 'techcareer_search' })
+  ) {
+    pass('Search provider host validation works');
+  } else {
+    fail('Search provider host validation failed');
+  }
+
+  const duckNoResultDiagnostic = scanModule.inspectSearchProviderResults('duckduckgo_html', 202, [], {
+    parser_key: 'kariyernet_search',
+  });
+  const bingMismatchDiagnostic = scanModule.inspectSearchProviderResults('bing_rss', 200, [
+    { url: 'https://example.com/blog/backend-jobs', title: 'Backend Jobs' },
+  ], {
+    parser_key: 'kariyernet_search',
+  });
+  if (
+    duckNoResultDiagnostic.warnings.some((warning) => warning.code === 'scan_provider_degraded') &&
+    bingMismatchDiagnostic.provider_host_mismatch === 1 &&
+    bingMismatchDiagnostic.warnings.some((warning) => warning.code === 'provider_host_mismatch')
+  ) {
+    pass('Search provider degradation diagnostics work');
+  } else {
+    fail('Search provider degradation diagnostics failed');
+  }
+
+  if (
     scanModule.isLikelyCareersNoiseEntry({ title: 'Privacy policy', href: 'https://example.com/privacy-policy', context: '' }) &&
     scanModule.isLikelyCareersNoiseEntry({ title: 'Join Us!', href: 'https://example.com/careers', context: 'Careers page' }) &&
     !scanModule.isLikelyCareersNoiseEntry({ title: 'Senior Backend Engineer', href: 'https://example.com/careers/jobs/senior-backend-engineer', context: 'Engineering Team Backend Platform' })
@@ -753,6 +782,91 @@ if (scanModule) {
     pass('Direct-source promotion match works');
   } else {
     fail('Direct-source promotion match failed');
+  }
+}
+
+{
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'career-ops-verify-'));
+  try {
+    mkdirSync(join(fixtureRoot, 'data'), { recursive: true });
+    mkdirSync(join(fixtureRoot, 'reports'), { recursive: true });
+    mkdirSync(join(fixtureRoot, 'output'), { recursive: true });
+    writeFileSync(join(fixtureRoot, 'output', 'cv-candidate-example.pdf'), 'pdf');
+    writeFileSync(join(fixtureRoot, 'data', 'applications.md'), `# Applications Tracker
+
+| # | Date | Company | Role | Score | Status | PDF | Report | Notes |
+|---|------|---------|------|-------|--------|-----|--------|-------|
+| 1 | 2026-04-15 | Example | Backend Engineer | 3.3/5 | SKIP | ✅ | [001](reports/001-example-2026-04-15.md) | Low priority despite score |
+`);
+    writeFileSync(join(fixtureRoot, 'data', 'pipeline.md'), '# Pipeline Inbox\n\n## Pendientes\n\n## Procesadas\n');
+    writeFileSync(join(fixtureRoot, 'data', 'review-pipeline.md'), '# Review Queue\n\n## Unverified Public Matches\n\n- [ ] https://tr.linkedin.com/jobs/view/example | Example | Backend Engineer | public_unverified\n');
+    writeFileSync(join(fixtureRoot, 'data', 'tr-listings.jsonl'), '{"url":"https://example.com/job","title":"Backend Engineer"}\n');
+    writeFileSync(join(fixtureRoot, 'reports', '001-example-2026-04-15.md'), `# Report
+
+**Date:** 2026-04-15
+**Score:** 3.3/5
+**URL:** https://example.com/job
+**PDF:** output/cv-candidate-example.pdf
+`);
+    writeFileSync(join(fixtureRoot, 'reports', '002-orphan-2026-04-15.md'), '# Orphan\n');
+    const output = run('node', ['verify-pipeline.mjs'], {
+      env: { ...process.env, CAREER_OPS_ROOT: fixtureRoot },
+    });
+    if (
+      output &&
+      output.includes('orphan_report') &&
+      output.includes('skip_with_generated_pdf') &&
+      output.includes('low_priority_skip') &&
+      output.includes('review_queue_pending')
+    ) {
+      pass('Pipeline verifier warns on orphan/review/SKIP-with-PDF fixtures');
+    } else {
+      fail(`Pipeline verifier warning fixture mismatch: ${output}`);
+    }
+  } catch (err) {
+    fail(`Pipeline verifier warning fixture failed: ${err.message}`);
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+}
+
+{
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'career-ops-verify-missing-pdf-'));
+  try {
+    mkdirSync(join(fixtureRoot, 'data'), { recursive: true });
+    mkdirSync(join(fixtureRoot, 'reports'), { recursive: true });
+    writeFileSync(join(fixtureRoot, 'data', 'applications.md'), `# Applications Tracker
+
+| # | Date | Company | Role | Score | Status | PDF | Report | Notes |
+|---|------|---------|------|-------|--------|-----|--------|-------|
+| 1 | 2026-04-15 | Example | Backend Engineer | 4.0/5 | EVALUATED | ✅ | [001](reports/001-example-2026-04-15.md) | |
+`);
+    writeFileSync(join(fixtureRoot, 'reports', '001-example-2026-04-15.md'), `# Report
+
+**Date:** 2026-04-15
+**Score:** 4.0/5
+**URL:** https://example.com/job
+**PDF:** output/missing.pdf
+`);
+    let failedAsExpected = false;
+    try {
+      execFileSync('node', ['verify-pipeline.mjs'], {
+        cwd: ROOT,
+        encoding: 'utf-8',
+        env: { ...process.env, CAREER_OPS_ROOT: fixtureRoot },
+      });
+    } catch (err) {
+      failedAsExpected = String(err.stdout || '').includes('missing_pdf_file');
+    }
+    if (failedAsExpected) {
+      pass('Pipeline verifier errors on missing generated PDF files');
+    } else {
+      fail('Pipeline verifier did not error on missing generated PDF files');
+    }
+  } catch (err) {
+    fail(`Pipeline verifier missing-PDF fixture failed: ${err.message}`);
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true });
   }
 }
 
@@ -867,6 +981,53 @@ if (trListingModule) {
     pass('TR listing sidecar upsert is keyed by canonical URL');
   } else {
     fail(`TR listing sidecar upsert mismatch: ${sidecar}`);
+  }
+}
+
+{
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'career-ops-patterns-'));
+  try {
+    mkdirSync(join(fixtureRoot, 'data'), { recursive: true });
+    mkdirSync(join(fixtureRoot, 'reports'), { recursive: true });
+    writeFileSync(join(fixtureRoot, 'data', 'applications.md'), `# Applications Tracker
+
+| # | Date | Company | Role | Score | Status | PDF | Report | Notes |
+|---|------|---------|------|-------|--------|-----|--------|-------|
+| 1 | 2026-04-15 | Doğal TR | Backend Engineer | 4.2/5 | EVALUATED | ✅ | [001](reports/001-dogal-tr.md) | |
+`);
+    writeFileSync(join(fixtureRoot, 'reports', '001-dogal-tr.md'), `# Değerlendirme: Doğal TR -- Backend Engineer
+
+**Rol Türü:** Backend / Platform Engineer
+**Çalışma Modeli:** Hibrit
+**Ücret:** Açık
+
+## Genel Puan
+
+| Kriter | Ağırlık | Puan |
+|---|---:|---:|
+| Rol Uyumu | 18 | 4 |
+| **Ağırlıklı Puan** | **100** | **4.20/5** |
+
+**Final Puan:** 4.20/5
+`);
+
+    const output = run('node', ['analyze-patterns.mjs', '--min-threshold', '0'], {
+      env: { ...process.env, CAREER_OPS_ROOT: fixtureRoot },
+    });
+    const parsed = output ? JSON.parse(output) : null;
+    if (
+      parsed?.archetypeBreakdown?.[0]?.archetype === 'Backend / Platform Engineer' &&
+      parsed?.remotePolicy?.[0]?.policy === 'hybrid/onsite' &&
+      parsed?.scoreComparison?.pending?.avg === 4.2
+    ) {
+      pass('Pattern analysis parses natural Turkish report labels');
+    } else {
+      fail(`Pattern analysis natural Turkish mismatch: ${output}`);
+    }
+  } catch (err) {
+    fail(`Pattern analysis natural Turkish fixture failed: ${err.message}`);
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true });
   }
 }
 

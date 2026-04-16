@@ -61,7 +61,8 @@ Eres un worker de evaluación de ofertas de empleo for the candidate (read name 
    - usa esos archivos como override autoritativo para evaluación, scoring, report format y PDF
    - usa `language.cv_preferences`, `compensation.salary_preferences`, `location_preferences`, `constraints` y `automation.application` cuando existan
 3. Si el modo TR está activo:
-   - las report machine keys SIEMPRE quedan en inglés: `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`
+   - la superficie visible del report debe estar en Türkiye Türkçesi natural: `Rol Türü`, `Kısa Özet`, `Çalışma Modeli`, `Ücret`, `Tarih`, `Puan`, `İlan URL’si`, `PDF`, `Pipeline ID`
+   - los valores internos de tracker, sidecar JSONL y tags siguen canonical (`remote`, `hybrid`, `transparent`, `high`, etc.)
    - el contenido visible puede estar en turco
 4. Si el modo TR no está activo, continúa con el flujo legacy de este prompt
 
@@ -107,7 +108,7 @@ Convertir "builder" en señal profesional, no en "hobby maker". El framing cambi
 
 #### Bloque A — Resumen del Rol
 
-Tabla con: Arquetipo detectado, Domain, Function, Seniority, Remote, Team size, TL;DR.
+Si TR mode está activo, la tabla visible usa labels naturales: Rol Türü, Alan, İşin Odağı, Kıdem, Çalışma Modeli, Ekip Büyüklüğü, Kısa Özet. Si no, usa el formato legacy.
 
 #### Bloque B — Match con CV
 
@@ -159,15 +160,15 @@ Top 5 cambios al CV + Top 5 cambios a LinkedIn.
 #### Score Global
 
 **IMPORTANTE:** Si `language.modes_dir: modes/tr`, NO uses esta tabla legacy de 5 dimensiones. En su lugar, sigue el modelo de `modes/tr/teklif.md`:
-- tabla `Global Score` de 10 dimensiones
-- `Red Flag Cap`
-- `Final Score`
-- `Confidence`
-- `Recommendation Category`
-- `Borderline`
-- `Strengths`
-- `Risks`
-- `Recommendation`
+- tabla `Genel Puan` de 10 dimensiones
+- `Risk Tavanı`
+- `Final Puan`
+- `Güven Düzeyi`
+- `Karar Kategorisi`
+- `Sınırda mı?`
+- `Güçlü Yönler`
+- `Riskler`
+- `Karar`
 
 | Dimensión | Score |
 |-----------|-------|
@@ -190,56 +191,59 @@ Donde `{company-slug}` es el nombre de empresa en lowercase, sin espacios, con g
 **Formato del report:**
 
 Si `config/profile.yml -> language.modes_dir` es `modes/tr`, este bloque es solo una referencia minima. El contrato obligatorio del report lo define `modes/tr/teklif.md`:
-- machine keys del header en English (`Date`, `Archetype`, `Score`, `URL`, `PDF`, `Batch ID`)
-- metadata Turkey si `language.modes_dir` es `modes/tr`: `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence`
-- bloque `## Global Score`
-- `**Red Flag Cap:**`, `**Final Score:**`, `**Confidence:**`, `**Recommendation Category:**`, `**Borderline:**`
-- secciones `## Strengths`, `## Risks`, `## Recommendation`
+- header visible en Türkiye Türkçesi natural (`Tarih`, `Rol Türü`, `Kısa Özet`, `Puan`, `İlan URL’si`, `PDF`, `Pipeline ID`)
+- metadata Turkey visible: `Şehir`, `Çalışma Modeli`, `İlan Dili`, `Çalışma Türü`, `Maaş Bilgisi`, `Kaynak`, `Güven Düzeyi`
+- bloque `## Genel Puan`
+- `**Risk Tavanı:**`, `**Final Puan:**`, `**Güven Düzeyi:**`, `**Karar Kategorisi:**`, `**Sınırda mı?:**`
+- secciones `## Güçlü Yönler`, `## Riskler`, `## Karar`
 
 ```markdown
-# Evaluación: {Empresa} — {Rol}
+# Değerlendirme: {Şirket} -- {Rol}
 
-**Date:** {{DATE}}
-**Archetype:** {detectado}
-**Score:** {X/5}
-**URL:** {URL de la oferta original}
+**Tarih:** {{DATE}}
+**Rol Türü:** {tespit edilen rol türü}
+**Kısa Özet:** {tek cümlelik özet}
+**Puan:** {X/5}
+**İlan URL’si:** {URL de la oferta original}
 **PDF:** output/cv-candidate-{company-slug}-{lang}-{{DATE}}.pdf
-**Batch ID:** {{ID}}
-**City:** {city or unknown}
-**Work Model:** {remote|hybrid|on_site|field|unspecified}
-**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
-**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
-**Salary Transparency:** {transparent|market_range|opaque|unknown}
-**Source:** {portal or company careers}
-**Confidence:** {high|medium|low}
+**Pipeline ID:** {{ID}}
+**Şehir:** {şehir veya Bilinmiyor}
+**Çalışma Modeli:** {Uzaktan|Hibrit|Ofisten|Sahada|Belirtilmemiş}
+**İlan Dili:** {Türkçe|İngilizce|Türkçe + İngilizce|Belirtilmemiş}
+**Çalışma Türü:** {Tam zamanlı|Yarı zamanlı|Sözleşmeli|Staj|Geçici|Freelance|Danışmanlık|Çıraklık|Belirtilmemiş}
+**Maaş Bilgisi:** {Açık|Piyasa bandı verilmiş|Belirtilmemiş|Bilinmiyor}
+**Kaynak:** {portal veya şirket kariyer sayfası}
+**Güven Düzeyi:** {Yüksek|Orta|Düşük}
 
 ---
 
-## A) Resumen del Rol
+## A) Rol Özeti
 (contenido completo)
 
-## B) Match con CV
+## B) CV Eşleşmesi
 (contenido completo)
 
-## C) Nivel y Estrategia
+## C) Kıdem ve Strateji
 (contenido completo)
 
-## D) Comp y Demanda
+## D) Maaş ve Piyasa
 (contenido completo)
 
-## E) Plan de Personalización
+## E) Kişiselleştirme Planı
 (contenido completo)
 
-## F) Plan de Entrevistas
+## F) Mülakat Planı
 (contenido completo)
 
 ---
 
-## Keywords extracted
+## ATS Anahtar Kelimeleri
 (15-20 keywords del JD para ATS)
 ```
 
 ### Paso 4 — Generar PDF
+
+Antes de generar PDF, aplica la puerta de decisión: no basta con score `>= 3.0`. Genera PDF solo si la recommendation/karar es apply/evaluate (`hemen_basvur`, `secici_basvur`, `EVALUATED`) y no hay confidence low, geo blocker, salary blocker ni stack mismatch crítico. Si el tracker status final será `SKIP`, deja `**PDF:** not generated` / `Üretilmedi` y usa `❌`.
 
 1. Lee `cv.md` + `config/profile.yml`
 2. Extrae 15-20 keywords del JD

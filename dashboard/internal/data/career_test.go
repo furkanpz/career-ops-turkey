@@ -112,6 +112,65 @@ func TestParseApplicationsReadsColonStyleReportMetadata(t *testing.T) {
 	}
 }
 
+func TestParseApplicationsReadsNaturalTurkishReportMetadata(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "data"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "reports"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	applications := `| # | Date | Company | Role | Score | Status | PDF | Report | Notes |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-14 | Delta | Backend Engineer | 4.2/5 | EVALUATED | ✅ | [004](reports/004-delta.md) |  |
+`
+	if err := os.WriteFile(filepath.Join(root, "data", "applications.md"), []byte(applications), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	report := `# Değerlendirme: Delta -- Backend Engineer
+
+**Tarih:** 2026-04-14
+**Rol Türü:** Backend / Platform Engineer
+**Kısa Özet:** Türkiye pazarı için doğal Türkçe rapor fixture'ı.
+**Puan:** 4.20/5
+**İlan URL’si:** https://www.kariyer.net/is-ilani/delta-backend?utm_source=test
+**PDF:** output/cv-candidate-delta-tr-2026-04-14.pdf
+**Pipeline ID:** 004
+**Şehir:** istanbul
+**Çalışma Modeli:** Hibrit
+**İlan Dili:** Türkçe + İngilizce
+**Çalışma Türü:** Tam zamanlı
+**Maaş Bilgisi:** Açık
+**Kaynak:** Kariyer.net
+**Güven Düzeyi:** Yüksek
+`
+	if err := os.WriteFile(filepath.Join(root, "reports", "004-delta.md"), []byte(report), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	apps := ParseApplications(root)
+	if len(apps) != 1 {
+		t.Fatalf("expected 1 app, got %d", len(apps))
+	}
+	app := apps[0]
+	if app.JobURL != "https://www.kariyer.net/is-ilani/delta-backend?utm_source=test" {
+		t.Fatalf("unexpected job URL: %q", app.JobURL)
+	}
+	if app.City != "istanbul" || app.WorkModel != "hybrid" || app.Language != "tr_en" || app.EmploymentType != "full_time" {
+		t.Fatalf("unexpected normalized TR metadata: city=%q work=%q language=%q employment=%q", app.City, app.WorkModel, app.Language, app.EmploymentType)
+	}
+	if app.SalaryTransparency != "transparent" || !app.SalaryTransparent || app.Source != "Kariyer.net" || app.Confidence != "high" {
+		t.Fatalf("unexpected normalized report metadata: salary=%q transparent=%v source=%q confidence=%q", app.SalaryTransparency, app.SalaryTransparent, app.Source, app.Confidence)
+	}
+
+	archetype, tldr, remote, comp := LoadReportSummary(root, "reports/004-delta.md")
+	if archetype != "Backend / Platform Engineer" || tldr == "" || remote != "Hibrit" || comp != "" {
+		t.Fatalf("unexpected natural TR summary: archetype=%q tldr=%q remote=%q comp=%q", archetype, tldr, remote, comp)
+	}
+}
+
 func TestParseApplicationsPrefersNoteTagsOverReportMetadata(t *testing.T) {
 	root := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(root, "data"), 0755); err != nil {

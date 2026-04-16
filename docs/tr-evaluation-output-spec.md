@@ -24,31 +24,34 @@ It does not change the underlying A-F evaluation structure.
 
 ## Required Report Header
 
-To reduce downstream breakage risk, keep these machine-stable keys in the report header even in Turkish mode:
+New Turkish reports use natural Türkiye Türkçesi for visible report keys. Internal tracker statuses, sidecar JSONL fields, and pipeline note tags remain canonical; dashboard/report parsers read both this Turkish shape and legacy English keys.
 
 ```markdown
-# Degerlendirme: {Company} -- {Role}
+# Değerlendirme: {Şirket} -- {Rol}
 
-**Date:** {YYYY-MM-DD}
-**Archetype** | {detected archetype}
-**Score:** {final score}/5
-**URL:** {original posting URL}
-**PDF:** {pdf path or pending}
-**City:** {city or unknown}
-**Work Model:** {remote|hybrid|on_site|field|unspecified}
-**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
-**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
-**Salary Transparency:** {transparent|market_range|opaque|unknown}
-**Source:** {portal or company careers}
-**Confidence:** {high|medium|low}
+**Tarih:** {YYYY-MM-DD}
+**Rol Türü:** {detected role family}
+**Kısa Özet:** {one-sentence summary}
+**Çalışma Modeli:** {Uzaktan|Hibrit|Ofisten|Sahada|Belirtilmemiş}
+**Ücret:** {salary text or Belirtilmemiş}
+**Puan:** {final score}/5
+**İlan URL’si:** {original posting URL}
+**İlan Gerçekliği:** {Yüksek güven|Önce doğrula|Şüpheli}
+**PDF:** {pdf path or Üretilmedi}
+**Pipeline ID:** {pipeline/batch id if available}
+**Şehir:** {city or Bilinmiyor}
+**İlan Dili:** {Türkçe|İngilizce|Türkçe + İngilizce|...|Belirtilmemiş}
+**Çalışma Türü:** {Tam zamanlı|Yarı zamanlı|Sözleşmeli|Staj|Geçici|Freelance|Danışmanlık|Çıraklık|Belirtilmemiş}
+**Maaş Bilgisi:** {Açık|Piyasa bandı verilmiş|Belirtilmemiş|Bilinmiyor}
+**Kaynak:** {portal or company careers}
+**Güven Düzeyi:** {Yüksek|Orta|Düşük}
 ```
 
 Notes:
 
-- `**URL:**` is required.
-- `**Archetype** |` stays fixed intentionally for parser-safe dashboard extraction.
-- `**Score:**` should be the final score after any red-flag cap, not the raw weighted score.
-- Turkey metadata keys stay English intentionally; dashboard reads these as fallback when `data/tr-listings.jsonl` or pipeline tags are missing.
+- `**İlan URL’si:**` is required.
+- `**Puan:**` should be the final score after any red-flag cap, not the raw weighted score.
+- Legacy keys such as `Date`, `Archetype`, `Work Model`, and `Confidence` are still parser-compatible for older reports, but should not be used in newly generated Turkish reports.
 
 ## Required Body Structure
 
@@ -57,7 +60,7 @@ The body should keep the existing A-F sequence:
 ```markdown
 ## A) Rol Ozeti
 ## B) CV Eslesmesi
-## C) Seniority ve Strateji
+## C) Kidem ve Strateji
 ## D) Maas ve Piyasa
 ## E) Kisisellestirme Plani
 ## F) Mulakat Plani
@@ -66,49 +69,50 @@ The body should keep the existing A-F sequence:
 After A-F, these sections are required:
 
 ```markdown
-## Global Score
-## Strengths
-## Risks
-## Recommendation
+## G) Ilan Gercekligi
+## Genel Puan
+## Guclu Yonler
+## Riskler
+## Karar
 ```
 
-## Global Score Section
+## Genel Puan Section
 
 Required table:
 
 ```markdown
-| Dimension | Weight | Score |
+| Kriter | Agirlik | Puan |
 |---|---:|---:|
-| Role Fit | 18 | X |
-| Alignment With Candidate Goals | 12 | X |
-| Seniority Fit | 10 | X |
-| City / Work Model Fit | 10 | X |
-| Language Fit | 8 | X |
-| Salary Transparency / Market Fairness | 12 | X |
-| Posting Quality | 8 | X |
-| Company Clarity / Hiring Credibility | 8 | X |
-| Application Effort | 6 | X |
-| Interview Likelihood | 8 | X |
-| **Weighted Score** | **100** | **X.XX/5** |
+| Rol Uyumu | 18 | X |
+| Aday Hedefleriyle Uyum | 12 | X |
+| Kidem Uyumu | 10 | X |
+| Sehir / Calisma Modeli Uyumu | 10 | X |
+| Dil Uyumu | 8 | X |
+| Maas Bilgisi / Piyasa Uyumu | 12 | X |
+| Ilan Kalitesi | 8 | X |
+| Sirket Netligi / Ise Alim Guveni | 8 | X |
+| Basvuru Eforu | 6 | X |
+| Mulakata Kalma Ihtimali | 8 | X |
+| **Agirlikli Puan** | **100** | **X.XX/5** |
 ```
 
 Required metadata directly below the table:
 
 ```markdown
-**Red Flag Cap:** none | major | critical
-**Final Score:** X.XX/5
-**Confidence:** high | medium | low
-**Recommendation Category:** hemen_basvur | secici_basvur | sinirda_once_dogrula | basvurma
-**Borderline:** yes | no
+**Risk Tavani:** Yok | Ciddi | Kritik
+**Final Puan:** X.XX/5
+**Guven Duzeyi:** Yuksek | Orta | Dusuk
+**Karar Kategorisi:** hemen_basvur | secici_basvur | sinirda_once_dogrula | basvurma
+**Sinirda mi?:** Evet | Hayir
 ```
 
 Rules:
 
-- `Final Score` is the action-driving score.
-- If a cap exists, `Final Score` must reflect the capped result.
-- `Borderline: yes` is mandatory when the case is not cleanly actionable.
+- `Final Puan` is the action-driving score.
+- If a cap exists, `Final Puan` must reflect the capped result.
+- `Sinirda mi?: Evet` is mandatory when the case is not cleanly actionable.
 
-## Strengths Section
+## Guclu Yonler Section
 
 Purpose:
 
@@ -129,7 +133,7 @@ Bad example:
 
 - Strong company and exciting opportunity.
 
-## Risks Section
+## Riskler Section
 
 Purpose:
 
@@ -150,7 +154,7 @@ Bad example:
 
 - Salary might be fine but hard to know.
 
-## Recommendation Section
+## Karar Section
 
 Required content:
 
@@ -161,7 +165,7 @@ Required content:
 Recommended shape:
 
 ```markdown
-## Recommendation
+## Karar
 
 Secici basvur. Rol mantikli, ama maas seffafligi ve hibrit beklentisi netlestirilmeden agresif ilerleme onerilmez.
 
@@ -175,9 +179,9 @@ Once dogrula:
 
 ### Borderline
 
-A report must set `Borderline: yes` if any of these is true:
+A report must set `Sinirda mi?: Evet` if any of these is true:
 
-- `Final Score` is between `3.7` and `4.1`
+- `Final Puan` is between `3.7` and `4.1`
 - confidence is `low`
 - at least one major red flag exists
 - two or more dimensions score `3/5`
@@ -188,7 +192,7 @@ Effect:
 
 ### Low Confidence
 
-Use `Confidence: low` when:
+Use `Guven Duzeyi: Dusuk` when:
 
 - JD is incomplete or low-quality
 - company identity is unclear
@@ -218,8 +222,8 @@ If thresholds and caution rules conflict, the more conservative outcome wins.
 
 The Turkish mode should only produce a draft-answers section when all are true:
 
-- `Final Score >= 4.5`
-- `Confidence` is not `low`
+- `Final Puan >= 4.5`
+- `Guven Duzeyi` is not `Dusuk`
 - no major or critical red flag exists
 
 Otherwise, the report should stop at the recommendation and avoid overcommitting the candidate.

@@ -852,19 +852,19 @@ func (m PipelineModel) renderPreview() string {
 	if summary, ok := m.reportCache[app.ReportPath]; ok {
 		if summary.archetype != "" {
 			lines = append(lines, padStyle.Render(
-				labelStyle.Render("Archetype: ")+valueStyle.Render(summary.archetype)))
+				labelStyle.Render("Rol Türü: ")+valueStyle.Render(summary.archetype)))
 		}
 		if summary.tldr != "" {
 			lines = append(lines, padStyle.Render(
-				labelStyle.Render("TL;DR: ")+valueStyle.Render(summary.tldr)))
+				labelStyle.Render("Kısa Özet: ")+valueStyle.Render(summary.tldr)))
 		}
 		if summary.comp != "" {
 			lines = append(lines, padStyle.Render(
-				labelStyle.Render("Comp: ")+valueStyle.Render(summary.comp)))
+				labelStyle.Render("Ücret: ")+valueStyle.Render(summary.comp)))
 		}
 		if summary.remote != "" {
 			lines = append(lines, padStyle.Render(
-				labelStyle.Render("Remote: ")+valueStyle.Render(summary.remote)))
+				labelStyle.Render("Çalışma Modeli: ")+valueStyle.Render(summary.remote)))
 		}
 	} else if app.Notes != "" {
 		// Fallback: show notes
@@ -876,7 +876,7 @@ func (m PipelineModel) renderPreview() string {
 
 	if meta := renderTurkeyMetadata(app); meta != "" {
 		lines = append(lines, padStyle.Render(
-			labelStyle.Render("TR Metadata: ")+valueStyle.Render(meta)))
+			labelStyle.Render("TR Bilgileri: ")+valueStyle.Render(meta)))
 	}
 
 	return strings.Join(lines, "\n")

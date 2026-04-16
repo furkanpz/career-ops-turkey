@@ -36,30 +36,98 @@
 - `automation.application`
   PDF, draft answers ve apply helper davranışında gating sinyali olarak kullanılır.
 
+## PDF üretim kapısı
+
+PDF üretimi sadece puan eşiğine göre yapılmaz. TR akışında PDF varsayılan olarak yalnızca şu durumda üretilir:
+
+- final puan `>= 3.0`
+- karar kategorisi `hemen_basvur` veya `secici_basvur`
+- güven düzeyi `low` değil
+- şehir / maaş / legal setup / kritik stack blocker yok
+
+Şu durumda PDF üretme; report header'da `**PDF:** Üretilmedi` yaz ve tracker PDF kolonunu `❌` bırak:
+
+- karar kategorisi `basvurma`
+- karar kategorisi `sinirda_once_dogrula`
+- güven düzeyi `low`
+- role uygulanabilir görünse bile lokasyon, maaş, zorunlu onsite veya kritik stack uyumsuzluğu başvuru kararını bloke ediyorsa
+
+Score `>= 3.0` ama karar `basvurma` ise bunu raporda açıkça "puan var ama başvuru önermiyorum" diye gerekçelendir.
+
 ## Makine kontratı
 
 - Tracker status label'ları her zaman canonical English kalır.
-- Report machine-key'leri her zaman canonical English kalır:
-  `Archetype`, `TL;DR`, `Remote`, `Comp`, `Date`, `Score`, `URL`, `PDF`, `Batch ID`
-- Türkiye metadata key'leri parser-safe English kalır:
-  `City`, `Work Model`, `Language`, `Employment Type`, `Salary Transparency`, `Source`, `Confidence`
-- Türkçe gövde ve Türkçe operatör metni serbesttir.
+- `data/tr-listings.jsonl`, pipeline note tag'leri ve tracker status'ları internal canonical değerleri kullanır:
+  `remote`, `hybrid`, `on_site`, `field`, `unspecified`, `full_time`, `transparent`, `opaque`, `high`, `medium`, `low`.
+- Report'un kullanıcıya görünen yüzeyi doğal Türkiye Türkçesi olur. Yeni raporlarda canonical English key göstermeyin.
+- Dashboard/parser geriye uyumlu şekilde hem eski English key'leri hem de yeni Türkçe key'leri okur.
+
+### Doğal Türkçe report sözlüğü
+
+Yeni TR raporlarda şu görünür label'ları kullan:
+
+| İç anlam | Görünür label |
+|---|---|
+| Archetype | Rol Türü |
+| TL;DR | Kısa Özet |
+| Remote / Work Model | Çalışma Modeli |
+| Comp | Ücret |
+| Legitimacy | İlan Gerçekliği |
+| Assessment | Sonuç |
+| City | Şehir |
+| Language | İlan Dili |
+| Employment Type | Çalışma Türü |
+| Salary Transparency | Maaş Bilgisi |
+| Confidence | Güven Düzeyi |
+| Global Score | Genel Puan |
+| Dimension | Kriter |
+| Weight | Ağırlık |
+| Final Score | Final Puan |
+| Red Flag Cap | Risk Tavanı |
+| Recommendation Category | Karar Kategorisi |
+| Borderline | Sınırda mı? |
+| Strengths | Güçlü Yönler |
+| Risks | Riskler |
+| Recommendation | Karar |
+| Keywords extracted | ATS Anahtar Kelimeleri |
+
+Görünür değerleri de doğal Türkçe yaz:
+
+| Internal value | Görünür Türkçe |
+|---|---|
+| remote | Uzaktan |
+| hybrid | Hibrit |
+| on_site | Ofisten |
+| field | Sahada |
+| unspecified | Belirtilmemiş |
+| full_time | Tam zamanlı |
+| part_time | Yarı zamanlı |
+| contract | Sözleşmeli |
+| freelance | Freelance |
+| transparent | Açık |
+| market_range | Piyasa bandı verilmiş |
+| opaque | Belirtilmemiş |
+| unknown | Bilinmiyor |
+| high / medium / low | Yüksek / Orta / Düşük |
+| none / major / critical | Yok / Ciddi / Kritik |
+| Positive / Neutral / Concerning | Olumlu / Nötr / Riskli |
+| High Confidence / Proceed with Caution / Suspicious | Yüksek güven / Önce doğrula / Şüpheli |
 
 ### Türkiye metadata kontratı
 
 Bir ilan değerlendirmesi, batch işi veya auto-pipeline report'u şu metadata bloğunu header'a yakın ekler:
 
 ```markdown
-**City:** {istanbul|ankara|izmir|remote|unknown}
-**Work Model:** {remote|hybrid|on_site|field|unspecified}
-**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
-**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
-**Salary Transparency:** {transparent|market_range|opaque|unknown}
-**Source:** {portal veya company careers}
-**Confidence:** {high|medium|low}
+**Şehir:** {istanbul|ankara|izmir|remote|Bilinmiyor}
+**Çalışma Modeli:** {Uzaktan|Hibrit|Ofisten|Sahada|Belirtilmemiş}
+**İlan Dili:** {Türkçe|İngilizce|Türkçe + İngilizce|Almanca|Fransızca|Arapça|Rusça|Çok dilli|Belirtilmemiş}
+**Çalışma Türü:** {Tam zamanlı|Yarı zamanlı|Sözleşmeli|Staj|Geçici|Freelance|Danışmanlık|Çıraklık|Belirtilmemiş}
+**Maaş Bilgisi:** {Açık|Piyasa bandı verilmiş|Belirtilmemiş|Bilinmiyor}
+**Kaynak:** {portal veya şirket kariyer sayfası}
+**Güven Düzeyi:** {Yüksek|Orta|Düşük}
 ```
 
-Bu alanlar dashboard ve scanner sidecar ile aynı anlamdadır. Emin değilsen alan tipine göre güvenli değer kullan: `City: unknown`, `Work Model: unspecified`, `Language: unspecified`, `Employment Type: unspecified`, `Salary Transparency: unknown`; kesin veri gibi davranma.
+Bu alanlar dashboard ve scanner sidecar ile aynı anlamdadır. Emin değilsen alan tipine göre güvenli değer kullan: şehir ve maaş için `Bilinmiyor`, çalışma modeli / ilan dili / çalışma türü için `Belirtilmemiş`; kesin veri gibi davranma.
 
 ---
 
@@ -71,16 +139,16 @@ Skor 10 ağırlıklı boyuttan oluşur ve 1-5 aralığındadır:
 
 | Boyut | Ağırlık |
 |---|---:|
-| Role Fit | 18 |
-| Alignment With Candidate Goals | 12 |
-| Seniority Fit | 10 |
-| City / Work Model Fit | 10 |
-| Language Fit | 8 |
-| Salary Transparency / Market Fairness | 12 |
-| Posting Quality | 8 |
-| Company Clarity / Hiring Credibility | 8 |
-| Application Effort | 6 |
-| Interview Likelihood | 8 |
+| Rol Uyumu | 18 |
+| Aday Hedefleriyle Uyum | 12 |
+| Kıdem Uyumu | 10 |
+| Şehir / Çalışma Modeli Uyumu | 10 |
+| Dil Uyumu | 8 |
+| Maaş Bilgisi / Piyasa Uyumu | 12 |
+| İlan Kalitesi | 8 |
+| Şirket Netliği / İşe Alım Güveni | 8 |
+| Başvuru Eforu | 6 |
+| Mülakata Kalma İhtimali | 8 |
 
 ### Skor ilkeleri
 
@@ -95,12 +163,12 @@ Skor 10 ağırlıklı boyuttan oluşur ve 1-5 aralığındadır:
 Her değerlendirme sonunda şunlar MUTLAKA yer alır:
 
 - final score
-- strengths
-- risks
-- recommendation category
-- confidence
+- güçlü yönler
+- riskler
+- karar kategorisi
+- güven düzeyi
 
-### Strengths kuralı
+### Güçlü Yönler kuralı
 
 - En fazla 5 madde
 - Her madde bir kanıta dayansın
@@ -116,9 +184,9 @@ Her değerlendirme sonunda şunlar MUTLAKA yer alır:
 
 ---
 
-## Confidence Kurallari
+## Güven Düzeyi Kuralları
 
-Confidence değerleri:
+İç güven değerleri:
 
 - `high`
 - `medium`
@@ -158,7 +226,7 @@ Aşağıdakilerden biri varsa kullan:
 
 ---
 
-## Borderline Kurallari
+## Sınırda Vaka Kuralları
 
 Aşağıdaki durumlardan biri varsa case'i `borderline` olarak işaretle:
 
@@ -175,7 +243,7 @@ Aşağıdaki durumlardan biri varsa case'i `borderline` olarak işaretle:
 
 ---
 
-## Recommendation Category Kurallari
+## Karar Kategorisi Kuralları
 
 Makine-dostu kategori anahtarları:
 
@@ -222,7 +290,7 @@ Yalnızca şu durumda:
 
 ---
 
-## Red Flag Caps
+## Risk Tavanları
 
 Red flag'ler weighted score içine gizlenmez. Ayrıca belirtilir.
 
@@ -273,6 +341,6 @@ Kural:
 3. İlk değerlendirmede `node cv-sync-check.mjs` çalıştır
 4. Role archetype belirle
 5. Puan verirken kanıt eksiğini not et
-6. Final score, strengths, risks, recommendation category ve confidence ver
-7. Borderline ve low-confidence vakaları açıkça işaretle
-8. Dili Türkçe tut, ama makine için kritik report key'lerini English ve sabit bırak
+6. Final puan, güçlü yönler, riskler, karar kategorisi ve güven düzeyi ver
+7. Sınırda ve düşük güvenli vakaları açıkça işaretle
+8. Report görünür yüzeyini doğal Türkçe tut; internal tracker/tag/sidecar değerlerini canonical bırak

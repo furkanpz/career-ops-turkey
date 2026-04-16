@@ -1,33 +1,33 @@
 # Mod: teklif -- Türkiye için tam A-G değerlendirme
 
-Bu dosya `modes/oferta.md` ile birlikte okunur. `modes/oferta.md` içindeki A-G özellik yüzeyinin TAMAMI korunur: story bank entegrasyonu, Section G gating, ATS keyword extraction, report kaydı ve tracker writeback davranışı düşmez.
+Bu dosya `modes/oferta.md` ile birlikte okunur. `modes/oferta.md` içindeki A-G özellik yüzeyinin TAMAMI korunur: story bank entegrasyonu, başvuru cevapları gating'i, ATS anahtar kelime çıkarımı, report kaydı ve tracker writeback davranışı düşmez.
 
 Kullanıcı bir ilan metni veya URL verdiğinde, HER ZAMAN A-G değerlendirme yüzeyini üret. Ardından Türkiye scoring framework ile final sonucu ver.
 
-## Adım 0 -- Archetype tespiti
+## Adım 0 -- Rol türü tespiti
 
-İlanı uygun archetype'a ata. Gerekirse en yakın 2 archetype'i belirt.
+İlanı uygun rol türüne ata. Gerekirse en yakın 2 rol türünü belirt.
 
 Bu seçim şunları etkiler:
 
 - Blok B'de hangi proof point'lerin öne çıkacağı
 - Blok E'de CV'nin nasıl yeniden çerçeveleneceği
 - Blok F'de hangi STAR hikâyelerinin seçileceği
-- Blok G'de draft application answers'ın güvenli şekilde açılıp açılmayacağı
+- başvuru cevapları taslağının güvenli şekilde açılıp açılmayacağı
 
 ## Blok A -- Rol özeti
 
 Tablo mutlaka şu satırları içerir:
 
-- `**Archetype** | ...`
-- `**Domain** | ...`
-- `**Function** | ...`
-- `**Seniority** | ...`
-- `**Remote** | ...`
-- `**Team size** | ...` veya `Bilinmiyor`
-- `**TL;DR** | ...`
+- `**Rol Türü** | ...`
+- `**Alan** | ...`
+- `**İşin Odağı** | ...`
+- `**Kıdem** | ...`
+- `**Çalışma Modeli** | ...`
+- `**Ekip Büyüklüğü** | ...` veya `Bilinmiyor`
+- `**Kısa Özet** | ...`
 
-`TL;DR` tek cümlede rolün gerçek özünü anlatmalı. Boş slogan istemiyorum.
+`Kısa Özet` tek cümlede rolün gerçek özünü anlatmalı. Boş slogan istemiyorum.
 
 ## Blok B -- CV eşleşmesi
 
@@ -41,29 +41,29 @@ Gerekli alt bölümler:
 2. Gaps
 3. Her gap için kısa mitigation
 
-Her gap için şu soruları cevapla:
+Her açık için şu soruları cevapla:
 
-1. Hard blocker mi, nice-to-have mi?
-2. Aday adjacent deneyim gösterebilir mi?
+1. Gerçek engel mi, tercih sebebi mi?
+2. Aday yakın deneyim gösterebilir mi?
 3. Portfolyo veya case study ile açık kapanır mı?
 4. Başvuru metninde nasıl daha dürüst ama güçlü çerçevelenir?
 
-## Blok C -- Seniority ve strateji
+## Blok C -- Kıdem ve strateji
 
 Şunları açıkça yaz:
 
 1. İlan seviyesi
 2. Adayın bu archetype'teki doğal seviyesi
-3. Eğer hafif mismatch varsa nasıl pozisyonlanmalı
-4. Eğer downlevel riski varsa bunun pratik sonucu ne olur
+3. Eğer hafif uyumsuzluk varsa nasıl pozisyonlanmalı
+4. Eğer daha düşük seviye riski varsa bunun pratik sonucu ne olur
 
 ## Blok D -- Maaş ve piyasa
 
 WebSearch ile araştır:
 
 - güncel maaş verisi
-- şirketin comp itibari
-- role talebi / doygunluk sinyali
+- şirketin ücret itibarı
+- role talebi / piyasa doygunluğu sinyali
 
 Türkiye için özellikle bak:
 
@@ -105,44 +105,46 @@ Ek olarak:
 
 A-G değerlendirme bittikten sonra, `docs/tr-scoring-framework.md` ve `modes/tr/_shared.md` ile uyumlu şekilde şu çıktıyı EKLE:
 
-### 1. Global Score tablosu
+### 1. Genel Puan tablosu
 
 ```markdown
-## Global Score
+## Genel Puan
 
-| Dimension | Weight | Score |
+| Kriter | Ağırlık | Puan |
 |---|---:|---:|
-| Role Fit | 18 | X |
-| Alignment With Candidate Goals | 12 | X |
-| Seniority Fit | 10 | X |
-| City / Work Model Fit | 10 | X |
-| Language Fit | 8 | X |
-| Salary Transparency / Market Fairness | 12 | X |
-| Posting Quality | 8 | X |
-| Company Clarity / Hiring Credibility | 8 | X |
-| Application Effort | 6 | X |
-| Interview Likelihood | 8 | X |
-| **Weighted Score** | **100** | **X.XX/5** |
+| Rol Uyumu | 18 | X |
+| Aday Hedefleriyle Uyum | 12 | X |
+| Kıdem Uyumu | 10 | X |
+| Şehir / Çalışma Modeli Uyumu | 10 | X |
+| Dil Uyumu | 8 | X |
+| Maaş Bilgisi / Piyasa Uyumu | 12 | X |
+| İlan Kalitesi | 8 | X |
+| Şirket Netliği / İşe Alım Güveni | 8 | X |
+| Başvuru Eforu | 6 | X |
+| Mülakata Kalma İhtimali | 8 | X |
+| **Ağırlıklı Puan** | **100** | **X.XX/5** |
 ```
 
 ### 2. Zorunlu sonuç alanları
 
-Global Score bölümünden hemen sonra bunları ver:
+Genel Puan bölümünden hemen sonra bunları görünür Türkçe label ve doğal değerlerle ver:
 
 ```markdown
-**Red Flag Cap:** none | major | critical
-**Final Score:** X.XX/5
-**Confidence:** high | medium | low
-**Recommendation Category:** hemen_basvur | secici_basvur | sinirda_once_dogrula | basvurma
-**Borderline:** yes | no
+**Risk Tavanı:** Yok | Ciddi | Kritik
+**Final Puan:** X.XX/5
+**Güven Düzeyi:** Yüksek | Orta | Düşük
+**Karar Kategorisi:** hemen_basvur | secici_basvur | sinirda_once_dogrula | basvurma
+**Sınırda mı?:** Evet | Hayır
 ```
 
-### 3. Strengths
+`Karar Kategorisi` makine dostu kategori değerlerini koruyabilir; diğer değerleri doğal Türkçe yaz.
+
+### 3. Güçlü Yönler
 
 Başlık:
 
 ```markdown
-## Strengths
+## Güçlü Yönler
 ```
 
 Kurallar:
@@ -151,26 +153,26 @@ Kurallar:
 - her madde kanıt temelli
 - en güçlü fit sinyallerini öne çıkar
 
-### 4. Risks
+### 4. Riskler
 
 Başlık:
 
 ```markdown
-## Risks
+## Riskler
 ```
 
 Kurallar:
 
 - 3-5 madde
 - bilinmeyeni bilinmeyen olarak yaz
-- major / critical risk varsa net yaz
+- ciddi / kritik risk varsa net yaz
 
-### 5. Recommendation
+### 5. Karar
 
 Başlık:
 
 ```markdown
-## Recommendation
+## Karar
 ```
 
 Bu bölümde:
@@ -179,19 +181,19 @@ Bu bölümde:
 - 1 kısa gerekçe
 - gerekiyorsa "önce şu 1-3 şeyi doğrula" listesi
 
-Recommendation dili pratik ve recruiter-respectful olmalı:
+Karar dili pratik ve recruiter'a saygılı olmalı:
 
 - zayıf role "denemekten zarar gelmez" deme
 - düşük confidence varsa "iyi fırsat" deme
 - adayın zamanını ve recruiter'ın zamanını koru
 
-### 6. Kök mode parity kuralı
+### 6. Kök mode uyumluluk kuralı
 
 `modes/oferta.md` içindeki aşağıdaki davranışlar korunur:
 
 - `interview-prep/story-bank.md` ile story reuse
-- `## Keywords extracted` bölümü
-- `## G) Draft Application Answers` gating kuralı
+- `## ATS Anahtar Kelimeleri` bölümü
+- başvuru cevapları taslağı gating kuralı
 - tracker'a final capped score yazımı
 
 ---
@@ -202,21 +204,21 @@ Recommendation dili pratik ve recruiter-respectful olmalı:
 
 Şu durumlardan biri varsa net şekilde işaretle:
 
-- final score 3.7-4.1 aralığında
-- confidence low
-- major red flag mevcut
+- final puan 3.7-4.1 aralığında
+- güven düzeyi düşük
+- ciddi risk mevcut
 - iki veya daha fazla boyut 3/5
 
-Bu durumda recommendation category en fazla `sinirda_once_dogrula` olabilir.
+Bu durumda karar kategorisi en fazla `sinirda_once_dogrula` olabilir.
 
 ### Low-confidence durumlar
 
-Confidence `low` ise:
+Güven düzeyi `Düşük` ise:
 
 - bunu açıkça yaz
 - hangi veriler eksik olduğunu yaz
-- recommendation category `hemen_basvur` olamaz
-- draft application answers'ı otomatik öne çıkarma
+- karar kategorisi `hemen_basvur` olamaz
+- başvuru cevapları taslağını otomatik öne çıkarma
 
 ### Overclaiming yasağı
 
@@ -232,41 +234,51 @@ Rapor dosyası:
 
 `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`
 
-Header için parser-riskini azaltmak üzere şu anahtarlar korunur:
+Header kullanıcıya doğal Türkiye Türkçesiyle görünür. Internal canonical değerleri yalnızca tracker, sidecar ve note tag'lerde koru; report'ta yeni yüzey aşağıdaki gibidir:
 
 ```markdown
 # Değerlendirme: {Şirket} -- {Rol}
 
-**Date:** {YYYY-MM-DD}
-**Archetype** | {tespit edilen archetype}
-**Score:** {final score}/5
-**URL:** {ilan URL}
-**PDF:** {yol veya pending}
-**City:** {city veya unknown}
-**Work Model:** {remote|hybrid|on_site|field|unspecified}
-**Language:** {tr|en|tr_en|de|fr|ar|ru|multilingual|unspecified}
-**Employment Type:** {full_time|part_time|contract|internship|temporary|freelance|consulting|apprenticeship|unspecified}
-**Salary Transparency:** {transparent|market_range|opaque|unknown}
-**Source:** {portal veya company careers}
-**Confidence:** {high|medium|low}
+**Tarih:** {YYYY-MM-DD}
+**Rol Türü:** {tespit edilen rol türü}
+**Kısa Özet:** {tek cümlelik özet}
+**Çalışma Modeli:** {Uzaktan|Hibrit|Ofisten|Sahada|Belirtilmemiş}
+**Ücret:** {maaş bilgisi veya Belirtilmemiş}
+**Puan:** {final score}/5
+**İlan URL’si:** {ilan URL}
+**İlan Gerçekliği:** {Yüksek güven|Önce doğrula|Şüpheli}
+**PDF:** {yol veya Üretilmedi}
+**Pipeline ID:** {batch/pipeline id veya yok}
+**Şehir:** {şehir veya Bilinmiyor}
+**İlan Dili:** {Türkçe|İngilizce|Türkçe + İngilizce|...|Belirtilmemiş}
+**Çalışma Türü:** {Tam zamanlı|Yarı zamanlı|Sözleşmeli|...|Belirtilmemiş}
+**Maaş Bilgisi:** {Açık|Piyasa bandı verilmiş|Belirtilmemiş|Bilinmiyor}
+**Kaynak:** {portal veya şirket kariyer sayfası}
+**Güven Düzeyi:** {Yüksek|Orta|Düşük}
 ```
+
+PDF alanı için TR kapısı geçerlidir: `hemen_basvur` veya `secici_basvur` dışında kalan, confidence `low` olan ya da lokasyon/maaş/kritik stack blocker içeren roller için puan `>= 3.0` olsa bile `Üretilmedi` yaz.
+
+Eski `Date`, `Archetype`, `Remote`, `Comp`, `City`, `Work Model`, `Salary Transparency`, `Confidence` label'larını yeni TR raporlarda kullanma. Parser geriye uyumluluk için onları okumaya devam eder.
 
 Rapor iskeleti:
 
 ```markdown
 ## A) Rol Özeti
 ## B) CV Eşleşmesi
-## C) Seniority ve Strateji
+## C) Kıdem ve Strateji
 ## D) Maaş ve Piyasa
 ## E) Kişiselleştirme Planı
 ## F) Mülakat Planı
-## Global Score
-## Strengths
-## Risks
-## Recommendation
+## G) İlan Gerçekliği
+## Genel Puan
+## Güçlü Yönler
+## Riskler
+## Karar
+## ATS Anahtar Kelimeleri
 ```
 
-`Section G` benzeri application draft bölümü sadece şu durumda eklenebilir:
+Başvuru cevapları taslağı sadece şu durumda eklenebilir:
 
 - final score `>= 4.5`
 - confidence `low` değil
@@ -276,7 +288,7 @@ Rapor iskeleti:
 
 ## Tracker yazımı
 
-Tracker'a yazarken `Final Score` kullan.
+Tracker'a yazarken final puanı kullan.
 
 Yani:
 

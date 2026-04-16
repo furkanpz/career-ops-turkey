@@ -15,27 +15,27 @@ Bu mod, `modes/tr/teklif.md` ile üretilmiş evaluation report'unu temel alır.
 
 Başvuru cevabı üretmeden önce rapordan şunları oku:
 
-- `Final Score`
-- `Confidence`
-- `Recommendation Category`
-- `Strengths`
-- `Risks`
+- `Final Puan` veya legacy `Final Score`
+- `Güven Düzeyi` veya legacy `Confidence`
+- `Karar Kategorisi` veya legacy `Recommendation Category`
+- `Güçlü Yönler` veya legacy `Strengths`
+- `Riskler`
 
 ## Conservative davranış
 
-### `Recommendation Category: basvurma`
+### `Karar Kategorisi: basvurma`
 
 - Kullanıcıya bunu açıkça söyle
 - Varsayılan davranış başvuru metni yazmamak
 - Yalnızca kullanıcı özellikle isterse, son derece dürüst ve minimal draft ver
 
-### `Recommendation Category: sinirda_once_dogrula`
+### `Karar Kategorisi: sinirda_once_dogrula`
 
 - Cevap üretmeden önce hangi noktaları doğrulamak gerektiğini yaz
 - Eksik veri maaş, lokasyon, dil veya işveren netliği ise bunu saklama
 - Başvuru metni oluştursan bile kesinlik tonu kullanma
 
-### `Confidence: low`
+### `Güven Düzeyi: Düşük`
 
 - Form cevaplarında aşırı iddialı ton kullanma
 - "Bu role çok uygun" gibi sert ifadelerden kaçın
@@ -75,7 +75,7 @@ Form uzun ise scroll alıp iteratif devam et. Bu davranış düşmez.
 ```markdown
 ## Başvuru Cevapları -- {Şirket} / {Rol}
 
-Temel: Final Score X.X/5 | Confidence: medium | Recommendation: secici_basvur | Archetype: [type]
+Temel: Final Puan X.X/5 | Güven Düzeyi: Orta | Karar: secici_basvur | Rol Türü: [type]
 
 ### 1. [Form sorusu]
 > [copy-paste hazır cevap]

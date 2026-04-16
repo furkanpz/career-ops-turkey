@@ -36,6 +36,7 @@ const PORTALS_PATH = join(ROOT, 'portals.yml');
 const DATA_DIR = join(ROOT, 'data');
 const SCAN_HISTORY_PATH = join(DATA_DIR, 'scan-history.tsv');
 const SCAN_LATEST_PATH = join(DATA_DIR, 'scan-latest.tsv');
+const SCAN_DIAGNOSTICS_PATH = join(DATA_DIR, 'scan-diagnostics.json');
 const TR_LISTINGS_PATH = join(DATA_DIR, 'tr-listings.jsonl');
 const PIPELINE_PATH = join(DATA_DIR, 'pipeline.md');
 const REVIEW_PIPELINE_PATH = join(DATA_DIR, 'review-pipeline.md');
@@ -204,6 +205,23 @@ const SEARCH_SOURCE_PROFILES = {
     priority: 100,
     siteTokens: ['career', 'careers', 'jobs'],
   },
+};
+
+const SEARCH_EXPECTED_HOST_PATTERNS = {
+  linkedin_jobs_search: [/linkedin\.com$/i],
+  kariyernet_search: [/kariyer\.net$/i],
+  indeed_tr_search: [/indeed\.com$/i],
+  elemannet_search: [/eleman\.net$/i],
+  secretcv_search: [/secretcv\.com$/i],
+  yenibiris_search: [/yenibiris\.com$/i],
+  iskur_search: [/iskur\.gov\.tr$/i, /esube\.iskur\.gov\.tr$/i],
+  techcareer_search: [/techcareer\.net$/i],
+  youthall_search: [/youthall\.com$/i],
+  greenhouse_board: [/greenhouse\.io$/i],
+  ashby_board: [/ashbyhq\.com$/i],
+  lever_board: [/lever\.co$/i],
+  workable_board: [/workable\.com$/i],
+  teamtailor_board: [/teamtailor\.com$/i],
 };
 
 const LOCATION_SUFFIXES = [
@@ -892,9 +910,16 @@ async function fetchWithRetry(url, responseType, extra = {}) {
     try {
       const response = await fetch(url, { ...makeFetchOptions(extra), signal: controller.signal });
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const error = new Error(`HTTP ${response.status}`);
+        error.status = response.status;
+        throw error;
       }
-      return responseType === 'json' ? await response.json() : await response.text();
+      if (responseType === 'json') return await response.json();
+      const text = await response.text();
+      if (responseType === 'text_response') {
+        return { status: response.status, text };
+      }
+      return text;
     } catch (error) {
       lastError = error;
       if (attempt === FETCH_RETRY_COUNT || !isRetryableFetchError(error)) {
@@ -912,6 +937,10 @@ async function fetchWithRetry(url, responseType, extra = {}) {
 
 async function fetchText(url, extra = {}) {
   return fetchWithRetry(url, 'text', extra);
+}
+
+async function fetchTextResponse(url, extra = {}) {
+  return fetchWithRetry(url, 'text_response', extra);
 }
 
 async function fetchJson(url, extra = {}) {
@@ -1147,6 +1176,12 @@ function renderReviewQueue(mergedEntries) {
   ];
 
   const blocks = ['# Review Queue'];
+  const summaryEntries = summarizeReviewEntries(mergedEntries);
+  if (summaryEntries.length > 0) {
+    blocks.push('', '## Source Summary', '');
+    blocks.push(...summaryEntries.map((item) => `- ${item.source}: total=${item.total}, authwall=${item.authwall_blocked}, public_unverified=${item.public_unverified}, review_only=${item.review_only}`));
+    blocks.push('');
+  }
   for (const [heading, entries] of sections) {
     blocks.push('', `## ${heading}`, '');
     if (entries.length > 0) {
@@ -1156,6 +1191,51 @@ function renderReviewQueue(mergedEntries) {
   }
 
   return `${blocks.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd()}\n`;
+}
+
+function reviewSourceFromUrl(url = '') {
+  const host = getSourceHost(url);
+  if (host.includes('linkedin.com')) return 'LinkedIn';
+  if (host.includes('kariyer.net')) return 'Kariyer.net';
+  if (host.includes('indeed.com')) return 'Indeed';
+  if (host.includes('eleman.net')) return 'Eleman.net';
+  if (host.includes('secretcv.com')) return 'Secretcv';
+  if (host.includes('yenibiris.com')) return 'Yenibiris';
+  if (host.includes('iskur')) return 'ISKUR';
+  if (host.includes('techcareer.net')) return 'Techcareer';
+  if (host.includes('youthall.com')) return 'Youthall';
+  if (host.includes('greenhouse')) return 'Greenhouse';
+  if (host.includes('ashbyhq.com')) return 'Ashby';
+  if (host.includes('lever.co')) return 'Lever';
+  if (host.includes('workable.com')) return 'Workable';
+  if (host.includes('teamtailor.com')) return 'Teamtailor';
+  return host || 'Unknown';
+}
+
+function summarizeReviewEntries(mergedEntries = {}) {
+  const summary = new Map();
+  const allEntries = [
+    ...(mergedEntries.unverified_public || []),
+    ...(mergedEntries.review_only || []),
+  ];
+  for (const entry of allEntries) {
+    const source = reviewSourceFromUrl(entry.url);
+    const current = summary.get(source) || {
+      total: 0,
+      authwall_blocked: 0,
+      public_unverified: 0,
+      review_only: 0,
+    };
+    const reason = String(entry.reviewReason || '');
+    current.total += 1;
+    if (reason.includes('authwall_blocked')) current.authwall_blocked += 1;
+    if (reason.includes('public_unverified')) current.public_unverified += 1;
+    if (reason.includes('review_only:')) current.review_only += 1;
+    summary.set(source, current);
+  }
+  return [...summary.entries()]
+    .map(([source, counts]) => ({ source, ...counts }))
+    .sort((left, right) => right.total - left.total || left.source.localeCompare(right.source));
 }
 
 function appendToReviewPipeline(offers) {
@@ -1970,6 +2050,154 @@ function searchFetchOptions(providerName) {
   });
 }
 
+function incrementCount(target, key, amount = 1) {
+  if (!key) return;
+  target[key] = (target[key] || 0) + amount;
+}
+
+function extractSiteHostsFromQuery(query = '') {
+  const hosts = [];
+  for (const match of String(query || '').matchAll(/site:([^\s)"']+)/gi)) {
+    const host = match[1]
+      .replace(/^https?:\/\//i, '')
+      .replace(/^\*\./, '')
+      .split('/')[0]
+      .trim();
+    if (host && !hosts.includes(host)) hosts.push(host);
+  }
+  return hosts;
+}
+
+function expectedHostPatternsFor(queryConfig = {}) {
+  const parserKey = queryConfig.parser_key || 'kariyernet_search';
+  const patterns = [...(SEARCH_EXPECTED_HOST_PATTERNS[parserKey] || [])];
+  for (const host of extractSiteHostsFromQuery(queryConfig.query)) {
+    patterns.push(new RegExp(`${escapeRegex(host)}$`, 'i'));
+  }
+  return patterns;
+}
+
+export function isExpectedSearchResultHost(url, queryConfig = {}) {
+  const patterns = expectedHostPatternsFor(queryConfig);
+  if (patterns.length === 0) return true;
+  const host = getSourceHost(url);
+  return patterns.some((pattern) => pattern.test(host));
+}
+
+function makeQueryDiagnostic(queryConfig, searchResultLimit) {
+  const seeds = searchUrlCandidatesFor(queryConfig);
+  const expanded = expandDirectSearchUrls(
+    queryConfig,
+    queryConfig?.pagination?.max_pages ?? queryConfig?.direct_search_page_limit,
+  );
+  return {
+    name: queryConfig.name || '',
+    parser_key: queryConfig.parser_key || 'kariyernet_search',
+    adapter_family: queryConfig.adapter_family || '',
+    search_result_limit: resolveSearchResultLimit(searchResultLimit),
+    direct: {
+      configured_url_count: seeds.length,
+      expanded_url_count: expanded.length,
+      attempted_url_count: 0,
+      http_statuses: {},
+      raw_results: 0,
+      accepted_results: 0,
+      skipped_title: 0,
+      blocked_reason: '',
+      error: '',
+    },
+    providers: [],
+    warnings: [],
+  };
+}
+
+function makeScanDiagnostics(runId, dryRun, config, searchResultLimit) {
+  return {
+    contract_version: 'scan-diagnostics/v1',
+    run_id: runId,
+    generated_at: runId,
+    dry_run: Boolean(dryRun),
+    search_results_per_query: resolveSearchResultLimit(searchResultLimit),
+    configured_search_queries: Array.isArray(config?.search_queries) ? config.search_queries.length : 0,
+    queries: [],
+    warnings: [],
+  };
+}
+
+function addQueryWarning(queryDiagnostic, code, message, extra = {}) {
+  if (!queryDiagnostic) return;
+  queryDiagnostic.warnings.push({ code, message, ...extra });
+}
+
+export function inspectSearchProviderResults(providerName, httpStatus, rawResults = [], queryConfig = {}) {
+  const diagnostic = {
+    provider: providerName,
+    http_status: httpStatus,
+    raw_results: Array.isArray(rawResults) ? rawResults.length : 0,
+    provider_host_mismatch: 0,
+    warnings: [],
+  };
+
+  for (const result of Array.isArray(rawResults) ? rawResults : []) {
+    if (!isExpectedSearchResultHost(result.url, queryConfig)) {
+      diagnostic.provider_host_mismatch += 1;
+    }
+  }
+
+  if (httpStatus !== 200 || diagnostic.raw_results === 0) {
+    diagnostic.warnings.push({
+      code: 'scan_provider_degraded',
+      message: `${providerName} returned HTTP ${httpStatus} with ${diagnostic.raw_results} parseable results`,
+    });
+  }
+
+  if (diagnostic.provider_host_mismatch > 0) {
+    diagnostic.warnings.push({
+      code: 'provider_host_mismatch',
+      message: `${providerName} returned ${diagnostic.provider_host_mismatch} result(s) outside the expected source host`,
+    });
+  }
+
+  return diagnostic;
+}
+
+function summarizeSearchDiagnostics(searchDiagnostics) {
+  const warnings = [];
+  for (const query of searchDiagnostics?.queries || []) {
+    for (const warning of query.warnings || []) {
+      warnings.push(`${query.name}: ${warning.code} — ${warning.message}`);
+    }
+  }
+  return warnings;
+}
+
+function writeScanDiagnostics(searchDiagnostics) {
+  ensureDataFiles();
+  writeFileSync(SCAN_DIAGNOSTICS_PATH, `${JSON.stringify(searchDiagnostics, null, 2)}\n`, 'utf-8');
+}
+
+function summarizeReviewOffersBySource(reviewOffers = []) {
+  const summary = new Map();
+  for (const offer of reviewOffers) {
+    const source = offer.source || sourceProfileFor(offer.parserKey, offer.adapterFamily).source || 'Unknown';
+    const current = summary.get(source) || {
+      total: 0,
+      authwall_blocked: 0,
+      public_unverified: 0,
+      review_only: 0,
+    };
+    const reason = String(offer.reviewReason || '');
+    current.total += 1;
+    if (reason.includes('authwall_blocked')) current.authwall_blocked += 1;
+    if (reason.includes('public_unverified')) current.public_unverified += 1;
+    if (reason.includes('review_only:')) current.review_only += 1;
+    summary.set(source, current);
+  }
+  return [...summary.entries()]
+    .map(([source, counts]) => ({ source, ...counts }))
+    .sort((left, right) => right.total - left.total || left.source.localeCompare(right.source));
+}
+
 function searchUrlCandidatesFor(queryConfig) {
   const urls = [];
   if (looksLikeHttpUrl(queryConfig.search_url)) urls.push(queryConfig.search_url);
@@ -2062,7 +2290,7 @@ export function applySourceQuotas(offers, history, firstSeen) {
   return kept;
 }
 
-async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT) {
+async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT, queryDiagnostic = null) {
   const parserKey = queryConfig.parser_key || 'kariyernet_search';
   const directPageLimit = resolveDirectSearchPageLimit(queryConfig?.pagination?.max_pages ?? queryConfig?.direct_search_page_limit);
   const seeds = searchUrlCandidatesFor(queryConfig);
@@ -2101,15 +2329,23 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
 
     for (const url of urls) {
       try {
-        const html = await fetchText(url, searchFetchOptions('direct_board'));
+        if (queryDiagnostic) queryDiagnostic.direct.attempted_url_count += 1;
+        const response = await fetchTextResponse(url, searchFetchOptions('direct_board'));
+        if (queryDiagnostic) incrementCount(queryDiagnostic.direct.http_statuses, String(response.status));
+        const html = response.text;
         if (isBlockedSearchHtml(html)) {
           succeeded = true;
           history.push(makeSourceBlockedHistoryEntry(queryConfig, url, firstSeen, 'captcha_blocked'));
+          if (queryDiagnostic) {
+            queryDiagnostic.direct.blocked_reason = 'captcha_blocked';
+            addQueryWarning(queryDiagnostic, 'direct_source_blocked', 'direct board search returned captcha/authwall HTML', { url });
+          }
           sourceBlocked = true;
           break;
         }
 
         const results = parseDirect(html, searchResultLimit);
+        if (queryDiagnostic) queryDiagnostic.direct.raw_results += results.length;
         succeeded = true;
         if (results.length === 0) {
           break;
@@ -2125,6 +2361,7 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
           const offer = classifyOffer(makeOffer(result), titleFilter);
           if (!offer.title || !offer.company || !offer.url) continue;
           if (offer.matchBucket === 'reject') {
+            if (queryDiagnostic) queryDiagnostic.direct.skipped_title += 1;
             history.push({
               url: offer.url,
               firstSeen,
@@ -2136,6 +2373,7 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
             continue;
           }
 
+          if (queryDiagnostic) queryDiagnostic.direct.accepted_results += 1;
           offers.push(offer);
         }
 
@@ -2147,8 +2385,16 @@ async function runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit 
         if (blockedReason) {
           succeeded = true;
           history.push(makeSourceBlockedHistoryEntry(queryConfig, url, firstSeen, blockedReason));
+          if (queryDiagnostic) {
+            queryDiagnostic.direct.blocked_reason = blockedReason;
+            if (error.status) incrementCount(queryDiagnostic.direct.http_statuses, String(error.status));
+            addQueryWarning(queryDiagnostic, 'direct_source_blocked', `direct board search failed with ${blockedReason}`, { url });
+          }
           sourceBlocked = true;
           break;
+        }
+        if (queryDiagnostic) {
+          queryDiagnostic.direct.error = error.message;
         }
         lastError = error;
         break;
@@ -2184,14 +2430,19 @@ const SEARCH_PROVIDERS = [
   },
 ];
 
-async function runSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT) {
+async function runSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT, searchDiagnostics = null) {
+  const queryDiagnostic = searchDiagnostics ? makeQueryDiagnostic(queryConfig, searchResultLimit) : null;
+  if (searchDiagnostics && queryDiagnostic) {
+    searchDiagnostics.queries.push(queryDiagnostic);
+  }
   let directResult = { offers: [], history: [], handled: false };
   let directError = null;
 
   try {
-    directResult = await runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit);
+    directResult = await runDirectSearchQuery(queryConfig, titleFilter, searchResultLimit, queryDiagnostic);
   } catch (error) {
     directError = error;
+    if (queryDiagnostic) queryDiagnostic.direct.error = error.message;
   }
 
   if (directResult.handled && (directResult.offers.length > 0 || directResult.history.length > 0)) {
@@ -2219,17 +2470,51 @@ async function runSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFA
   let lastError = directError;
 
   for (const provider of SEARCH_PROVIDERS) {
+    const providerDiagnostic = queryDiagnostic ? {
+      provider: provider.name,
+      http_status: null,
+      raw_results: 0,
+      normalized_results: 0,
+      accepted_results: 0,
+      skipped_title: 0,
+      provider_host_mismatch: 0,
+      rejected_normalization: 0,
+      error: '',
+    } : null;
+    if (queryDiagnostic && providerDiagnostic) {
+      queryDiagnostic.providers.push(providerDiagnostic);
+    }
     try {
       const url = provider.buildUrl(queryConfig.query);
-      const payload = await fetchText(url, searchFetchOptions(provider.name));
-      const rawResults = provider.parse(payload, searchResultLimit);
+      const response = await fetchTextResponse(url, searchFetchOptions(provider.name));
+      if (providerDiagnostic) providerDiagnostic.http_status = response.status;
+      const rawResults = provider.parse(response.text, searchResultLimit);
+      if (providerDiagnostic) providerDiagnostic.raw_results = rawResults.length;
+
+      if (response.status !== 200 || rawResults.length === 0) {
+        addQueryWarning(
+          queryDiagnostic,
+          'scan_provider_degraded',
+          `${provider.name} returned HTTP ${response.status} with ${rawResults.length} parseable results`,
+          { provider: provider.name, http_status: response.status, raw_results: rawResults.length },
+        );
+      }
 
       for (const rawResult of rawResults) {
+        if (!isExpectedSearchResultHost(rawResult.url, queryConfig)) {
+          if (providerDiagnostic) providerDiagnostic.provider_host_mismatch += 1;
+          continue;
+        }
         const normalized = normalizeSearchResult(rawResult, queryConfig);
-        if (!normalized) continue;
+        if (!normalized) {
+          if (providerDiagnostic) providerDiagnostic.rejected_normalization += 1;
+          continue;
+        }
+        if (providerDiagnostic) providerDiagnostic.normalized_results += 1;
         const offer = classifyOffer(normalized, titleFilter);
 
         if (offer.matchBucket === 'reject') {
+          if (providerDiagnostic) providerDiagnostic.skipped_title += 1;
           history.push({
             url: offer.url,
             firstSeen,
@@ -2241,7 +2526,27 @@ async function runSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFA
           continue;
         }
 
+        if (providerDiagnostic) providerDiagnostic.accepted_results += 1;
         offers.push(offer);
+      }
+
+      if (providerDiagnostic?.provider_host_mismatch > 0) {
+        addQueryWarning(
+          queryDiagnostic,
+          'provider_host_mismatch',
+          `${provider.name} returned ${providerDiagnostic.provider_host_mismatch} result(s) outside the expected source host`,
+          { provider: provider.name, count: providerDiagnostic.provider_host_mismatch },
+        );
+      }
+
+      if (rawResults.length > 0 && providerDiagnostic?.normalized_results === 0 && providerDiagnostic.accepted_results === 0) {
+        lastError = new Error(`${provider.name} produced no usable results after host/path validation`);
+        continue;
+      }
+
+      if (rawResults.length === 0) {
+        lastError = new Error(`${provider.name} produced no parseable results`);
+        continue;
       }
 
       return {
@@ -2249,6 +2554,7 @@ async function runSearchQuery(queryConfig, titleFilter, searchResultLimit = DEFA
         history,
       };
     } catch (error) {
+      if (providerDiagnostic) providerDiagnostic.error = error.message;
       lastError = error;
     }
   }
@@ -2368,7 +2674,7 @@ async function scanCompanyCareersPage(browser, company, titleFilter) {
   }
 }
 
-async function scanTrackedCompanyWebsearch(company, titleFilter, searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT) {
+async function scanTrackedCompanyWebsearch(company, titleFilter, searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT, searchDiagnostics = null) {
   if (!company.scan_query) {
     return { offers: [], history: [], errors: [] };
   }
@@ -2380,7 +2686,7 @@ async function scanTrackedCompanyWebsearch(company, titleFilter, searchResultLim
       parser_key: company.parser_key || 'custom_careers_hub',
       adapter_family: company.adapter_family || 'company_careers',
       company_name: company.name,
-    }, titleFilter, searchResultLimit);
+    }, titleFilter, searchResultLimit, searchDiagnostics);
 
     for (const offer of result.offers) {
       offer.sourcePriority = sourceProfileFor(company.parser_key || 'custom_careers_hub').priority;
@@ -2757,6 +3063,7 @@ async function main() {
   const browser = browserNeeded ? await chromium.launch({ headless: true }) : null;
 
   const runId = new Date().toISOString();
+  const searchDiagnostics = makeScanDiagnostics(runId, dryRun, config, searchResultLimit);
   const historyEntries = [];
   const rawOffers = [];
   const errors = [];
@@ -2798,7 +3105,7 @@ async function main() {
       SEARCH_CONCURRENCY,
       async (company) => {
         const startedAt = Date.now();
-        const result = await scanTrackedCompanyWebsearch(company, titleMatcher, searchResultLimit);
+        const result = await scanTrackedCompanyWebsearch(company, titleMatcher, searchResultLimit, searchDiagnostics);
         phaseTimings.push({ label: `company-websearch | ${company.name}`, durationMs: Date.now() - startedAt });
         return result;
       },
@@ -2816,7 +3123,7 @@ async function main() {
       try {
         console.log(`Progress: query — ${query.name}`);
         const startedAt = Date.now();
-        const result = await runSearchQuery(query, titleMatcher, searchResultLimit);
+        const result = await runSearchQuery(query, titleMatcher, searchResultLimit, searchDiagnostics);
         phaseTimings.push({ label: `query | ${query.name}`, durationMs: Date.now() - startedAt });
         return result;
       } catch (error) {
@@ -2870,6 +3177,29 @@ async function main() {
     if (!dryRun) {
       appendHistory(historyEntries);
       writeLatestHistory(historyEntries, runId);
+      searchDiagnostics.verification = {
+        raw_candidates: rawOffers.length,
+        grouped_candidates: dedupedOffers.length,
+        added_offers: addedOffers.length,
+        review_candidates: reviewOffers.length,
+        live_direct_sources: verificationResult.stats.liveDirectSources,
+        promoted_direct_sources: verificationResult.stats.promotedDirectSources,
+        authwall_dropped: verificationResult.stats.authwallDropped,
+      };
+      searchDiagnostics.warnings = summarizeSearchDiagnostics(searchDiagnostics);
+      writeScanDiagnostics(searchDiagnostics);
+    }
+    if (dryRun) {
+      searchDiagnostics.verification = {
+        raw_candidates: rawOffers.length,
+        grouped_candidates: dedupedOffers.length,
+        added_offers: addedOffers.length,
+        review_candidates: reviewOffers.length,
+        live_direct_sources: verificationResult.stats.liveDirectSources,
+        promoted_direct_sources: verificationResult.stats.promotedDirectSources,
+        authwall_dropped: verificationResult.stats.authwallDropped,
+      };
+      searchDiagnostics.warnings = summarizeSearchDiagnostics(searchDiagnostics);
     }
 
     const expiredCount = historyEntries.filter((entry) => entry.status === 'skipped_expired').length;
@@ -2895,6 +3225,8 @@ async function main() {
     const slowestOperations = [...phaseTimings, ...verificationResult.stats.timings]
       .sort((left, right) => right.durationMs - left.durationMs)
       .slice(0, 5);
+    const reviewSourceSummary = summarizeReviewOffersBySource(reviewOffers);
+    const diagnosticWarnings = searchDiagnostics.warnings || [];
 
     console.log(`Portal Scan — ${date}`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -2918,6 +3250,20 @@ async function main() {
       console.log('\nWarnings:');
       for (const warning of warnings) {
         console.log(`  WARN: ${warning}`);
+      }
+    }
+
+    if (diagnosticWarnings.length > 0) {
+      console.log('\nSearch diagnostics warnings:');
+      for (const warning of diagnosticWarnings.slice(0, 12)) {
+        console.log(`  WARN: ${warning}`);
+      }
+      if (diagnosticWarnings.length > 12) {
+        if (dryRun) {
+          console.log(`  WARN: ${diagnosticWarnings.length - 12} additional search diagnostic warning(s) omitted from console; rerun without --dry-run to write ${SCAN_DIAGNOSTICS_PATH}`);
+        } else {
+          console.log(`  WARN: ${diagnosticWarnings.length - 12} additional search diagnostic warning(s) written to ${SCAN_DIAGNOSTICS_PATH}`);
+        }
       }
     }
 
@@ -2948,6 +3294,13 @@ async function main() {
       }
     }
 
+    if (reviewSourceSummary.length > 0) {
+      console.log('\nReview source summary:');
+      for (const item of reviewSourceSummary) {
+        console.log(`  ~ ${item.source}: total=${item.total}, authwall=${item.authwall_blocked}, public_unverified=${item.public_unverified}, review_only=${item.review_only}`);
+      }
+    }
+
     if (topReviewQueries.length > 0) {
       console.log('\nTop review queries:');
       for (const [queryName, count] of topReviewQueries) {
@@ -2971,6 +3324,8 @@ async function main() {
 
     if (dryRun) {
       console.log('\n(dry run — no files were written)');
+    } else {
+      console.log(`\nDiagnostics saved to ${SCAN_DIAGNOSTICS_PATH}`);
     }
   } finally {
     if (browser) {

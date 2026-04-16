@@ -70,18 +70,18 @@ Use the same 1-5 scale for every dimension:
 
 The weighted score should use 10 dimensions and sum to 100.
 
-| Dimension | Weight |
+| Kriter | Ağırlık |
 |---|---:|
-| Role Fit | 18 |
-| Alignment With Candidate Goals | 12 |
-| Seniority Fit | 10 |
-| City / Work Model Fit | 10 |
-| Language Fit | 8 |
-| Salary Transparency / Market Fairness | 12 |
-| Posting Quality | 8 |
-| Company Clarity / Hiring Credibility | 8 |
-| Application Effort | 6 |
-| Interview Likelihood | 8 |
+| Rol Uyumu | 18 |
+| Aday Hedefleriyle Uyum | 12 |
+| Kıdem Uyumu | 10 |
+| Şehir / Çalışma Modeli Uyumu | 10 |
+| Dil Uyumu | 8 |
+| Maaş Bilgisi / Piyasa Uyumu | 12 |
+| İlan Kalitesi | 8 |
+| Şirket Netliği / İşe Alım Güveni | 8 |
+| Başvuru Eforu | 6 |
+| Mülakata Kalma İhtimali | 8 |
 
 Formula:
 
@@ -524,10 +524,10 @@ Current coarse buckets map cleanly to the proposed Turkey matrix:
 
 | Current spirit | Turkey-ready dimensions |
 |---|---|
-| Match con CV | Role Fit, Seniority Fit, Interview Likelihood |
-| North Star alignment | Alignment With Candidate Goals |
-| Comp | Salary Transparency / Market Fairness |
-| Cultural signals | City / Work Model Fit, Posting Quality, Company Clarity |
+| Match con CV | Rol Uyumu, Kıdem Uyumu, Mülakata Kalma İhtimali |
+| North Star alignment | Aday Hedefleriyle Uyum |
+| Comp | Maaş Bilgisi / Piyasa Uyumu |
+| Cultural signals | Şehir / Çalışma Modeli Uyumu, İlan Kalitesi, Şirket Netliği |
 | Red flags | Separate cap/override system |
 
 This keeps the evaluation recognizable while making the score materially more useful for real Turkey-market decisions.
@@ -543,24 +543,24 @@ Inside the existing A-F report structure:
 Recommended output shape:
 
 ```markdown
-## Global Score
+## Genel Puan
 
-| Dimension | Weight | Score |
+| Kriter | Ağırlık | Puan |
 |---|---:|---:|
-| Role Fit | 18 | 4 |
-| Alignment With Candidate Goals | 12 | 5 |
-| Seniority Fit | 10 | 4 |
-| City / Work Model Fit | 10 | 3 |
-| Language Fit | 8 | 5 |
-| Salary Transparency / Market Fairness | 12 | 2 |
-| Posting Quality | 8 | 4 |
-| Company Clarity / Hiring Credibility | 8 | 4 |
-| Application Effort | 6 | 3 |
-| Interview Likelihood | 8 | 4 |
-| **Weighted Score** | **100** | **3.86/5** |
+| Rol Uyumu | 18 | 4 |
+| Aday Hedefleriyle Uyum | 12 | 5 |
+| Kıdem Uyumu | 10 | 4 |
+| Şehir / Çalışma Modeli Uyumu | 10 | 3 |
+| Dil Uyumu | 8 | 5 |
+| Maaş Bilgisi / Piyasa Uyumu | 12 | 2 |
+| İlan Kalitesi | 8 | 4 |
+| Şirket Netliği / İşe Alım Güveni | 8 | 4 |
+| Başvuru Eforu | 6 | 3 |
+| Mülakata Kalma İhtimali | 8 | 4 |
+| **Ağırlıklı Puan** | **100** | **3.86/5** |
 
-Red-flag cap: major
-Final score: 3.40/5
+Risk Tavanı: Ciddi
+Final Puan: 3.40/5
 ```
 
 That format is explicit, machine-readable enough for later parsing, and consistent with the repo's structured evaluation style.

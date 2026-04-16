@@ -17,10 +17,11 @@ import { fileURLToPath } from 'url';
 import { normalizeTrackerStatus, normalizeTrackerStatusGroup } from './tracker-status-utils.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
-const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
-  ? join(CAREER_OPS, 'data/applications.md')
-  : join(CAREER_OPS, 'applications.md');
-const REPORTS_DIR = join(CAREER_OPS, 'reports');
+const CAREER_OPS_ROOT = process.env.CAREER_OPS_ROOT || CAREER_OPS;
+const APPS_FILE = existsSync(join(CAREER_OPS_ROOT, 'data/applications.md'))
+  ? join(CAREER_OPS_ROOT, 'data/applications.md')
+  : join(CAREER_OPS_ROOT, 'applications.md');
+const REPORTS_DIR = join(CAREER_OPS_ROOT, 'reports');
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -85,27 +86,42 @@ function parseReport(reportPath) {
   const plain = content.replace(/\*\*/g, '');
 
   // Extract Block A table (Role Summary) — works with EN/ES/TR variants
-  const blockARegex = /\|\s*(?:Archetype|Arquetipo)\s*\|\s*(.*?)\s*\|/i;
+  const blockARegex = /\|\s*(?:Archetype|Arquetipo|Rol Türü|Rol Turu)\s*\|\s*(.*?)\s*\|/i;
+  const blockAHeaderRegex = /(?:Rol Türü|Rol Turu|Archetype|Arquetipo):\s*(.+)/i;
   const seniorityRegex = /\|\s*(?:Seniority|Nivel|Level|Kidem|Kıdem|Seviye)\s*\|\s*(.*?)\s*\|/i;
-  const remoteRegex = /\|\s*(?:Remote|Remoto|Location|Lokasyon|Calisma modeli|Çalışma modeli)\s*\|\s*(.*?)\s*\|/i;
+  const remoteRegex = /\|\s*(?:Remote|Remoto|Location|Lokasyon|Calisma modeli|Çalışma modeli|Çalışma Modeli|Calisma Modeli)\s*\|\s*(.*?)\s*\|/i;
+  const remoteHeaderRegex = /(?:Çalışma Modeli|Calisma Modeli|Remote|Remoto):\s*(.+)/i;
   const teamRegex = /\|\s*(?:Team|Team size|Equipo|Takim buyuklugu|Takım büyüklüğü)\s*\|\s*(.*?)\s*\|/i;
   const compRegex = /\|\s*(?:Comp|Salary|Salario|Listed salary|Ucret|Ücret|Maas|Maaş)\s*\|\s*(.*?)\s*\|/i;
+  const compHeaderRegex = /(?:Ücret|Ucret|Maaş|Maas|Comp|Salary):\s*(.+)/i;
   const domainRegex = /\|\s*(?:Domain|Dominio|Industry|Alan|Sektor|Sektör)\s*\|\s*(.*?)\s*\|/i;
 
   const archMatch = plain.match(blockARegex);
   if (archMatch) report.archetype = archMatch[1].trim();
+  if (!report.archetype) {
+    const archHeaderMatch = plain.match(blockAHeaderRegex);
+    if (archHeaderMatch) report.archetype = archHeaderMatch[1].trim();
+  }
 
   const senMatch = plain.match(seniorityRegex);
   if (senMatch) report.seniority = senMatch[1].trim();
 
   const remMatch = plain.match(remoteRegex);
   if (remMatch) report.remote = remMatch[1].trim();
+  if (!report.remote) {
+    const remoteHeaderMatch = plain.match(remoteHeaderRegex);
+    if (remoteHeaderMatch) report.remote = remoteHeaderMatch[1].trim();
+  }
 
   const teamMatch = plain.match(teamRegex);
   if (teamMatch) report.teamSize = teamMatch[1].trim();
 
   const compMatch = plain.match(compRegex);
   if (compMatch) report.comp = compMatch[1].trim();
+  if (!report.comp) {
+    const compHeaderMatch = plain.match(compHeaderRegex);
+    if (compHeaderMatch) report.comp = compHeaderMatch[1].trim();
+  }
 
   const domainMatch = plain.match(domainRegex);
   if (domainMatch) report.domain = domainMatch[1].trim();
@@ -116,8 +132,8 @@ function parseReport(reportPath) {
   const compScoreRegex = /\|\s*(?:Comp)\s*\|\s*([\d.]+)\/5\s*\|/i;
   const culturalRegex = /\|\s*(?:Cultural signals|Cultural)\s*\|\s*([\d.]+)\/5\s*\|/i;
   const redFlagsRegex = /\|\s*(?:Red flags)\s*\|\s*([-+]?[\d.]+)\s*\|/i;
-  const globalRegex = /\|\s*(?:Global|Weighted Score)\s*\|(?:\s*\*\*)?\s*([\d.]+)\/5\s*\|/i;
-  const finalScoreRegex = /(?:\*\*Final Score:\*\*|Final Score:)\s*([\d.]+)\/5/i;
+  const globalRegex = /\|\s*(?:Global|Weighted Score|Genel Puan|Ağırlıklı Puan|Agirlikli Puan)\s*\|(?:\s*\*\*)?\s*([\d.]+)\/5\s*\|/i;
+  const finalScoreRegex = /(?:\*\*(?:Final Score|Final Puan):\*\*|(?:Final Score|Final Puan):)\s*([\d.]+)\/5/i;
 
   const cvScoreMatch = plain.match(scoreRegex);
   if (cvScoreMatch) report.scores.cvMatch = parseFloat(cvScoreMatch[1]);
@@ -215,7 +231,7 @@ function analyze() {
   // Enrich entries with report data and classification
   const enriched = entries.map(e => {
     const reportMatch = e.report.match(/\]\(([^)]+)\)/);
-    const reportPath = reportMatch ? join(CAREER_OPS, reportMatch[1]) : null;
+    const reportPath = reportMatch ? join(CAREER_OPS_ROOT, reportMatch[1]) : null;
     const reportData = reportPath ? parseReport(reportPath) : null;
     const outcome = classifyOutcome(e.status);
     const score = parseFloat(e.score) || 0;

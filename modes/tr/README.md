@@ -70,22 +70,22 @@ Bu katman, mevcut repo ruhunu korur:
 
 ## Parser uyumluluğu
 
-Türkçe raporlar oluşturulurken, dashboard ve parser için bazı header alanları canonical English kalmalıdır:
+Yeni Türkçe raporlarda kullanıcıya görünen header ve gövde doğal Türkiye Türkçesiyle yazılır:
 
-- `**Archetype** |`
-- `**Remote** |`
-- `**Score:**`
-- `**URL:**`
+- `**Tarih:**`
+- `**Rol Türü:**`
+- `**Kısa Özet:**`
+- `**Çalışma Modeli:**`
+- `**Ücret:**`
+- `**Puan:**`
+- `**İlan URL’si:**`
 - `**PDF:**`
-- `**TL;DR** |`
-- `**Date:**`
-- `**Batch ID:**`
-- `**City:**`
-- `**Work Model:**`
-- `**Language:**`
-- `**Employment Type:**`
-- `**Salary Transparency:**`
-- `**Source:**`
-- `**Confidence:**`
+- `**Pipeline ID:**`
+- `**Şehir:**`
+- `**İlan Dili:**`
+- `**Çalışma Türü:**`
+- `**Maaş Bilgisi:**`
+- `**Kaynak:**`
+- `**Güven Düzeyi:**`
 
-Görünen gövde Türkçe olabilir, ama bu anahtarlar sabit kalmalıdır.
+Tracker status'ları, pipeline note tag'leri ve `data/tr-listings.jsonl` canonical değerleri korur. Dashboard/parser eski English header'ları da geriye uyumluluk için okumaya devam eder.

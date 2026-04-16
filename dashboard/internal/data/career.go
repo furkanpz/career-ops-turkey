@@ -19,21 +19,21 @@ import (
 var (
 	reReportLink     = regexp.MustCompile(`\[(\d+)\]\(([^)]+)\)`)
 	reScoreValue     = regexp.MustCompile(`(\d+\.?\d*)/5`)
-	reArchetype      = regexp.MustCompile(`(?i)\*\*(?:Archetype|Arquetipo)(?:\s+detectado)?\*\*\s*\|\s*(.+)`)
-	reTlDr           = regexp.MustCompile(`(?i)\*\*TL;DR\*\*\s*\|\s*(.+)`)
-	reTlDrColon      = regexp.MustCompile(`(?i)\*\*TL;DR:\*\*\s*(.+)`)
-	reRemote         = regexp.MustCompile(`(?i)\*\*Remote\*\*\s*\|\s*(.+)`)
-	reComp           = regexp.MustCompile(`(?i)\*\*Comp\*\*\s*\|\s*(.+)`)
-	reArchetypeColon = regexp.MustCompile(`(?i)\*\*(?:Archetype|Arquetipo):\*\*\s*(.+)`)
-	reReportURL      = regexp.MustCompile(`(?m)^\*\*URL:\*\*\s*(https?://\S+)`)
-	reBatchID        = regexp.MustCompile(`(?m)^\*\*Batch ID:\*\*\s*(\d+)`)
-	reMetaCity       = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*City:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
-	reMetaWorkModel  = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Work Model:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
-	reMetaLanguage   = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Language:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
-	reMetaEmployment = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Employment Type:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
-	reMetaSalary     = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Salary Transparency:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
-	reMetaSource     = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Source:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
-	reMetaConfidence = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*Confidence:?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reArchetype      = regexp.MustCompile(`(?i)\*\*(?:Archetype|Arquetipo|Rol Türü|Rol Turu)(?:\s+detectado)?\*\*\s*(?:\||:)\s*(.+)`)
+	reTlDr           = regexp.MustCompile(`(?i)\*\*(?:TL;DR|Kısa Özet|Kisa Ozet)\*\*\s*(?:\||:)\s*(.+)`)
+	reTlDrColon      = regexp.MustCompile(`(?i)\*\*(?:TL;DR|Kısa Özet|Kisa Ozet):\*\*\s*(.+)`)
+	reRemote         = regexp.MustCompile(`(?i)\*\*(?:Remote|Remoto|Çalışma Modeli|Calisma Modeli):?\*\*\s*(?:\||:)?\s*(.+)`)
+	reComp           = regexp.MustCompile(`(?i)\*\*(?:Comp|Ücret|Ucret|Maaş|Maas):?\*\*\s*(?:\||:)?\s*(.+)`)
+	reArchetypeColon = regexp.MustCompile(`(?i)\*\*(?:Archetype|Arquetipo|Rol Türü|Rol Turu):\*\*\s*(.+)`)
+	reReportURL      = regexp.MustCompile(`(?m)^\*\*(?:URL|İlan URL’si|İlan URL'si|Ilan URL'si):\*\*\s*(https?://\S+)`)
+	reBatchID        = regexp.MustCompile(`(?m)^\*\*(?:Batch ID|Pipeline ID):\*\*\s*(\d+)`)
+	reMetaCity       = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*(?:City|Şehir|Sehir):?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaWorkModel  = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*(?:Work Model|Çalışma Modeli|Calisma Modeli):?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaLanguage   = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*(?:Language|İlan Dili|Ilan Dili):?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaEmployment = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*(?:Employment Type|İstihdam Türü|Istihdam Turu|Çalışma Türü|Calisma Turu):?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaSalary     = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*(?:Salary Transparency|Maaş Şeffaflığı|Maas Seffafligi|Maaş Bilgisi|Maas Bilgisi):?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaSource     = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*(?:Source|Kaynak):?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
+	reMetaConfidence = regexp.MustCompile(`(?im)^\s*\|?\s*\*\*(?:Confidence|Güven|Guven|Güven Düzeyi|Guven Duzeyi):?\*\*\s*(?:\||:)?\s*(.+?)\s*\|?\s*$`)
 
 	statusRegistryOnce   sync.Once
 	statusAliasToGroup   map[string]string
@@ -347,6 +347,111 @@ func parseFloatLoose(value string) float64 {
 	return parsed
 }
 
+func normalizeReportWorkModel(value string) string {
+	folded := foldStatus(value)
+	switch {
+	case strings.Contains(folded, "uzaktan") || strings.Contains(folded, "remote"):
+		if strings.Contains(folded, "hibrit") || strings.Contains(folded, "hybrid") {
+			return "hybrid"
+		}
+		return "remote"
+	case strings.Contains(folded, "hibrit") || strings.Contains(folded, "hybrid"):
+		return "hybrid"
+	case strings.Contains(folded, "ofisten") || strings.Contains(folded, "ofis") || strings.Contains(folded, "on_site") || strings.Contains(folded, "onsite") || strings.Contains(folded, "on-site"):
+		return "on_site"
+	case strings.Contains(folded, "sahada") || strings.Contains(folded, "field"):
+		return "field"
+	case strings.Contains(folded, "belirtilmemis") || strings.Contains(folded, "unspecified"):
+		return "unspecified"
+	default:
+		return value
+	}
+}
+
+func normalizeReportEmploymentType(value string) string {
+	folded := foldStatus(value)
+	switch {
+	case strings.Contains(folded, "tam zamanli") || strings.Contains(folded, "full_time") || strings.Contains(folded, "full time"):
+		return "full_time"
+	case strings.Contains(folded, "yari zamanli") || strings.Contains(folded, "part_time") || strings.Contains(folded, "part time"):
+		return "part_time"
+	case strings.Contains(folded, "staj") || strings.Contains(folded, "intern"):
+		return "internship"
+	case strings.Contains(folded, "sozlesmeli") || strings.Contains(folded, "contract"):
+		return "contract"
+	case strings.Contains(folded, "freelance"):
+		return "freelance"
+	case strings.Contains(folded, "danisman") || strings.Contains(folded, "consulting"):
+		return "consulting"
+	case strings.Contains(folded, "gecici") || strings.Contains(folded, "temporary"):
+		return "temporary"
+	case strings.Contains(folded, "cirak") || strings.Contains(folded, "apprenticeship"):
+		return "apprenticeship"
+	case strings.Contains(folded, "belirtilmemis") || strings.Contains(folded, "unspecified"):
+		return "unspecified"
+	default:
+		return value
+	}
+}
+
+func normalizeReportLanguage(value string) string {
+	folded := foldStatus(value)
+	hasTurkish := strings.Contains(folded, "turkce") || folded == "tr"
+	hasEnglish := strings.Contains(folded, "ingilizce") || strings.Contains(folded, "english") || folded == "en"
+	switch {
+	case strings.Contains(folded, "tr_en") || strings.Contains(folded, "en_tr") || (hasTurkish && hasEnglish):
+		return "tr_en"
+	case hasTurkish:
+		return "tr"
+	case hasEnglish:
+		return "en"
+	case strings.Contains(folded, "almanca") || strings.Contains(folded, "german") || folded == "de":
+		return "de"
+	case strings.Contains(folded, "fransizca") || strings.Contains(folded, "french") || folded == "fr":
+		return "fr"
+	case strings.Contains(folded, "arapca") || strings.Contains(folded, "arabic") || folded == "ar":
+		return "ar"
+	case strings.Contains(folded, "rusca") || strings.Contains(folded, "russian") || folded == "ru":
+		return "ru"
+	case strings.Contains(folded, "cok dilli") || strings.Contains(folded, "multilingual"):
+		return "multilingual"
+	case strings.Contains(folded, "belirtilmemis") || strings.Contains(folded, "unspecified"):
+		return "unspecified"
+	default:
+		return value
+	}
+}
+
+func normalizeReportSalaryTransparency(value string) string {
+	folded := foldStatus(value)
+	switch {
+	case folded == "acik" || strings.Contains(folded, "transparent"):
+		return "transparent"
+	case strings.Contains(folded, "piyasa bandi") || strings.Contains(folded, "market_range") || strings.Contains(folded, "market range"):
+		return "market_range"
+	case strings.Contains(folded, "belirtilmemis") || strings.Contains(folded, "opaque"):
+		return "opaque"
+	case strings.Contains(folded, "bilinmiyor") || strings.Contains(folded, "unknown"):
+		return "unknown"
+	default:
+		return value
+	}
+}
+
+func normalizeReportConfidence(value string) string {
+	folded := foldStatus(value)
+	switch {
+	case strings.Contains(folded, "yuksek") || folded == "high":
+		return "high"
+	case strings.Contains(folded, "orta") || folded == "medium":
+		return "medium"
+	case strings.Contains(folded, "dusuk") || folded == "low":
+		return "low"
+	default:
+		return value
+	}
+}
+
 func applyTagMetadata(app *model.CareerApplication, notes string) {
 	for _, token := range strings.Fields(strings.ReplaceAll(notes, ";", " ")) {
 		token = strings.Trim(token, ",|")
@@ -398,23 +503,23 @@ func applyReportMetadata(app *model.CareerApplication, reportText string) {
 		app.City = cleanTableCell(m[1])
 	}
 	if m := reMetaWorkModel.FindStringSubmatch(reportText); m != nil && app.WorkModel == "" {
-		app.WorkModel = cleanTableCell(m[1])
+		app.WorkModel = normalizeReportWorkModel(cleanTableCell(m[1]))
 	}
 	if m := reMetaLanguage.FindStringSubmatch(reportText); m != nil && app.Language == "" {
-		app.Language = cleanTableCell(m[1])
+		app.Language = normalizeReportLanguage(cleanTableCell(m[1]))
 	}
 	if m := reMetaEmployment.FindStringSubmatch(reportText); m != nil && app.EmploymentType == "" {
-		app.EmploymentType = cleanTableCell(m[1])
+		app.EmploymentType = normalizeReportEmploymentType(cleanTableCell(m[1]))
 	}
 	if m := reMetaSalary.FindStringSubmatch(reportText); m != nil && app.SalaryTransparency == "" {
-		app.SalaryTransparency = cleanTableCell(m[1])
+		app.SalaryTransparency = normalizeReportSalaryTransparency(cleanTableCell(m[1]))
 		app.SalaryTransparent = strings.EqualFold(app.SalaryTransparency, "transparent")
 	}
 	if m := reMetaSource.FindStringSubmatch(reportText); m != nil && app.Source == "" {
 		app.Source = cleanTableCell(m[1])
 	}
 	if m := reMetaConfidence.FindStringSubmatch(reportText); m != nil && app.Confidence == "" {
-		app.Confidence = cleanTableCell(m[1])
+		app.Confidence = normalizeReportConfidence(cleanTableCell(m[1]))
 		if app.ConfidenceScore == 0 {
 			app.ConfidenceScore = parseFloatLoose(app.Confidence)
 		}
